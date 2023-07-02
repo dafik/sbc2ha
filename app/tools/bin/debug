@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/bin/java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005  -jar sbc2ha.jar /home/debian/boneio/config.yaml

@@ -1,0 +1,65 @@
+package com.dfi.sbc2ha.display;
+
+import com.dfi.sbc2ha.config.sbc2ha.definition.OledConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.enums.InputKindType;
+import com.dfi.sbc2ha.config.sbc2ha.definition.input.InputSwitchConfig;
+import com.dfi.sbc2ha.helper.BoneIoBBB;
+import com.dfi.sbc2ha.helper.MockHelper;
+import com.dfi.sbc2ha.helper.stats.StatsProvider;
+import com.dfi.sbc2ha.sensor.SensorFactory;
+import com.dfi.sbc2ha.sensor.binary.Button;
+import com.dfi.sbc2ha.sensor.binary.ButtonState;
+import com.diozero.api.I2CDevice;
+import com.diozero.api.I2CDeviceInterface;
+import com.diozero.devices.oled.SH1106;
+import com.diozero.devices.oled.ShOledCommunicationChannel;
+import com.diozero.internal.spi.NativeDeviceFactoryInterface;
+import com.diozero.sbc.DeviceFactoryHelper;
+import com.diozero.util.Diozero;
+import org.tinylog.Logger;
+
+import static com.dfi.sbc2ha.helper.Constants.OLED_PIN;
+import static com.diozero.devices.oled.SH1106.DEFAULT_I2C_ADDRESS;
+
+
+public class DisplayFactory {
+    public static Display createDisplay(OledConfig config, StatsProvider statsProvider) {
+
+        NativeDeviceFactoryInterface ndf = DeviceFactoryHelper.getNativeDeviceFactory();
+        if (MockHelper.isMockRun()) {
+            //return mock(Display.class);
+        }
+
+        try {
+
+
+            InputSwitchConfig inputConfig = new InputSwitchConfig();
+            inputConfig.setId("case btn");
+            inputConfig.setKind(InputKindType.SWITCH);
+            inputConfig.setClickDetection(com.dfi.sbc2ha.config.sbc2ha.definition.enums.ButtonState.SINGLE);
+            inputConfig.setPin(OLED_PIN);
+            inputConfig.setGpioMode("gpio_pu");
+
+            Button btn = (Button) SensorFactory.createBinarySensor(inputConfig);
+
+            I2CDeviceInterface i2c = new I2CDevice(BoneIoBBB.I2C_CONTROLLER, DEFAULT_I2C_ADDRESS);
+            ShOledCommunicationChannel channel = new ShOledCommunicationChannel.I2cCommunicationChannel(i2c);
+            SH1106 delegate = new SH1106(channel, SH1106.Height.TALL);
+
+            Display display = new Display(delegate, btn, config, statsProvider);
+            Diozero.registerForShutdown(display);
+
+            btn.addListener(display::handleClick, ButtonState.SINGLE);
+            return display;
+
+        } catch (RuntimeException e) {
+            Logger.error("Unable setup display: {}", e.getMessage());
+
+            return null;
+        }
+
+
+    }
+
+
+}

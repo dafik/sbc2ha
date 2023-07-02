@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.dfi</groupId>
+        <artifactId>sbc2ha</artifactId>
+        <version>0.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>com.dfi.sbc2ha</groupId>
+    <artifactId>app</artifactId>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>com.diozero</groupId>
+            <artifactId>diozero-extensions</artifactId>
+            <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.diozero</groupId>
+            <artifactId>diozero-core</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
+        <!--
+                <dependency>
+                    <groupId>com.diozero</groupId>
+                    <artifactId>diozero-provider-mock</artifactId>
+                </dependency>
+        -->
+
+        <dependency>
+            <groupId>com.diozero</groupId>
+            <artifactId>diozero-provider-pigpio</artifactId>
+            <version>1.4.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--<dependency>
+    <groupId>org.eclipse.paho</groupId>
+    <artifactId>org.eclipse.paho.mqttv5.client</artifactId>
+    <version>1.2.5</version>
+</dependency>-->
+        <dependency>
+            <groupId>com.hivemq</groupId>
+            <artifactId>hivemq-mqtt-client</artifactId>
+            <version>1.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dalsemi.onewire</groupId>
+            <artifactId>ow-api</artifactId>
+            <version>1.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core-java11</artifactId>
+            <version>6.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>net.solarnetwork.common</groupId>
+            <artifactId>nifty-modbus-core</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.solarnetwork.common</groupId>
+            <artifactId>nifty-modbus-rtu</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.solarnetwork.common</groupId>
+            <artifactId>nifty-modbus-rtu-jsc</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dfi.sbc2ha.config</groupId>
+            <artifactId>config-sbc2ha</artifactId>
+            <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.tinylog</groupId>
+            <artifactId>tinylog-impl</artifactId>
+            <version>2.6.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <!--        <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <excludes>
+                            <exclude>boneIo/*</exclude>
+                            <exclude>FONT_4X5</exclude>
+                            <exclude>FONT_5x8</exclude>
+                        </excludes>
+                        <filtering>false</filtering>
+                    </resource>
+                </resources>-->
+
+        <plugins>
+
+            <!--                <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-jar-plugin</artifactId>
+                                <configuration>
+                                    <archive>
+                                        <manifest>
+                                            <addClasspath>true</addClasspath>
+                                            <classpathPrefix>lib/</classpathPrefix>
+                                            <mainClass>com.dfi.sbc2ha.App</mainClass>
+                                        </manifest>
+                                    </archive>
+                                </configuration>
+                            </plugin>-->
+
+            <!--            <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-dependency-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>prepare-runtime</id>
+                                    <goals>
+                                        <goal>unpack-dependencies</goal>
+                                    </goals>
+
+                                    <configuration>
+                                        <excludeTransitive>true</excludeTransitive>
+                                        <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                                        &lt;!&ndash; optional &ndash;&gt;
+                                        &lt;!&ndash; exclude copying test and provided dependencies &ndash;&gt;
+                                        <includeScope>runtime</includeScope>
+                                        <excludeScope>provided</excludeScope>
+                                        <excludeScope>test</excludeScope>
+                                        &lt;!&ndash; optional &ndash;&gt;
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>-->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.artifactId}-${project.version}-dep</finalName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>com.dfi.sbc2ha.App</Main-Class>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>com.diozero:diozero-core</artifact>
+                                    <excludes>
+                                        <exclude>tinylog.properties</exclude>
+                                        <exclude>com.diozero.devices.PwmLed.class</exclude>
+                                        <exclude>com.diozero.devices.W1ThermSensor.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--            <plugin>
+                            <artifactId>maven-assembly-plugin</artifactId>
+                            <version>3.4.2</version>
+                            <executions>
+                                <execution>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>single</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                            <configuration>
+                                <archive>
+                                    <manifest>
+                                        <mainClass>com.dfi.sbc2ha.App</mainClass>
+                                    </manifest>
+                                </archive>
+                                <descriptorRefs>
+                                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                                </descriptorRefs>
+                                <appendAssemblyId>false</appendAssemblyId>
+                                <finalName>sbc2ha</finalName>
+
+
+                     &lt;!&ndash;           <descriptors>
+                                    <descriptor>sbc2ha.xml</descriptor>
+                                </descriptors>&ndash;&gt;
+                            </configuration>
+                        </plugin>-->
+
+
+        </plugins>
+    </build>
+
+</project>

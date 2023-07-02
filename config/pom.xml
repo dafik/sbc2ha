@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.dfi</groupId>
+        <artifactId>sbc2ha</artifactId>
+        <version>0.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>com.dfi.sbc2ha</groupId>
+    <artifactId>config</artifactId>
+
+    <packaging>pom</packaging>
+    <modules>
+        <module>converter</module>
+        <module>config-boneio</module>
+        <module>config-sbc2ha</module>
+        <module>config-sbc2ha-new</module>
+    </modules>
+
+
+</project>

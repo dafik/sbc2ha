@@ -1,0 +1,19 @@
+[Unit]
+Description=Single board computer 2 Home Assistant
+After=syslog.target network.target
+
+[Service]
+SuccessExitStatus=143
+
+#User=debian
+#Group=debian
+
+Type=simple
+
+#Environment="JAVA_HOME=/usr/lib/jvm/adoptopenjdk-16-hotspot-armhf/bin/java"
+WorkingDirectory=/home/debian/sbc2ha
+ExecStart=/usr/bin/java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar sbc2ha.jar /home/debian/boneio/config.yaml
+ExecStop=/bin/kill -15 $MAINPID
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,4 @@
+#!/bin/bash
+sudo cp ./sbc2ha.service /lib/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now sbc2ha
