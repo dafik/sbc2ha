@@ -7,8 +7,9 @@ public enum PlatformType {
     MODBUS,
     LM75,
     I2C,
-    MCP23XX,
+    MCP23017,
     OLED,
     MQTT,
+    PCA9685,
     GPIO
 }

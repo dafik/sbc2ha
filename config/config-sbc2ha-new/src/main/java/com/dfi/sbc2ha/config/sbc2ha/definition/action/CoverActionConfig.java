@@ -10,8 +10,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class CoverActionConfig extends ActionConfig {
 
-    @JsonProperty("actuator_id")
-    String actuatorId;
+
+    int output;
 
     @JsonProperty("action_cover")
     ActionCoverType actionCover;

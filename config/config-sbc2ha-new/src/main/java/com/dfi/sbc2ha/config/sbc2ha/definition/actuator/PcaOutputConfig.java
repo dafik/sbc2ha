@@ -9,9 +9,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class PcaOutputConfig extends ActuatorConfig {
 
-    @JsonProperty("pca_id")
-    String pcaId;
-
     @JsonProperty("percentage_default_brightness")
     int percentageDefaultBrightnes = 1;
 

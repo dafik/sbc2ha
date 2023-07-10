@@ -6,7 +6,6 @@ import com.diozero.adapter.onewire.DiozeroDS2482Adapter;
 import com.diozero.adapter.onewire.DiozeroI2CAdapter;
 import com.diozero.adapter.onewire.OneWireContainer28M;
 import com.diozero.api.I2CDevice;
-import com.diozero.devices.oneWire.bus.DS248.DS2482Bus;
 import com.diozero.devices.oneWire.bus.DS248.DS2482BusImpl;
 import org.tinylog.Logger;
 
@@ -65,7 +64,7 @@ public class DS2482Factory {
         //}
     }
 
-    public static DS2482Bus setupDS2482Bus(I2CDevice i2CDevice) {
+    public static DS2482BusImpl setupDS2482Bus(I2CDevice i2CDevice) {
         DiozeroI2CAdapter i2CAdapter = new DiozeroI2CAdapter(i2CDevice);
         DiozeroDS2482Adapter adapter = new DiozeroDS2482Adapter(i2CAdapter);
 

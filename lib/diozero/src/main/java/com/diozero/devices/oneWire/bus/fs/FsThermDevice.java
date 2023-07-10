@@ -10,7 +10,7 @@ import com.diozero.devices.oneWire.bus.OneWireThermDevice;
  * @see <a href="https://github.com/timofurrer/w1thermsensor">W1ThermSensor Python library</a>
  */
 public class FsThermDevice extends FsDevice implements OneWireThermDevice {
-    public FsThermDevice(FsBus bus, Type type, String serialNumber) {
+    public FsThermDevice(FsBusImpl bus, Type type, String serialNumber) {
         super(bus, type, serialNumber);
     }
 

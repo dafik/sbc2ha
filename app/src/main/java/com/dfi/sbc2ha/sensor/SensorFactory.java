@@ -1,13 +1,18 @@
 package com.dfi.sbc2ha.sensor;
 
-import com.dfi.sbc2ha.config.sbc2ha.definition.input.InputConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.input.InputSensorConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.input.InputSwitchConfig;
+import com.dfi.sbc2ha.bus.Lm75Bus;
+import com.dfi.sbc2ha.bus.OWireBus;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.AdcSensorConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.Lm75SensorConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.SensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputSensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputSwitchConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.oneWire.therm.DS18B20;
 import com.dfi.sbc2ha.exception.MissingHardwareException;
 import com.dfi.sbc2ha.helper.ConfigurePin;
+import com.dfi.sbc2ha.helper.deserializer.DurationStyle;
+import com.dfi.sbc2ha.helper.extensionBoard.ExtensionBoardInfo;
+import com.dfi.sbc2ha.helper.extensionBoard.ExtensionInputBoard;
 import com.dfi.sbc2ha.sensor.analog.AnalogSensor;
 import com.dfi.sbc2ha.sensor.binary.Binary;
 import com.dfi.sbc2ha.sensor.binary.BinarySensor;
@@ -17,6 +22,7 @@ import com.dfi.sbc2ha.sensor.temperature.Lm75TempSensor;
 import com.dfi.sbc2ha.sensor.temperature.oneWire.OneWireFactory;
 import com.dfi.sbc2ha.sensor.temperature.oneWire.W1TempSensor;
 import com.diozero.api.GpioPullUpDown;
+import com.diozero.api.I2CDevice;
 import com.diozero.api.InvalidModeException;
 import com.diozero.api.PinInfo;
 import com.diozero.sbc.BoardInfo;
@@ -33,20 +39,36 @@ public class SensorFactory {
         try {
             return create(config);
         } catch (InvalidModeException | MissingHardwareException e) {
-            Logger.error("error creating " + config.getPin());
+            Logger.error("error creating " + config.getInput());
             throw new RuntimeException(e);
         }
     }
 
-    public static W1TempSensor createOneWireTherm(SensorConfig config, Map<String, Object> busMap) {
-        return OneWireFactory.createOneWireTherm(config, busMap);
+    public static Button createCaseButton(String headerName, int pinNumber, boolean pullUp) throws RuntimeException {
+        try {
+            BoardInfo boardInfo = DeviceFactoryHelper.getNativeDeviceFactory().getBoardInfo();
+            PinInfo pinInfo = getPinInfoFromHeader(boardInfo, headerName, pinNumber);
+            Button.Builder builder = Button.Builder.builder(pinInfo)
+                    .setClickDetection(ButtonState.SINGLE)
+                    .setDebounceTimeMillis(DurationStyle.detectAndParse("25ms").toMillis())
+                    .setPud(pullUp ? GpioPullUpDown.PULL_UP : GpioPullUpDown.NONE);
+
+            return builder.build();
+        } catch (InvalidModeException | MissingHardwareException e) {
+            Logger.error("error creating header: {} pin: {}", headerName, pinNumber);
+            throw new RuntimeException(e);
+        }
     }
 
 
-    public static Lm75TempSensor createLM75Temp(Lm75SensorConfig config) {
-        //config.setUpdateInterval(DurationStyle.detectAndParse("5s"));
+    public static W1TempSensor createOneWireTherm(DS18B20 config, OWireBus bus) {
+        return OneWireFactory.createOneWireTherm(config, bus);
+    }
 
-        return Lm75TempSensor.Builder.builder(Integer.parseInt(config.getAddress()))
+
+    public static Lm75TempSensor createLM75Temp(Lm75SensorConfig config, Lm75Bus busMap) {
+        I2CDevice busInternal = busMap.getBus();
+        return Lm75TempSensor.Builder.builder(busInternal)
                 .setName(config.getId())
                 .setUpdateInterval(config.getUpdateInterval())
                 .setFilters(config.getFilters())
@@ -71,46 +93,47 @@ public class SensorFactory {
     }
 
     private static Button createButton(InputSwitchConfig config) throws MissingHardwareException {
-        PinInfo pinInfo = searchPinInfo(config.getPin());
+        ExtensionInputBoard.InputDefinition inputDefinition = getInputDefinition(config.getInput());
+        PinInfo pinInfo = searchPinInfo(inputDefinition);
         Button.Builder builder = Button.Builder.builder(pinInfo)
                 .setClickDetection(ButtonState.valueOf(config.getClickDetection().name()))
                 .setDebounceTimeMillis(config.getBounceTime().toMillis());
 
-        return createBinarySensor(config, pinInfo, builder).build();
+        return createBinarySensor(config, pinInfo, builder, inputDefinition.isPullUp()).build();
 
 
     }
 
     private static Binary createBinary(InputSensorConfig config) throws MissingHardwareException {
-        PinInfo pinInfo = searchPinInfo(config.getPin());
+        ExtensionInputBoard.InputDefinition inputDefinition = getInputDefinition(config.getInput());
+        PinInfo pinInfo = searchPinInfo(inputDefinition);
         Binary.Builder builder = Binary.Builder.builder(pinInfo)
                 .setDebounceTimeMillis(config.getBounceTime().toMillis());
 
-        return createBinarySensor(config, pinInfo, builder).build();
+        return createBinarySensor(config, pinInfo, builder, inputDefinition.isPullUp()).build();
     }
 
     public static AnalogSensor createAnalogSensor(AdcSensorConfig config) {
         try {
-            PinInfo pinInfo = searchPinInfo(config.getPin());
+            ExtensionInputBoard.InputDefinition inputDefinition = getAnalogDefinition(config.getAnalog());
+            PinInfo pinInfo = searchPinInfo(inputDefinition);
             AnalogSensor.Builder builder = AnalogSensor.Builder.builder(pinInfo);
             builder.setName(Optional.of(config.getId()).orElse(config.getId()));
 
             return builder.build();
 
         } catch (InvalidModeException | MissingHardwareException e) {
-            Logger.error("error creating " + config.getPin());
+            Logger.error("error creating analog" + config.getAnalog());
             throw new RuntimeException(e);
         }
 
     }
 
-    private static <T extends BinarySensor.Builder<T>> T createBinarySensor(InputConfig<?> config, PinInfo pinInfo, T builder) {
-        if (config.getGpioMode() != null) {
-            GpioPullUpDown mode = findPullUpDown(config.getGpioMode());
-            if (mode != null) {
-                builder.setPullUpDown(mode);
-                ConfigurePin.configure(pinInfo, mode);
-            }
+    private static <T extends BinarySensor.Builder<T>> T createBinarySensor(InputConfig<?> config, PinInfo pinInfo, T builder, boolean isPullUp) {
+        if (isPullUp) {
+            GpioPullUpDown mode = GpioPullUpDown.PULL_UP;
+            builder.setPullUpDown(mode);
+            ConfigurePin.configure(pinInfo, mode);
         }
         builder.setName(Optional.of(config.getId()).orElse(config.getId()));
         builder.setInverted(config.isInverted());
@@ -120,7 +143,7 @@ public class SensorFactory {
     }
 
     private static void registerLoggerEvents(BinarySensor<?, ?> input, InputConfig<?> config) {
-        input.whenAny(evt -> Logger.info("{} on:{} pin:{} time: {} ", evt.getState(), input.getName(), config.getPin(), evt.getNanoTime()));
+        input.whenAny(evt -> Logger.info("{} on:{} pin:{} time: {} ", evt.getState(), input.getName(), config.getInput(), evt.getNanoTime()));
     }
 
     public static PinInfo searchPinInfo(String headerPin) throws MissingHardwareException {
@@ -131,14 +154,26 @@ public class SensorFactory {
             throw new IllegalArgumentException(headerPin);
         }
 
-        return getPinInfoFromHeader(boardInfo, temp[0], temp[1]);
+        return getPinInfoFromHeader(boardInfo, temp[0], Integer.parseInt(temp[1]));
     }
 
-    private static PinInfo getPinInfoFromHeader(BoardInfo boardInfo, String headerName, String pinNumber) throws MissingHardwareException {
+    public static PinInfo searchPinInfo(ExtensionInputBoard.InputDefinition def) throws MissingHardwareException {
+        BoardInfo boardInfo = DeviceFactoryHelper.getNativeDeviceFactory().getBoardInfo();
+        return getPinInfoFromHeader(boardInfo, def.getHeader(), def.getPin());
+    }
+
+    private static ExtensionInputBoard.InputDefinition getInputDefinition(int input) {
+        return ExtensionBoardInfo.getInstance().getIn().get("D").get(input);
+    }
+
+    private static ExtensionInputBoard.InputDefinition getAnalogDefinition(int input) {
+        return ExtensionBoardInfo.getInstance().getIn().get("A").get(input);
+    }
+
+    private static PinInfo getPinInfoFromHeader(BoardInfo boardInfo, String headerName, int pinNumber) throws MissingHardwareException {
         Map<Integer, PinInfo> headerMap = getHeaderMap(boardInfo, headerName);
-        int key = Integer.parseInt(pinNumber);
-        if (headerMap.containsKey(key)) {
-            return headerMap.get(key);
+        if (headerMap.containsKey(pinNumber)) {
+            return headerMap.get(pinNumber);
         }
         throw new MissingHardwareException("Pin: " + pinNumber + " not found in header: " + headerName);
     }

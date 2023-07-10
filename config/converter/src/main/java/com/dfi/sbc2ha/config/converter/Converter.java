@@ -8,6 +8,7 @@ import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -20,9 +21,10 @@ public class Converter {
         try {
 
             String configFile = getConfigFile(args);
-            AppConfig appConfig = convertFile(configFile);
+            String vendor = getVendor(args);
+            AppConfig appConfig = convertFile(configFile, vendor);
 
-            saveConfig(appConfig,configFile);
+            saveConfig(appConfig, configFile);
 
 
         } catch (IllegalArgumentException e) {
@@ -36,12 +38,18 @@ public class Converter {
     }
 
     private static void saveConfig(AppConfig appConfig, String configFile) {
-        ConfigHelper.saveCacheYaml(configFile,appConfig,"-sbc2ha");
+        ConfigHelper.saveCacheYaml(configFile, appConfig, "-sbc2ha");
     }
 
-    public static AppConfig convertFile(String fileLocation) {
+    public static AppConfig convertFile(String fileLocation, String vendor) {
         BoneIoConfig boneIoConfig = getAppConfig(fileLocation);
-        return BoneIoConverter.convert(boneIoConfig);
+        if (Objects.equals(vendor, "boneio")) {
+            return BoneIoConverter.convertBoneIo(boneIoConfig);
+        } else if (vendor.equals("rpi")) {
+            return BoneIoConverter.convert(boneIoConfig, vendor, "nohat", "nohat");
+        } else {
+            throw new IllegalArgumentException("unknown vendor " + vendor);
+        }
     }
 
 
@@ -62,6 +70,13 @@ public class Converter {
             return args[0];
         }
         throw new IllegalArgumentException("no config file provided as first argument");
+    }
+
+    static String getVendor(String[] args) throws IllegalArgumentException {
+        if (args.length > 1) {
+            return args[1];
+        }
+        return "boneio";
     }
 }
 

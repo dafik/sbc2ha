@@ -1,8 +1,8 @@
 package com.dfi.sbc2ha.display;
 
 import com.dfi.sbc2ha.Version;
-import com.dfi.sbc2ha.config.sbc2ha.definition.OledConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.ScreenType;
+import com.dfi.sbc2ha.config.sbc2ha.definition.platform.OledConfig;
 import com.dfi.sbc2ha.helper.stats.StatsProvider;
 import com.dfi.sbc2ha.helper.stats.provider.*;
 import com.dfi.sbc2ha.helper.timer.ClickTimerTask;

@@ -1,9 +1,11 @@
 package com.dfi.sbc2ha.sensor.temperature;
 
-import com.dfi.sbc2ha.helper.BoneIoBBB;
+import com.dfi.sbc2ha.config.sbc2ha.definition.filters.ValueFilterType;
+import com.diozero.api.I2CDevice;
 import com.diozero.devices.LM75;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 public class Lm75TempSensor extends TempSensor {
@@ -18,22 +20,21 @@ public class Lm75TempSensor extends TempSensor {
 
     }
 
-    public Lm75TempSensor(LM75 delegate, String name, Duration updateInterval, Map<String, String> filters) {
+    public Lm75TempSensor(LM75 delegate, String name, Duration updateInterval, List<Map<ValueFilterType, Number>> filters) {
         super(delegate, name, updateInterval, filters);
     }
 
 
     public static class Builder extends TempSensor.Builder<Builder> {
-
+        private final I2CDevice bus;
         private LM75 delegate;
-        private int address;
 
-        public Builder(int address) {
-            this.address = address;
+        public Builder(I2CDevice bus) {
+            this.bus = bus;
         }
 
-        public static Builder builder(int address) {
-            return new Builder(address);
+        public static Builder builder(I2CDevice bus) {
+            return new Builder(bus);
         }
 
         @Override
@@ -41,10 +42,6 @@ public class Lm75TempSensor extends TempSensor {
             return this;
         }
 
-        public Builder setAddress(int address) {
-            this.address = address;
-            return this;
-        }
 
         public Lm75TempSensor build() {
             if (delegate == null) {
@@ -54,7 +51,7 @@ public class Lm75TempSensor extends TempSensor {
         }
 
         private Builder setupDelegate() {
-            delegate = new LM75(BoneIoBBB.I2C_CONTROLLER, (byte) address);
+            delegate = new LM75(bus);
             return this;
         }
 

@@ -1,6 +1,7 @@
 package com.dfi.sbc2ha.sensor.analog;
 
 
+import com.dfi.sbc2ha.config.sbc2ha.definition.filters.ValueFilterType;
 import com.dfi.sbc2ha.helper.deserializer.DurationStyle;
 import com.dfi.sbc2ha.sensor.scheduled.ScheduledSensor;
 import com.dfi.sbc2ha.sensor.temperature.TempSensor;
@@ -13,9 +14,7 @@ import com.diozero.sbc.DeviceFactoryHelper;
 import org.tinylog.Logger;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static com.dfi.sbc2ha.sensor.analog.AnalogState.CHANGED;
@@ -25,7 +24,7 @@ public class AnalogSensor extends ScheduledSensor<AnalogInputDevice, AnalogEvent
     public static final Duration UPDATE_INTERVAL = DurationStyle.detectAndParse("60s");
 
     protected final AnalogInputDevice delegate;
-    private final Map<String, String> filters = new HashMap<>();
+    private final List<Map<ValueFilterType, Number>> filters = new ArrayList<>();
 
     protected float lastRawValue;
     protected float lastValue;
@@ -35,14 +34,14 @@ public class AnalogSensor extends ScheduledSensor<AnalogInputDevice, AnalogEvent
     }
 
     public AnalogSensor(AnalogInputDevice delegate, String name, Duration updateInterval) {
-        this(delegate, name, updateInterval, new HashMap<>());
+        this(delegate, name, updateInterval, new ArrayList<>());
     }
 
-    public AnalogSensor(AnalogInputDevice delegate, String name, Duration updateInterval, Map<String, String> filters) {
+    public AnalogSensor(AnalogInputDevice delegate, String name, Duration updateInterval, List<Map<ValueFilterType, Number>> filters) {
         super(name, updateInterval);
         this.delegate = delegate;
 
-        this.filters.putAll(filters);
+        this.filters.addAll(filters);
 
         listeners.put(CHANGED, new LinkedHashSet<>());
     }
@@ -64,7 +63,7 @@ public class AnalogSensor extends ScheduledSensor<AnalogInputDevice, AnalogEvent
     }
 
     public void handleChanged(float temperature) {
-        AnalogEvent e = new AnalogEvent( CHANGED, temperature);
+        AnalogEvent e = new AnalogEvent(CHANGED, temperature);
         listeners.get(CHANGED).forEach(consumer -> consumer.accept(e));
         handleAny(e);
     }
@@ -76,9 +75,13 @@ public class AnalogSensor extends ScheduledSensor<AnalogInputDevice, AnalogEvent
 
 
     private float applyFilters(float rawValue) {
-        filters.forEach((s, s2) -> Logger.warn("Not implemented yey"));
-
-
+        for (var filter : filters) {
+            for (Map.Entry<ValueFilterType, Number> entry : filter.entrySet()) {
+                ValueFilterType valueFilterType = entry.getKey();
+                Number number = entry.getValue();
+                rawValue = valueFilterType.getFilter().apply(rawValue, number.floatValue());
+            }
+        }
         return rawValue;
     }
 

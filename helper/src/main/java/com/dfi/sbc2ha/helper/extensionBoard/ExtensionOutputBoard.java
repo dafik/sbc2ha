@@ -9,7 +9,7 @@ import java.util.Map;
 public class ExtensionOutputBoard {
     private final Map<Integer, OutputDefinition> def = new HashMap<>();
 
-    public static ExtensionOutputBoard of(List<String[]> entries) {
+    public static ExtensionOutputBoard ofBoneIo(List<String[]> entries) {
         ExtensionOutputBoard extensionOutputBoard = new ExtensionOutputBoard();
 
         List<Integer> busAddress = List.of(
@@ -30,6 +30,21 @@ public class ExtensionOutputBoard {
         return extensionOutputBoard;
     }
 
+    public static ExtensionOutputBoard ofRpi(List<String[]> entries) {
+        ExtensionOutputBoard extensionOutputBoard = new ExtensionOutputBoard();
+
+        for (var entry : entries) {
+            int gpio = Integer.parseInt(entry[2]);
+            String type = entry[3].toUpperCase();
+            OutputDefinition od = new OutputDefinition(type, -1, gpio);
+
+
+            extensionOutputBoard.add(Integer.parseInt(entry[0]), od);
+        }
+        return extensionOutputBoard;
+    }
+
+
     public OutputDefinition get(int outputNumber) {
         return def.get(outputNumber);
     }
@@ -45,6 +60,20 @@ public class ExtensionOutputBoard {
             OutputDefinition od = entry.getValue();
 
             if (od.getPin() == pin && od.getId() == mcpId && od.getType().equals("MCP")) {
+                found = integer;
+                break;
+            }
+        }
+
+        return found;
+    }
+    public int getByGpioId(int gpio) {
+        int found = -1;
+        for (Map.Entry<Integer, OutputDefinition> entry : def.entrySet()) {
+            Integer integer = entry.getKey();
+            OutputDefinition od = entry.getValue();
+
+            if (od.getPin() == gpio && od.getType().equals("GPIO")) {
                 found = integer;
                 break;
             }

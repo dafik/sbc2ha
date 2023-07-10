@@ -2,6 +2,7 @@ package com.dfi.sbc2ha.config.boneio.definition.sensor;
 
 
 import com.dfi.sbc2ha.config.boneio.definition.enums.PlatformType;
+import com.dfi.sbc2ha.config.boneio.definition.filter.BoneIoValueFilterType;
 import com.dfi.sbc2ha.config.boneio.definition.sensor.oneWire.therm.ds2482.BoneIoDS18B20busDS2482;
 import com.dfi.sbc2ha.config.boneio.definition.sensor.oneWire.therm.fs.BoneIoDS18B20busFs;
 import com.dfi.sbc2ha.helper.deserializer.DurationDeserializer;
@@ -15,8 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import java.time.Duration;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @JsonTypeInfo(
@@ -57,7 +57,7 @@ public abstract class BoneIoSensorConfig {
     @JsonSerialize(using = DurationSerializer.class)
     Duration updateInterval = DurationStyle.detectAndParse("60s");
 
-    Map<String, String> filters = new LinkedHashMap<>();
+    public List<Map<BoneIoValueFilterType, Number>> filters = new ArrayList<>();
 
     @JsonProperty("show_in_ha")
     boolean showInHa = true;

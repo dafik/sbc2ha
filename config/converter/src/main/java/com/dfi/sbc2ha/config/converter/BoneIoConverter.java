@@ -11,6 +11,7 @@ import com.dfi.sbc2ha.config.boneio.definition.action.BoneIoOutputActionConfig;
 import com.dfi.sbc2ha.config.boneio.definition.bus.BoneIoBusConfig;
 import com.dfi.sbc2ha.config.boneio.definition.bus.BoneIoFsBusConfig;
 import com.dfi.sbc2ha.config.boneio.definition.bus.BoneIoModbusBusConfig;
+import com.dfi.sbc2ha.config.boneio.definition.filter.BoneIoValueFilterType;
 import com.dfi.sbc2ha.config.boneio.definition.input.BoneIoInputConfig;
 import com.dfi.sbc2ha.config.boneio.definition.input.BoneIoInputSensorConfig;
 import com.dfi.sbc2ha.config.boneio.definition.input.BoneIoInputSwitchConfig;
@@ -24,56 +25,52 @@ import com.dfi.sbc2ha.config.boneio.definition.sensor.BoneIoModbusSensorConfig;
 import com.dfi.sbc2ha.config.boneio.definition.sensor.BoneIoSensorConfig;
 import com.dfi.sbc2ha.config.boneio.definition.sensor.oneWire.therm.ds2482.BoneIoDS18B20busDS2482;
 import com.dfi.sbc2ha.config.boneio.definition.sensor.oneWire.therm.fs.BoneIoDS18B20busFs;
-import com.dfi.sbc2ha.config.sbc2ha.definition.*;
+import com.dfi.sbc2ha.config.sbc2ha.definition.AppConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.LoggerConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.action.ActionConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.action.CoverActionConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.action.MqttActionConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.action.OutputActionConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.platform.*;
-import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.*;
+import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.ActuatorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.GpioOutputConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.McpOutputConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.PcaOutputConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.*;
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.deviceClass.ha.BinarySensorDeviceClassType;
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.deviceClass.ha.SwitchDeviceClassType;
 import com.dfi.sbc2ha.config.sbc2ha.definition.extentsionBoard.ExtensionBoardsConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.GpioOutputConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.McpOutputConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.ActuatorConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.PcaOutputConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.filters.ValueFilterType;
+import com.dfi.sbc2ha.config.sbc2ha.definition.platform.*;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.*;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.*;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.oneWire.therm.ds2482.DS18B20busDS2482;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.oneWire.therm.fs.DS18B20busFs;
 import com.dfi.sbc2ha.helper.extensionBoard.ExtensionBoardInfo;
 import org.tinylog.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class BoneIoConverter {
 
-    private static String inputBoard;
-    private static String outputBoard;
-
-
-    static AppConfig convert(BoneIoConfig boneIoConfig) {
+    static AppConfig convertBoneIo(BoneIoConfig boneIoConfig) {
         return convert(boneIoConfig,
+                "boneio",
                 detectInputBoard(boneIoConfig.getInput()),
                 detectOutputBoard(boneIoConfig.getOutput())
         );
     }
 
-    static AppConfig convert(BoneIoConfig boneIoConfig, String inputBoard, String outputBoard) {
+    static AppConfig convert(BoneIoConfig boneIoConfig, String vendor, String inputBoard, String outputBoard) {
 
         AppConfig appConfig = new AppConfig();
-        appConfig.setExtensionBoards(getExtensionBoardsConfig(inputBoard, outputBoard));
+        appConfig.setExtensionBoards(getExtensionBoardsConfig(vendor, inputBoard, outputBoard));
 
         appConfig.addPlatform(getMqttConfig(boneIoConfig.getMqtt()));
         appConfig.addPlatform(getOledConfig(boneIoConfig.getOled()));
 
-        appConfig.addPlatforms(getBusConfig(boneIoConfig.getMcp23017(), PlatformType.MCP23XX));
+        appConfig.addPlatforms(getBusConfig(boneIoConfig.getMcp23017(), PlatformType.MCP23017));
         appConfig.addPlatforms(getBusConfig(boneIoConfig.getDs2482(), PlatformType.DS2482));
         appConfig.addPlatform(getDallas(boneIoConfig.getDallas()));
         appConfig.addPlatform(getModbus(boneIoConfig.getModbus()));
@@ -85,21 +82,19 @@ public class BoneIoConverter {
         appConfig.addSensors(getSensor(boneIoConfig.getSensor()));
         appConfig.addSensors(getAdc(boneIoConfig.getAdc()));
 
-        appConfig.addSensors(getInput(boneIoConfig.getInput()));
+        appConfig.addSensors(getInput(boneIoConfig.getInput(), appConfig.getActuator()));
         appConfig.setLogger(getLogger(boneIoConfig.getLogger()));
 
         return appConfig;
     }
 
-    private static ExtensionBoardsConfig getExtensionBoardsConfig(String inputB, String outputB) {
+    private static ExtensionBoardsConfig getExtensionBoardsConfig(String vendor, String inputB, String outputB) {
 
-        inputBoard = inputB;
-        outputBoard = outputB;
 
         ExtensionBoardsConfig ebc = new ExtensionBoardsConfig();
-        ebc.setVendor("boneio");
-        ebc.setInputBoard(inputBoard);
-        ebc.setOutputBoard(outputBoard);
+        ebc.setVendor(vendor);
+        ebc.setInputBoard(inputB);
+        ebc.setOutputBoard(outputB);
 
         ExtensionBoardInfo.initialize(ebc.getVendor(), ebc.getInputBoard(), ebc.getOutputBoard());
 
@@ -136,20 +131,20 @@ public class BoneIoConverter {
 
 
     static List<PlatformConfig> getBusConfig(List<BoneIoBusConfig> l, PlatformType pt) {
-        List<PlatformConfig> list = new ArrayList<>();
-        for (var s : l) {
+        return l.stream().map(s -> {
             I2cBusConfig d = new I2cBusConfig();
             d.setId(s.getId());
             d.setAddress(s.getAddress());
             d.setPlatform(pt);
-        }
-        return list;
+            return d;
+        }).collect(Collectors.toList());
+
     }
 
     static LoggerConfig getLogger(BoneIoLoggerConfig s) {
         LoggerConfig d = new LoggerConfig();
         d.setDefaultLevel(s.getDefaultLevel());
-        Map<String, String> logs = new HashMap<>(s.getLogs());
+        Map<String, String> logs = new LinkedHashMap<>(s.getLogs());
         d.setLogs(logs);
         return d;
     }
@@ -168,26 +163,26 @@ public class BoneIoConverter {
         return l;
     }
 
-    static List<SensorConfig> getInput(List<BoneIoInputConfig<?>> sl) {
+    static List<SensorConfig> getInput(List<BoneIoInputConfig<?>> sl, List<ActuatorConfig> actuator) {
         return sl.stream().map(s -> {
             switch (s.getKind()) {
                 default:
                 case SWITCH:
-                    return getInputSwitchConfig((BoneIoInputSwitchConfig) s);
+                    return getInputSwitchConfig((BoneIoInputSwitchConfig) s, actuator);
                 case SENSOR:
-                    return getInputSensorConfig((BoneIoInputSensorConfig) s);
+                    return getInputSensorConfig((BoneIoInputSensorConfig) s, actuator);
             }
         }).collect(Collectors.toList());
     }
 
-    static InputSensorConfig getInputSensorConfig(BoneIoInputSensorConfig s) {
+    static InputSensorConfig getInputSensorConfig(BoneIoInputSensorConfig s, List<ActuatorConfig> actuator) {
         var d = new InputSensorConfig();
         d.setDeviceClass(convertEnum(BinarySensorDeviceClassType.class, s.getDeviceClass()));
         setInputConfig(s, d);
 
         var sa = s.getActions();
-        Map<InputSensorAction, List<ActionConfig>> da = new HashMap<>();
-        sa.forEach((san, sc) -> da.put(convertEnum(InputSensorAction.class, san), getActions(sc)));
+        Map<InputSensorAction, List<ActionConfig>> da = new LinkedHashMap<>();
+        sa.forEach((san, sc) -> da.put(convertEnum(InputSensorAction.class, san), getActions(sc, actuator)));
         d.setActions(da);
 
         return d;
@@ -205,14 +200,14 @@ public class BoneIoConverter {
         }
     }
 
-    static InputSwitchConfig getInputSwitchConfig(BoneIoInputSwitchConfig s) {
+    static InputSwitchConfig getInputSwitchConfig(BoneIoInputSwitchConfig s, List<ActuatorConfig> actuator) {
         var d = new InputSwitchConfig();
         d.setDeviceClass(convertEnum(SwitchDeviceClassType.class, s.getDeviceClass()));
         setInputConfig(s, d);
 
         var sa = s.getActions();
-        Map<InputSwitchAction, List<ActionConfig>> da = new HashMap<InputSwitchAction, List<ActionConfig>>();
-        sa.forEach((san, sc) -> da.put(convertEnum(InputSwitchAction.class, san), getActions(sc)));
+        Map<InputSwitchAction, List<ActionConfig>> da = new LinkedHashMap<>();
+        sa.forEach((san, sc) -> da.put(convertEnum(InputSwitchAction.class, san), getActions(sc, actuator)));
         d.setActions(da);
 
         return d;
@@ -238,7 +233,7 @@ public class BoneIoConverter {
     }
 
 
-    static List<ActionConfig> getActions(List<BoneIoActionConfig> sla) {
+    static List<ActionConfig> getActions(List<BoneIoActionConfig> sla, List<ActuatorConfig> actuator) {
         List<ActionConfig> dla = new ArrayList<>();
         for (var sa : sla) {
             ActionConfig da;
@@ -248,10 +243,10 @@ public class BoneIoConverter {
                     break;
                 default:
                 case OUTPUT:
-                    da = getOutputAction((BoneIoOutputActionConfig) sa);
+                    da = getOutputAction((BoneIoOutputActionConfig) sa, actuator);
                     break;
                 case COVER:
-                    da = getCoverAction((BoneIoCoverActionConfig) sa);
+                    da = getCoverAction((BoneIoCoverActionConfig) sa, actuator);
                     break;
             }
             da.setAction(convertEnum(ActionType.class, sa.getAction()));
@@ -267,16 +262,20 @@ public class BoneIoConverter {
         return d;
     }
 
-    static OutputActionConfig getOutputAction(BoneIoOutputActionConfig s) {
+    static OutputActionConfig getOutputAction(BoneIoOutputActionConfig s, List<ActuatorConfig> list) {
+        ActuatorConfig a = list.stream().filter(c -> c.getId().equals(s.getPin())).findFirst().orElseThrow();
         OutputActionConfig d = new OutputActionConfig();
-        d.setActuatorId(s.getPin());
+        d.setOutput(a.getOutput());
+        d.setActionOutput(convertEnum(ActionOutputType.class, s.getActionOutput()));
         return d;
 
     }
 
-    static CoverActionConfig getCoverAction(BoneIoCoverActionConfig s) {
+    static CoverActionConfig getCoverAction(BoneIoCoverActionConfig s, List<ActuatorConfig> list) {
+        ActuatorConfig a = list.stream().filter(c -> c.getId().equals(s.getPin())).findFirst().orElseThrow();
         CoverActionConfig d = new CoverActionConfig();
-        d.setActuatorId(s.getPin());
+        d.setOutput(a.getOutput());
+        d.setActionCover(convertEnum(ActionCoverType.class, s.getActionCover()));
         return d;
     }
 
@@ -310,14 +309,14 @@ public class BoneIoConverter {
             return instance.getOutputMcpByPin(Integer.parseInt(s.getPin()),
                     Integer.parseInt(((BoneIoMcpOutputConfig) s).getMcpId().replace("mcp", "")));
         } else {
-            throw new RuntimeException("Not implemented yet");
+            return instance.getOutputRpiByGpio(Integer.parseInt(s.getPin()));
         }
     }
 
     static PcaOutputConfig getPcaOutput(BoneIoPcaOutputConfig s) {
         var d = new PcaOutputConfig();
         setOutput(s, d);
-        d.setPcaId(s.getPcaId());
+        //d.setPcaId(s.getPcaId());
         d.setPercentageDefaultBrightnes(s.getPercentageDefaultBrightnes());
         return d;
     }
@@ -325,7 +324,7 @@ public class BoneIoConverter {
     static McpOutputConfig getMcpOutput(BoneIoMcpOutputConfig s) {
         var d = new McpOutputConfig();
         setOutput(s, d);
-        d.setMcpId(s.getMcpId());
+        //d.setMcpId(s.getMcpId());
 
         return d;
     }
@@ -393,9 +392,9 @@ public class BoneIoConverter {
         return null;
     }
 
-    static FsBusConfig getDallas(BoneIoFsBusConfig s) {
+    static DallasBusConfig getDallas(BoneIoFsBusConfig s) {
         if (s == null) return null;
-        var d = new FsBusConfig();
+        var d = new DallasBusConfig();
         d.setId(s.getId());
         return d;
     }
@@ -422,7 +421,7 @@ public class BoneIoConverter {
     }
 
     private static PlatformConfig createLm75Platfrom(AppConfig appConfig, BoneIoLm75SensorConfig s) {
-        I2cBusConfig pc = new I2cBusConfig();
+        Lm75BusConfig pc = new Lm75BusConfig();
         pc.setAddress(s.getAddress());
         pc.setId("Lm75");
         appConfig.addPlatform(pc);
@@ -430,11 +429,19 @@ public class BoneIoConverter {
         return pc;
     }
 
-    static Map<String, String> getFilters(Map<String, String> filters) {
-        return new HashMap<String, String>();
+    static List<Map<ValueFilterType, Number>> getFilters(List<Map<BoneIoValueFilterType, Number>> filterList) {
+        return filterList.stream().map(filter -> {
+            Map<ValueFilterType, Number> dict = new HashMap<>();
+            filter.forEach((s, s2) -> {
+                dict.put(ValueFilterType.valueOf(s.name()), s2);
+            });
+            return dict;
+        }).collect(Collectors.toList());
+
     }
 
     static OledConfig getOledConfig(BoneIoOledConfig oled) {
+        if (oled == null) return null;
         OledConfig oledConfig = new OledConfig();
         oledConfig.setEnabled(oled.isEnabled());
         oledConfig.setScreensaverTimeout(oled.getScreensaverTimeout());

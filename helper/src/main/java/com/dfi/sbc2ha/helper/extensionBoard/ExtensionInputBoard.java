@@ -11,7 +11,7 @@ public class ExtensionInputBoard {
     private final Map<Integer, InputDefinition> analog = new HashMap<>();
     private final Map<Integer, InputDefinition> casing = new HashMap<>();
 
-    public static ExtensionInputBoard of(List<String[]> entries, ExtensionModes modes) {
+    public static ExtensionInputBoard ofBoneIo(List<String[]> entries, ExtensionModes modes) {
         ExtensionInputBoard extensionInputBoard = new ExtensionInputBoard();
 
         for (var entry : entries) {
@@ -22,6 +22,19 @@ public class ExtensionInputBoard {
                 inputDefinition.setPullUp(pullUp);
             }
             extensionInputBoard.add(entry[0], Integer.parseInt(entry[1]), inputDefinition);
+        }
+        return extensionInputBoard;
+    }
+
+    public static ExtensionInputBoard ofRpi(List<String[]> entries) {
+        ExtensionInputBoard extensionInputBoard = new ExtensionInputBoard();
+
+        for (var entry : entries) {
+            int pin = Integer.parseInt(entry[0]);
+            int gpio = Integer.parseInt(entry[2]);
+
+            InputDefinition inputDefinition = new InputDefinition(ExtensionInputType.DIGITAL, null, gpio);
+            extensionInputBoard.add("D", pin, inputDefinition);
         }
         return extensionInputBoard;
     }
@@ -55,6 +68,18 @@ public class ExtensionInputBoard {
         }
     }
 
+    public Map<Integer, InputDefinition> get(String type) {
+        switch (type) {
+            case "A":
+                return analog;
+            case "D":
+                return digital;
+            case "C":
+                return casing;
+            default:
+                throw new IllegalArgumentException("unknown type: " + type);
+        }
+    }
 
     private int getId(Map<Integer, InputDefinition> def, String header, int pin) {
         int found = -1;
@@ -67,14 +92,6 @@ public class ExtensionInputBoard {
             }
         }
         return found;
-    }
-
-    @Data
-    public static class InputDefinition {
-        final ExtensionInputType type;
-        final String header;
-        final int pin;
-        boolean pullUp;
     }
 
     public enum ExtensionInputType {
@@ -94,6 +111,14 @@ public class ExtensionInputBoard {
                     throw new IllegalArgumentException("unknown type: " + c);
             }
         }
+    }
+
+    @Data
+    public static class InputDefinition {
+        final ExtensionInputType type;
+        final String header;
+        final int pin;
+        boolean pullUp;
     }
 
 }

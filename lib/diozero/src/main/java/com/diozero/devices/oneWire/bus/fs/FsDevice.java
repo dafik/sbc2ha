@@ -10,9 +10,9 @@ import com.diozero.devices.oneWire.bus.OneWireDevice;
 public class FsDevice implements OneWireDevice {
     protected final Type type;
     protected final String serialNumber;
-    protected final FsBus oneWireBus;
+    protected final FsBusImpl oneWireBus;
 
-    public FsDevice(FsBus bus, Type type, String serialNumber) {
+    public FsDevice(FsBusImpl bus, Type type, String serialNumber) {
         this.oneWireBus = bus;
         this.type = type;
         this.serialNumber = serialNumber;

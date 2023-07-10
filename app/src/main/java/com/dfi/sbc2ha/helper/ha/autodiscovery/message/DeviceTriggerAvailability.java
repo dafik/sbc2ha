@@ -97,36 +97,6 @@ public class DeviceTriggerAvailability extends Availability implements Iterable<
     }
 
 
-/*    public DeviceTriggerAvailability(String id, String name, ButtonState state) {
-        super(id, name, HaDeviceType.DEVICE_AUTOMATION, SbcDeviceType.INPUT);
-
-        //<discovery_prefix>/device_automation/[<node_id>/]<object_id>/config
-        //    "topic": "zigbee2mqtt/0x90fd9ffffedf1266/action",
-        this.topic = formatTopic(Availability.topicPrefix, getStateDeviceTypeName(), id);
-
-        switch (state) {
-            default:
-            case SINGLE:
-                type = "button_short_press";
-                break;
-            case DOUBLE:
-                type = "button_double_press";
-                break;
-            case LONG:
-                type = "button_long_press";
-                break;
-            case RELEASE:
-                type = "button_long_release";
-                break;
-        }
-        payload = state.toString().toLowerCase();
-        subtype = name;
-        setUniqueId(null);
-        setStateTopic(null);
-        setName(null);
-        setAvailability(null);
-    }*/
-
     @Override
     public String getNodeName() {
         return super.getNodeName() + "_" + type;

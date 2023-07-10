@@ -8,22 +8,26 @@ import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.SensorConfig;
 import com.dfi.sbc2ha.helper.deserializer.DurationDeserializer;
 import com.dfi.sbc2ha.helper.deserializer.DurationSerializer;
 import com.dfi.sbc2ha.helper.deserializer.DurationStyle;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@EqualsAndHashCode(callSuper = true)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         property = "kind",
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         defaultImpl = InputSwitchConfig.class
-
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = InputSensorConfig.class, name = "sensor"),
@@ -48,7 +52,11 @@ public abstract class InputConfig<A extends InputAction> extends SensorConfig {
     boolean inverted = false;
 
     Map<A, List<ActionConfig>> actions = new HashMap<>();
-//   actions (Optional, dictionary) - dictionary of predefined actions ([single, double, long], [pressed, released]).
+
+    public InputConfig() {
+        super();
+        platform = PlatformType.GPIO;
+    }
 
     @JsonIgnore
     public List<ActionConfig> getEventActions(A event) {
@@ -56,10 +64,5 @@ public abstract class InputConfig<A extends InputAction> extends SensorConfig {
             return List.of();
         }
         return actions.get(event);
-    }
-
-    public InputConfig() {
-        super();
-        platform = PlatformType.GPIO;
     }
 }

@@ -14,11 +14,26 @@
     <artifactId>app</artifactId>
 
 
+
     <dependencies>
+        <dependency>
+            <groupId>com.dfi.sbc2ha.config</groupId>
+            <artifactId>config-sbc2ha-new</artifactId>
+            <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.diozero</groupId>
             <artifactId>diozero-extensions</artifactId>
             <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dalsemi.onewire</groupId>
+            <artifactId>ow-api</artifactId>
+            <version>1.2</version>
             <scope>compile</scope>
         </dependency>
 
@@ -50,15 +65,15 @@
         <dependency>
             <groupId>com.hivemq</groupId>
             <artifactId>hivemq-mqtt-client</artifactId>
-            <version>1.3.0</version>
+            <version>1.3.1</version>
         </dependency>
 
         <dependency>
-            <groupId>com.dalsemi.onewire</groupId>
-            <artifactId>ow-api</artifactId>
-            <version>1.2</version>
-            <scope>compile</scope>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.mqttv5.client</artifactId>
+            <version>1.2.5</version>
         </dependency>
+
 
         <dependency>
             <groupId>com.github.oshi</groupId>
@@ -81,12 +96,7 @@
             <version>0.4.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.dfi.sbc2ha.config</groupId>
-            <artifactId>config-sbc2ha</artifactId>
-            <version>0.0.1</version>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.tinylog</groupId>
             <artifactId>tinylog-impl</artifactId>

@@ -1,14 +1,14 @@
 package com.dfi.sbc2ha.helper.ha.autodiscovery.message;
 
 import com.dfi.sbc2ha.Version;
-import com.dfi.sbc2ha.config.sbc2ha.definition.input.InputConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.input.InputSensorConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.input.InputSwitchConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.modbus.Register;
-import com.dfi.sbc2ha.config.sbc2ha.definition.output.OutputConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.ActuatorConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.AdcSensorConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.Lm75SensorConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.SensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputSensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputSwitchConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.Register;
 import com.dfi.sbc2ha.helper.Constants;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.HaDeviceType;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
@@ -94,8 +94,8 @@ public abstract class Availability {
     }*/
 
     public static DeviceTriggerAvailability getDeviceTriggerAvailability(InputSwitchConfig config, List<ButtonState> states) {
-        String id = config.getPin();
-        String name = Optional.of(config.getId()).orElse(config.getPin());
+        String id = String.valueOf(config.getInput());
+        String name = Optional.of(config.getId()).orElse(id);
 
         return new DeviceTriggerAvailability(id, name, states);
     }
@@ -139,8 +139,8 @@ public abstract class Availability {
     }
 
     public static InputAvailability getInputAvailability(InputSwitchConfig config) {
-        String id = config.getPin();
-        String name = Optional.of(config.getId()).orElse(config.getPin());
+        String id = String.valueOf(config.getInput());
+        String name = Optional.of(config.getId()).orElse(id);
 
         InputAvailability availability = new InputAvailability(id, name);
         if (null != config.getDeviceClass()) {
@@ -150,8 +150,8 @@ public abstract class Availability {
     }
 
     private static BinarySensorAvailability getBinarySensorAvailability(InputSensorConfig config) {
-        String id = config.getPin();
-        String name = Optional.of(config.getId()).orElse(config.getPin());
+        String id = String.valueOf(config.getInput());
+        String name = Optional.of(config.getId()).orElse(id);
 
         BinarySensorAvailability availability = new BinarySensorAvailability(id, name);
         if (null != config.getDeviceClass()) {
@@ -160,9 +160,9 @@ public abstract class Availability {
         return availability;
     }
 
-    public static Availability getActuatorAvailability(OutputConfig config) {
-        String id = config.getId().replace(" ", "");
-        String name = Optional.of(config.getId()).orElse(config.getKind() + "_" + config.getPin());
+    public static Availability getActuatorAvailability(ActuatorConfig config) {
+        String id = String.valueOf(config.getOutput());
+        String name = Optional.of(config.getId()).orElse(config.getKind() + "_" + id);
         switch (config.getOutputType()) {
             case SWITCH:
                 return new SwitchAvailability(id, name);

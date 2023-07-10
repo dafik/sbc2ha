@@ -1,7 +1,7 @@
 package com.dfi.sbc2ha.helper.ha.autodiscovery.message;
 
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.deviceClass.ha.SensorDeviceClassType;
-import com.dfi.sbc2ha.config.sbc2ha.definition.modbus.Register;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.Register;
 import com.dfi.sbc2ha.helper.Constants;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.HaDeviceType;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;

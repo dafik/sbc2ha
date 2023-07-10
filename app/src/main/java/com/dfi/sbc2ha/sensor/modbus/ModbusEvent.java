@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.sensor.modbus;
 
-import com.dfi.sbc2ha.config.sbc2ha.definition.modbus.Register;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.Register;
 import com.dfi.sbc2ha.sensor.StateEvent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;

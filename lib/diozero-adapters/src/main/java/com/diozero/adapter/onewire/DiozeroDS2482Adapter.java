@@ -1,11 +1,14 @@
 package com.diozero.adapter.onewire;
 
+import com.diozero.api.DeviceInterface;
+import com.diozero.api.RuntimeIOException;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
 
 
-public class DiozeroDS2482Adapter extends com.dalsemi.onewire.adapter.DSPortAdapterAbstract {
+public class DiozeroDS2482Adapter extends com.dalsemi.onewire.adapter.DSPortAdapterAbstract implements DeviceInterface {
     static final byte DS2482_1WireTripletCmd = (byte) 0x78;
     static final byte DS2482_1WireResetCmd = (byte) 0xB4;
     static final byte OWSearchCmd = (byte) 0xF0;
@@ -737,6 +740,15 @@ public class DiozeroDS2482Adapter extends com.dalsemi.onewire.adapter.DSPortAdap
             //System.out.println("[OWReadByte] Poll count exceeded; DS2482 was reset: result was " + PrintBits(0, received));
         }
         return received;
+    }
+
+    @Override
+    public void close() throws RuntimeIOException {
+        try {
+            i2CAdapter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     // bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0
     //========================================

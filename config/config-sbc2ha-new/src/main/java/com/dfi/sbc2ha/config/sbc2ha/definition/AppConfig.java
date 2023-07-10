@@ -1,11 +1,10 @@
 package com.dfi.sbc2ha.config.sbc2ha.definition;
 
-import com.dfi.sbc2ha.config.sbc2ha.definition.enums.PlatformType;
-import com.dfi.sbc2ha.config.sbc2ha.definition.platform.*;
-import com.dfi.sbc2ha.config.sbc2ha.definition.extentsionBoard.ExtensionBoardsConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.*;
-import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.ActuatorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.enums.PlatformType;
+import com.dfi.sbc2ha.config.sbc2ha.definition.extentsionBoard.ExtensionBoardsConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.platform.PlatformConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.SensorConfig;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -22,14 +21,24 @@ public class AppConfig {
     List<PlatformConfig> platform = new ArrayList<>();
     List<SensorConfig> sensor = new ArrayList<>();
     List<ActuatorConfig> actuator = new ArrayList<>();
-
-    List<InputConfig<?>> input = new ArrayList<>();
-
     LoggerConfig logger;
 
 
     public void addSensors(List<SensorConfig> sensorList) {
         sensor.addAll(sensorList);
+    }
+
+    public List<SensorConfig> getSensor(PlatformType type) {
+        return sensor.stream()
+                .filter(sensorConfig -> sensorConfig.getPlatform() == type)
+                .collect(Collectors.toList());
+    }
+
+    public <T extends SensorConfig> List<T> getSensor(PlatformType type, Class<T> sensorClass) {
+        return sensor.stream()
+                .filter(sensorConfig -> sensorConfig.getPlatform() == type)
+                .map(sensorClass::cast)
+                .collect(Collectors.toList());
     }
 
     public List<PlatformConfig> getPlatform(PlatformType type) {
@@ -38,8 +47,15 @@ public class AppConfig {
                 .collect(Collectors.toList());
     }
 
+    public <T extends PlatformConfig> List<T> getPlatform(PlatformType type, Class<T> listClass) {
+        return platform.stream()
+                .filter(platformConfig -> platformConfig.getPlatform() == type)
+                .map(listClass::cast)
+                .collect(Collectors.toList());
+    }
+
     @JsonIgnore
-    public List<String> getOutputIds() {
+    public List<String> getActuatorLabels() {
         return getActuator().stream().map(ActuatorConfig::getId).collect(Collectors.toList());
     }
 

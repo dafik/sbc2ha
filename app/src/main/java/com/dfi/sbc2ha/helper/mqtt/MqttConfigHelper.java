@@ -1,11 +1,9 @@
 package com.dfi.sbc2ha.helper.mqtt;
 
-import com.dfi.sbc2ha.config.sbc2ha.definition.MqttConfig;
-import com.hivemq.client.mqtt.datatypes.MqttTopicFilter;
+import com.dfi.sbc2ha.config.sbc2ha.definition.platform.MqttConfig;
 import lombok.Getter;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MqttConfigHelper {
@@ -35,24 +33,16 @@ public class MqttConfigHelper {
         return topicPrefix + "/cmd/";
     }
 
-    public MqttTopicFilter subscribeTopic() {
-        return MqttTopicFilter.of(cmdTopicPrefix() + "+/+/#");
+
+    public String getCommandTopic() {
+        return cmdTopicPrefix() + "+/+/#";
     }
 
-    public MqttTopicFilter getHaStatusTopic() {
-        return MqttTopicFilter.of("homeassistant/status");
-
+    public String getHaStatusTopic() {
+        return "homeassistant/status";
     }
-
-    public List<MqttTopicFilter> getHaDiscoveryTopics() {
-        return List.of(
-                MqttTopicFilter.of("homeassistant/switch/" + topicPrefix + "/#"),
-                MqttTopicFilter.of("homeassistant/light/" + topicPrefix + "/#"),
-                MqttTopicFilter.of("homeassistant/binary_sensor/" + topicPrefix + "/#"),
-                MqttTopicFilter.of("homeassistant/sensor/" + topicPrefix + "/#"),
-                MqttTopicFilter.of("homeassistant/cover/" + topicPrefix + "/#"),
-                MqttTopicFilter.of("homeassistant/button/" + topicPrefix + "/#")
-        );
+    public String getHaDiscoveryTopic() {
+        return "homeassistant/+/" + topicPrefix + "/#";
     }
 
 

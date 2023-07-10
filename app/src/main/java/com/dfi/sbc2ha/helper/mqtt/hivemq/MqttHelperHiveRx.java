@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.mqtt.hivemq;
 
-import com.dfi.sbc2ha.config.sbc2ha.definition.MqttConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.platform.MqttConfig;
 import com.dfi.sbc2ha.helper.ha.DeviceState;
 import com.dfi.sbc2ha.helper.mqtt.MqttConfigHelper;
 import com.dfi.sbc2ha.helper.mqtt.MqttHelper;
@@ -19,25 +19,32 @@ import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAck;
 import com.hivemq.client.rx.FlowableWithSingle;
 import io.reactivex.*;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 public class MqttHelperHiveRx extends MqttHelperHive implements MqttHelper {
 
     private final Subject<Mqtt5Publish> messagesSubject = PublishSubject.create();
     private final Mqtt5RxClient client;
     private final Flowable<Mqtt5PublishResult> publishScenario;
-    private final Flowable<Mqtt5Publish> subscribeScenario;
+    private Flowable<Mqtt5Publish> subscribeDiscovery;
+    private Flowable<Mqtt5Publish> subscribeCommands;
     private Disposable subscribe;
     private Disposable publish;
     private Disposable connected;
     private boolean readyForPublish = false;
     private Manager connectedListener;
+    private List<MqttTopicFilter> subscribedTopics = new ArrayList<>();
+    private Map<MqttTopicFilter, Disposable> subscriptions = new HashMap<>();
 
     public MqttHelperHiveRx(MqttConfig config, MqttConfigHelper mqttConfigHelper) {
         super(config, mqttConfigHelper);
@@ -48,13 +55,15 @@ public class MqttHelperHiveRx extends MqttHelperHive implements MqttHelper {
         messagesSubject.doOnSubscribe(d -> Logger.trace("message subject subscribed"));
 
         client = createClientRx();
-        List<MqttTopicFilter> sub = new ArrayList<>(mqttConfigHelper.getHaDiscoveryTopics());
 
-        sub.add(mqttConfigHelper.subscribeTopic());
-        sub.add(mqttConfigHelper.getHaStatusTopic());
+/*        List<MqttTopicFilter> sub = new ArrayList<>();
+        sub.add(MqttTopicFilter.of(mqttConfigHelper.getHaDiscoveryTopic()));
+        sub.add(MqttTopicFilter.of(mqttConfigHelper.getCommandTopic()));
+        sub.add(MqttTopicFilter.of(mqttConfigHelper.getHaStatusTopic()));
 
+        subscribeDiscovery = getSubscribeScenario(sub);
+        subscribeCommands = getSubscribeScenario(sub);*/
 
-        subscribeScenario = getSubscribeScenario(sub);
         publishScenario = getPublishScenario();
     }
 
@@ -66,8 +75,27 @@ public class MqttHelperHiveRx extends MqttHelperHive implements MqttHelper {
     }
 
     @Override
+    public Flowable<Mqtt5Publish> subscribeTopic(String topic) {
+        return subscribeFilter(MqttTopicFilter.of(topic));
+    }
+
+    public Flowable<Mqtt5Publish> subscribeFilter(MqttTopicFilter topicFilter) {
+        Flowable<Mqtt5Publish> subscribeScenario = getSubscribeScenario(topicFilter);
+        subscribedTopics.add(topicFilter);
+
+        return subscribeScenario;
+    }
+
+    @Override
+    public void createSubscription(String topic, Consumer<? super Mqtt5Publish> handle) {
+        MqttTopicFilter topicFilter = MqttTopicFilter.of(topic);
+        subscriptions.put(topicFilter,
+                subscribeFilter(topicFilter).subscribe(handle));
+    }
+
+    @Override
     public Observable<Mqtt5Publish> getSubscriptions() {
-        return subscribeScenario.toObservable();
+        return subscribeDiscovery.toObservable();
     }
 
     @Override
@@ -115,7 +143,7 @@ public class MqttHelperHiveRx extends MqttHelperHive implements MqttHelper {
     }
 
     private void onConnected() {
-        subscribe = subscribeScenario.ignoreElements().subscribe();
+        //subscribe = subscribeDiscovery.ignoreElements().subscribe();
         publish = publishScenario.subscribe();
     }
 
@@ -135,10 +163,27 @@ public class MqttHelperHiveRx extends MqttHelperHive implements MqttHelper {
 
         return subAckAndMatchingPublishes
                 .doOnSingle(subAck -> Logger.trace("Subscribed, {} ", subAck.getReasonCodes()));
-         /*       .doOnNext(publish -> {
-                    Logger.trace("Received publish topic:  {}, QoS: {}, payload: {}, Thread: {}",
-                            publish.getTopic(), publish.getQos(), payloadToString(publish.getPayloadAsBytes()), Thread.currentThread().getName());
-                });*/
+
+    }
+
+    private Flowable<Mqtt5Publish> getSubscribeScenario(MqttTopicFilter topic) {
+        return client.subscribePublishesWith()
+                .topicFilter(topic)
+                .qos(MqttQos.EXACTLY_ONCE)
+                .applySubscribe()
+                .doOnSingle(subAck -> {
+                    Logger.trace("Subscribed, {} ", subAck.getReasonCodes());
+                })
+               .doOnNext(publish -> {
+                   Logger.trace("received topic: {}", topic);
+                })
+                .doOnComplete(() -> {
+                    Logger.trace("completed");
+                })
+                .doOnError(throwable -> {
+                    Logger.trace("error");
+                });
+
     }
 
     private Flowable<Mqtt5PublishResult> getPublishScenario() {
@@ -150,8 +195,10 @@ public class MqttHelperHiveRx extends MqttHelperHive implements MqttHelper {
 
         return client.publish(messagesToPublish).observeOn(Schedulers.io())
                 //.subscribeOn(Schedulers.io())
-                .doOnNext(publishResult -> Logger.trace("Publish acknowledged: {}",
-                        publishResult.getPublish().getTopic()));
+                .doOnNext(publishResult -> {
+                    Logger.trace("Publish acknowledged: {}",
+                            publishResult.getPublish().getTopic());
+                });
     }
 
     private Mqtt5RxClient createClientRx() {
@@ -182,3 +229,4 @@ public class MqttHelperHiveRx extends MqttHelperHive implements MqttHelper {
 
 
 }
+

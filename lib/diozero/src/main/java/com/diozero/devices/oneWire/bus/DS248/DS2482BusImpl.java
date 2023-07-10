@@ -4,6 +4,7 @@ import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.TemperatureContainer;
 import com.diozero.adapter.onewire.DiozeroDS2482Adapter;
 import com.diozero.adapter.onewire.OneWireContainer28M;
+import com.diozero.api.RuntimeIOException;
 import com.diozero.devices.oneWire.OneWireGenericSensor;
 import com.diozero.devices.oneWire.OneWireSensor;
 import com.diozero.devices.oneWire.OneWireThermSensor;
@@ -101,4 +102,8 @@ public class DS2482BusImpl implements DS2482Bus {
         }
     }
 
+    @Override
+    public void close() throws RuntimeIOException {
+        adapter.close();
+    }
 }

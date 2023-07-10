@@ -10,8 +10,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class OutputActionConfig extends ActionConfig {
 
-    @JsonProperty("actuator_id")
-    String actuatorId;
+    @JsonProperty("output")
+    int output;
 
     @JsonProperty("action_output")
     ActionOutputType actionOutput;

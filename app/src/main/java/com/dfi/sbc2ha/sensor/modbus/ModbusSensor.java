@@ -1,9 +1,9 @@
 package com.dfi.sbc2ha.sensor.modbus;
 
-import com.dfi.sbc2ha.bus.Modbus;
-import com.dfi.sbc2ha.config.sbc2ha.definition.modbus.ModbusSensorDefinition;
-import com.dfi.sbc2ha.config.sbc2ha.definition.modbus.Register;
-import com.dfi.sbc2ha.config.sbc2ha.definition.modbus.RegisterBase;
+import com.dfi.sbc2ha.modbus.Modbus;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.ModbusSensorDefinition;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.Register;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.RegisterBase;
 import com.dfi.sbc2ha.helper.ha.DeviceState;
 import com.dfi.sbc2ha.sensor.NullDelegate;
 import com.dfi.sbc2ha.sensor.scheduled.ScheduledSensor;

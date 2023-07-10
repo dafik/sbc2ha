@@ -1,7 +1,7 @@
-package com.dfi.sbc2ha.bus;
+package com.dfi.sbc2ha.modbus;
 
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.UartType;
-import com.dfi.sbc2ha.config.sbc2ha.definition.modbus.ModbusRegisterType;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.ModbusRegisterType;
 import com.dfi.sbc2ha.helper.MockHelper;
 import com.diozero.adapter.modbus.DiozeroSerialPortProvider;
 import com.diozero.api.DeviceInterface;
@@ -37,8 +37,7 @@ public class Modbus implements DeviceInterface {
         params.setReadTimeout(0);
         NettyRtuModbusClientConfig config = new NettyRtuModbusClientConfig(uart.uartConfig.file, params);
 
-        final ModbusClient client = new RtuNettyModbusClient(config, new DiozeroSerialPortProvider());
-        return client;
+        return new RtuNettyModbusClient(config, new DiozeroSerialPortProvider());
     }
 
     private ModbusClient getModbusClientJsc(UartType uart, BasicSerialParameters params) {

@@ -1,5 +1,6 @@
 package com.dfi.sbc2ha.sensor.temperature;
 
+import com.dfi.sbc2ha.config.sbc2ha.definition.filters.ValueFilterType;
 import com.dfi.sbc2ha.sensor.Sensor;
 import com.dfi.sbc2ha.sensor.scheduled.ScheduledSensor;
 import com.diozero.api.RuntimeIOException;
@@ -7,9 +8,7 @@ import com.diozero.devices.ThermometerInterface;
 import org.tinylog.Logger;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static com.dfi.sbc2ha.sensor.temperature.TempState.CHANGED;
@@ -17,7 +16,7 @@ import static com.dfi.sbc2ha.sensor.temperature.TempState.CHANGED;
 public abstract class TempSensor extends ScheduledSensor<ThermometerInterface, TempEvent, TempState> implements ThermometerInterface {
 
     protected final ThermometerInterface delegate;
-    private final Map<String, String> filters = new HashMap<>();
+    private final List<Map<ValueFilterType, Number>> filters = new ArrayList<>();
 
     protected float lastRawValue;
     protected float lastValue;
@@ -27,14 +26,14 @@ public abstract class TempSensor extends ScheduledSensor<ThermometerInterface, T
     }
 
     public TempSensor(ThermometerInterface delegate, String name, Duration updateInterval) {
-        this(delegate, name, updateInterval, new HashMap<>());
+        this(delegate, name, updateInterval, new ArrayList<>());
     }
 
-    public TempSensor(ThermometerInterface delegate, String name, Duration updateInterval, Map<String, String> filters) {
+    public TempSensor(ThermometerInterface delegate, String name, Duration updateInterval, List<Map<ValueFilterType, Number>> filters) {
         super(name, updateInterval);
         this.delegate = delegate;
 
-        this.filters.putAll(filters);
+        this.filters.addAll(filters);
 
         listeners.put(CHANGED, new LinkedHashSet<>());
     }
@@ -68,7 +67,13 @@ public abstract class TempSensor extends ScheduledSensor<ThermometerInterface, T
 
 
     private float applyFilters(float rawValue) {
-        filters.forEach((s, s2) -> Logger.warn("Not implemented yey"));
+        for (var filter : filters) {
+            for (Map.Entry<ValueFilterType, Number> entry : filter.entrySet()) {
+                ValueFilterType valueFilterType = entry.getKey();
+                Number number = entry.getValue();
+                rawValue = valueFilterType.getFilter().apply(rawValue, number.floatValue());
+            }
+        }
         return rawValue;
     }
 
@@ -97,14 +102,14 @@ public abstract class TempSensor extends ScheduledSensor<ThermometerInterface, T
     public abstract static class Builder<T extends Builder<T>> extends Sensor.Builder<T> {
 
         protected Duration updateInterval = UPDATE_INTERVAL;
-        protected Map<String, String> filters = new HashMap<>();
+        protected List<Map<ValueFilterType, Number>> filters = new ArrayList<>();
 
         public T setUpdateInterval(Duration updateInterval) {
             this.updateInterval = updateInterval;
             return self();
         }
 
-        public T setFilters(Map<String, String> filters) {
+        public T setFilters(List<Map<ValueFilterType, Number>> filters) {
             this.filters = filters;
             return self();
         }

@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.bus;
 
-import com.dfi.sbc2ha.config.sbc2ha.definition.modbus.ModbusSensorDefinition;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.ModbusSensorDefinition;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;

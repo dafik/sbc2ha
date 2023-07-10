@@ -10,7 +10,7 @@ public class ExtensionModes {
     private ExtensionModes() {
     }
 
-    public static ExtensionModes of(List<String[]> list) {
+    public static ExtensionModes ofBoneIo(List<String[]> list) {
         ExtensionModes extensionModes = new ExtensionModes();
         for (var def : list) {
             String header = def[0];

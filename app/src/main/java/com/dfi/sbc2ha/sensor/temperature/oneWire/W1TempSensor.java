@@ -1,9 +1,11 @@
 package com.dfi.sbc2ha.sensor.temperature.oneWire;
 
+import com.dfi.sbc2ha.config.sbc2ha.definition.filters.ValueFilterType;
 import com.dfi.sbc2ha.sensor.temperature.TempSensor;
 import com.diozero.devices.oneWire.OneWireThermSensor;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 public class W1TempSensor extends TempSensor {
@@ -18,7 +20,7 @@ public class W1TempSensor extends TempSensor {
 
     }
 
-    public W1TempSensor(OneWireThermSensor delegate, String name, Duration updateInterval, Map<String, String> filters) {
+    public W1TempSensor(OneWireThermSensor delegate, String name, Duration updateInterval, List<Map<ValueFilterType, Number>> filters) {
         super(delegate, name, updateInterval, filters);
     }
 
