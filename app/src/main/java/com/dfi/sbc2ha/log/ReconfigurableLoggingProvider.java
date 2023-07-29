@@ -13,17 +13,18 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * This logging provider can be reconfigured at runtime.
+ */
 public class ReconfigurableLoggingProvider implements LoggingProvider {
 
     // Locking is required to ensure thread-safe configuration changes
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private static Map<String, String> originalConfiguration;
-
     // The real tinylog logging provider is used under the hood
     private static TinylogLoggingProvider realProvider = new TinylogLoggingProvider();
 
-    public static Map<String, String> reload() throws InterruptedException, ReflectiveOperationException {
+    public static void reload() throws InterruptedException, ReflectiveOperationException {
         lock.writeLock().lock();
         try {
             realProvider.shutdown();
@@ -36,30 +37,15 @@ public class ReconfigurableLoggingProvider implements LoggingProvider {
             method.setAccessible(true);
 
             Map<String, String> configuration = (Map) method.invoke(null);
-            if (originalConfiguration == null) {
-                originalConfiguration = configuration;
-            }
             Configuration.replace(configuration);
 
             realProvider = new TinylogLoggingProvider();
 
             frozen.setBoolean(null, true);
             method.setAccessible(false);
-            return configuration;
         } finally {
             lock.writeLock().unlock();
         }
-    }
-
-    public static Map<String, String> getOriginalConfig() {
-        if (originalConfiguration == null) {
-            try {
-                reload();
-            } catch (InterruptedException | ReflectiveOperationException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return originalConfiguration;
     }
 
     public ContextProvider getContextProvider() {

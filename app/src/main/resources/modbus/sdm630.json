@@ -175,19 +175,12 @@
           "address": 42,
           "unit_of_measurement": "V",
           "state_class": "measurement",
+          "device_class": "voltage",
           "return_type": "float32"
         },
         {
           "name": "AVG_Current",
           "address": 46,
-          "unit_of_measurement": "A",
-          "state_class": "measurement",
-          "device_class": "current",
-          "return_type": "float32"
-        },
-        {
-          "name": "Sum_Current",
-          "address": 48,
           "unit_of_measurement": "A",
           "state_class": "measurement",
           "device_class": "current",
@@ -251,6 +244,7 @@
           "address": 70,
           "unit_of_measurement": "Hz",
           "state_class": "measurement",
+          "device_class": "frequency",
           "return_type": "float32"
         },
         {

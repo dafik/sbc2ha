@@ -1,19 +1,24 @@
 package com.dfi.sbc2ha.helper.ha.autodiscovery.message;
 
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.deviceClass.ha.SensorDeviceClassType;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.ModbusSensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.ModbusSensorDefinition;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.Register;
-import com.dfi.sbc2ha.helper.Constants;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.RegisterBase;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.HaDeviceType;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
-import com.dfi.sbc2ha.sensor.modbus.ModbusSensor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
 
-public class ModbusSensorAvailability extends Availability {
+public class ModbusSensorAvailability extends IterableAvailability {
 
+    @JsonIgnore
     private final String deviceId;
+    @JsonIgnore
+    private final ModbusSensorDefinition def;
     @JsonProperty("unit_of_measurement")
     String unitOfMeasurement;
     @JsonProperty("state_class")
@@ -22,75 +27,43 @@ public class ModbusSensorAvailability extends Availability {
     String valueTemplate;
     @JsonProperty("device_class")
     String deviceClass;
+    @JsonIgnore
+    private Register register;
+    @JsonIgnore
+    private RegisterBase baserRegister;
 
 
-
-    /*
-        """Create Modbus Sensor availability topic for HA."""
-    return {
-        "availability": [{"topic": f"{topic}/{id}{STATE}"}],
-        "device": {
-            "identifiers": [id],
-            "manufacturer": "boneIO",
-            "model": model,
-            "name": f"boneIO {name.upper()}",
-            "sw_version": __version__,
-        },
-        "name": sensor_id,
-        "state_topic": f"{topic}/{device_type}/{id}/{state_topic_base}",
-        "unique_id": f"{topic}{sensor_id.replace('_', '').lower()}{name.lower()}",
-        **kwargs,
-    }
-    *
-    * */
-
-
-    public ModbusSensorAvailability(Register register, ModbusSensor device, String model, int registerBase) {
-        super(register.getId(), register.getName(), HaDeviceType.SENSOR, SbcDeviceType.SENSOR);
-        this.deviceId = device.getId();
-
-        SensorDeviceClassType deviceClassType = register.getDeviceClass() == null ? SensorDeviceClassType.NONE : register.getDeviceClass();
-        deviceClass = deviceClassType.getLabel();
-        stateClass = register.getStateClass().getLabel();
-        unitOfMeasurement = register.getUnitOfMeasurement();
-        String name = register.getName();
-
-        valueTemplate = "{{ value_json." + register.getName() + " | " + register.getHaFilter() + " }}";
-
-        //boneio-1/sensor/LicznikEnergi/0",
+    public ModbusSensorAvailability(ModbusSensorConfig sensorConfig, ModbusSensorDefinition def) {
+        super("", "", HaDeviceType.SENSOR, SbcDeviceType.SENSOR);
+        this.deviceId = sensorConfig.getName().replace(" ", "");
+        this.def = def;
 
         DeviceAvailability deviceAvailability = getDevice();
-        deviceAvailability.setName("boneIO " + device.getName().toUpperCase());
-        deviceAvailability.setModel(model.toUpperCase());
-        deviceAvailability.setIdentifiers(List.of(device.getId()));
+        deviceAvailability.setName("boneIO " + sensorConfig.getName().toUpperCase());
+        deviceAvailability.setModel(sensorConfig.getModel().toUpperCase());
+        deviceAvailability.setIdentifiers(List.of(deviceId));
 
-        getAvailability().get(0).put(TOPIC, formatTopic(Availability.topicPrefix, device.getId() + Constants.STATE));
+        getAvailability().get(0).put(TOPIC, formatTopic(Availability.topicPrefix, deviceId + STATE));
 
 
-        setStateTopic(formatTopic(Availability.topicPrefix, getStateDeviceTypeName(), device.getId(), String.valueOf(registerBase)));
-        setUniqueId(Availability.topicPrefix + getId().toLowerCase() + device.getName().toLowerCase());
-
+        setUniqueId(Availability.topicPrefix + getId().toLowerCase() + sensorConfig.getName().toLowerCase());
     }
 
-/*
-    {
-    "availability": [{"topic": "boneio-1/LicznikEnergistate"}],
-    "device": {
-        "identifiers": ["LicznikEnergi"],
-        "manufacturer": "boneIO",
-        "model": "SDM630",
-        "name": "boneIO LICZNIK ENERGI",
-        "sw_version": "0.6.1dev3"
-     },
-     "name": "Voltage_Phase1",
-     "state_topic": "boneio-1/sensor/LicznikEnergi/0",
-     "unique_id": "boneio-1voltagephase1licznik energi",
-     "unit_of_measurement": "V",
-     "state_class": "measurement",
-     "value_template": "{{ value_json.Voltage_Phase1 | round(2) }}",
-     "device_class": "voltage"
-     }
-  */
+
+    private void nextRegister() {
+        if (register == null) {
+            baserRegister = def.getFirstBaserRegister();
+            register = def.getFirstRegister();
+            return;
+        }
+
+        if (register == def.getLastRegister(baserRegister)) {
+            baserRegister = def.nextBaseRegister(baserRegister);
+            register = baserRegister.getRegisters().get(0);
+            return;
+        }
+        register = def.nextRegister(baserRegister, register);
+    }
 
     @Override
     public String getTopicPrefix() {
@@ -99,7 +72,40 @@ public class ModbusSensorAvailability extends Availability {
     }
 
     @Override
-    public String getNodeName() {
-        return deviceId + getId().toLowerCase();
+    public IterableAvailability iterator() {
+        baserRegister = null;
+        register = null;
+        return this;
+    }
+
+    @Override
+    public boolean hasNext() {
+        if (baserRegister == def.getLastBaserRegister()) {
+            return register != def.getLastRegister();
+        }
+        return true;
+    }
+
+    @Override
+    public ModbusSensorAvailability next() {
+        nextRegister();
+
+        setId(register.getId());
+        setName(register.getName());
+
+        setStateTopic(getStateTopic(register));
+        setUniqueId(Availability.topicPrefix + getStateDeviceType().toLowerCase() + deviceId + getId());
+
+        SensorDeviceClassType deviceClassType = register.getDeviceClass() == null ? null : register.getDeviceClass();
+        deviceClass = register.getDeviceClass() == null ? null : deviceClassType.getLabel();
+        stateClass = register.getStateClass().getLabel();
+        unitOfMeasurement = register.getUnitOfMeasurement();
+        valueTemplate = "{{ value_json | " + register.getHaFilter() + " }}";
+
+        return this;
+    }
+
+    public String getStateTopic(Register register) {
+        return formatTopic(Availability.topicPrefix, getStateDeviceTypeName(), deviceId, register.getName());
     }
 }

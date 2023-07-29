@@ -3,6 +3,7 @@ package com.dfi.sbc2ha.config.boneio.definition;
 import com.dfi.sbc2ha.config.boneio.definition.bus.BoneIoBusConfig;
 import com.dfi.sbc2ha.config.boneio.definition.bus.BoneIoFsBusConfig;
 import com.dfi.sbc2ha.config.boneio.definition.bus.BoneIoModbusBusConfig;
+import com.dfi.sbc2ha.config.boneio.definition.cover.BoneioCoverConfig;
 import com.dfi.sbc2ha.config.boneio.definition.input.BoneIoInputConfig;
 import com.dfi.sbc2ha.config.boneio.definition.output.BoneIoOutputConfig;
 import com.dfi.sbc2ha.config.boneio.definition.sensor.BoneIoAdcSensorConfig;
@@ -28,6 +29,7 @@ public class BoneIoConfig {
     List<BoneIoLm75SensorConfig> lm75 = new ArrayList<>();
     @JsonSetter(nulls = Nulls.SKIP)
     List<BoneIoBusConfig> mcp23017 = new ArrayList<>();
+    List<BoneIoBusConfig> pca9685 = new ArrayList<>();
     @JsonSetter(nulls = Nulls.SKIP)
     List<BoneIoBusConfig> ds2482 = new ArrayList<>();
     BoneIoFsBusConfig dallas;
@@ -36,6 +38,8 @@ public class BoneIoConfig {
     List<BoneIoModbusSensorConfig> modbusSensors = new ArrayList<>();
     @JsonSetter(nulls = Nulls.SKIP)
     List<BoneIoSensorConfig> sensor = new ArrayList<>();
+    @JsonSetter(nulls = Nulls.SKIP)
+    List<BoneioCoverConfig> cover = new ArrayList<>();
     @JsonSetter(nulls = Nulls.SKIP)
     List<BoneIoOutputConfig> output = new ArrayList<>();
     @JsonSetter(nulls = Nulls.SKIP)

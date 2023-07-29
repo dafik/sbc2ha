@@ -1,22 +1,21 @@
 package com.dfi.sbc2ha.manager;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
+@Slf4j
 public class ManagerExecutor implements Runnable, AutoCloseable {
     private final BlockingQueue<ManagerCommand> queue = new LinkedBlockingQueue<>();
     private final Consumer<ManagerCommand> consumer;
 
-    private final ManagerThreadFactory threadFactory;
     private final ExecutorService executor;
     private Future<?> queueFeature;
 
     public ManagerExecutor(Consumer<ManagerCommand> consumer) {
         this.consumer = consumer;
-        threadFactory = new ManagerThreadFactory();
+        ManagerThreadFactory threadFactory = new ManagerThreadFactory();
         executor = Executors.newFixedThreadPool(1, threadFactory);
 
         start();
@@ -53,27 +52,28 @@ public class ManagerExecutor implements Runnable, AutoCloseable {
                 ManagerCommand command = queue.take();
                 consumer.accept(command);
             }
+            log.info("queue exit");
 
         } catch (InterruptedException e) {
-            Logger.error(e);
+            log.error(e.getMessage(),e);
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         queueFeature.cancel(true);
         executor.shutdown();
     }
 
-    static class ManagerThreadFactory implements ThreadFactory {
+    public static class ManagerThreadFactory implements ThreadFactory {
         private static final AtomicInteger poolNumber = new AtomicInteger(1);
 
         private final ThreadGroup group;
         private final AtomicInteger threadNumber = new AtomicInteger(1);
         private final String namePrefix;
 
-        ManagerThreadFactory() {
+        public ManagerThreadFactory() {
 
             SecurityManager s = System.getSecurityManager();
             group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
@@ -82,12 +82,11 @@ public class ManagerExecutor implements Runnable, AutoCloseable {
 
         @Override
         public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-            return t;
+            return new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
         }
 
         void status() {
-            Logger.debug("activeCount=" + group.activeCount()
+            log.debug("activeCount=" + group.activeCount()
                     + ", activeGroupCount=" + group.activeGroupCount());
         }
     }

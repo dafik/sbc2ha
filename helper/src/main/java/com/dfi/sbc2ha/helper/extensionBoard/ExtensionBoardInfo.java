@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.extensionBoard;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 public class ExtensionBoardInfo {
     private static final String PIN_SEPARATOR = "_";
     private static ExtensionBoardInfo instance;
@@ -51,11 +52,11 @@ public class ExtensionBoardInfo {
 
     protected static List<String[]> loadBoardPinInfoDefinition(String boardDefFile) {
         List<String[]> out = new ArrayList<>();
-        Logger.trace("Looking for extension board def file '{}'", boardDefFile);
+        log.trace("Looking for extension board def file '{}'", boardDefFile);
         try (InputStream is = ExtensionBoardInfo.class.getClassLoader().getResourceAsStream(boardDefFile)) {
             if (is != null) {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-                    Logger.debug("Reading board defs file {}", boardDefFile);
+                    log.debug("Reading board defs file {}", boardDefFile);
                     while (true) {
                         String line = reader.readLine();
                         if (line == null) {

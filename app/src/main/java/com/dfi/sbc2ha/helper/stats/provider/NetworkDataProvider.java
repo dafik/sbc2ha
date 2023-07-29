@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.stats.provider;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.NetworkIF;
 
@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-public class NetworkDataProvider extends DataProvider<List<String>> {
+@Slf4j
+public class NetworkDataProvider extends DataProvider {
 
     private List<NetworkIF> networkIFs;
     private String ip = "reading..";
@@ -36,9 +36,7 @@ public class NetworkDataProvider extends DataProvider<List<String>> {
             try {
                 Pattern pattern = Pattern.compile("^vpn.+|^br.+|^docker.+|^lo");
                 List<String> niNames = NetworkInterface.networkInterfaces().map(NetworkInterface::getName)
-                        .filter(n -> {
-                            return !pattern.matcher(n).matches();
-                        })
+                        .filter(n -> !pattern.matcher(n).matches())
                         .collect(Collectors.toList());
 
                 String defaultNiName = "eth0";
@@ -46,9 +44,7 @@ public class NetworkDataProvider extends DataProvider<List<String>> {
                 NetworkInterface ni = NetworkInterface.getByName(name);
                 byte[] hardwareAddress = ni.getHardwareAddress();
                 InterfaceAddress iface = ni.getInterfaceAddresses().stream()
-                        .filter(in -> {
-                            return in.getNetworkPrefixLength() <= 32;
-                        })
+                        .filter(in -> in.getNetworkPrefixLength() <= 32)
                         .findFirst().orElseThrow();
 
                 String[] hexadecimal = new String[hardwareAddress.length];
@@ -64,7 +60,7 @@ public class NetworkDataProvider extends DataProvider<List<String>> {
                 throw new RuntimeException(e);
             }
         } catch (Exception e) {
-            Logger.error(e);
+            log.error(e.getMessage(),e);
         }
         onChange();
 

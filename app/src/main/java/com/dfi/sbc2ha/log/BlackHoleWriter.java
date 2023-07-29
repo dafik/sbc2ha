@@ -1,5 +1,6 @@
 package com.dfi.sbc2ha.log;
 
+
 import org.tinylog.core.LogEntry;
 import org.tinylog.core.LogEntryValue;
 import org.tinylog.writers.Writer;

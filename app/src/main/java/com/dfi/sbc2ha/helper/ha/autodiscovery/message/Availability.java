@@ -2,27 +2,34 @@ package com.dfi.sbc2ha.helper.ha.autodiscovery.message;
 
 import com.dfi.sbc2ha.Version;
 import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.ActuatorConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.AdcSensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.CoverConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.Lm75SensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.ModbusSensorConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.SensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.analog.AnalogSensorConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.analog.NtcConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.analog.ResistanceConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputSensorConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputSwitchConfig;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.ModbusSensorDefinition;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.Register;
-import com.dfi.sbc2ha.helper.Constants;
+import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.oneWire.therm.DS18B20;
+import com.dfi.sbc2ha.helper.bus.ModbusFactory;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.HaDeviceType;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
-import com.dfi.sbc2ha.sensor.binary.ButtonState;
 import com.dfi.sbc2ha.sensor.modbus.ModbusSensor;
+import com.dfi.sbc2ha.state.sensor.ButtonState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class Availability {
@@ -32,13 +39,11 @@ public abstract class Availability {
     public static final String TOPIC_SEPARATOR = "/";
     public static final String SET_BRIGHTNESS = "set_brightness";
     public static final String TOPIC = "topic";
+    public static final String STATE = "state";
 
     protected static String topicPrefix = "boneIO";
     private static String version;
     private static String model;
-
-    @JsonIgnore
-    private final String id;
     @JsonIgnore
     private final HaDeviceType haDeviceType;
     @JsonIgnore
@@ -48,6 +53,8 @@ public abstract class Availability {
      * Information about the device this device trigger is a part of to tie it into the device registry. At least one of identifiers or connections must be present to identify the device.
      */
     private final DeviceAvailability device;
+    @JsonIgnore
+    private String id;
     private List<Map<String, String>> availability = new ArrayList<>();
     private String name;
     @JsonProperty("state_topic")
@@ -60,7 +67,7 @@ public abstract class Availability {
         String model = Availability.model;
 
         Map<String, String> availabilityTopic = new HashMap<>();
-        availabilityTopic.put(TOPIC, formatTopic(topic, Constants.STATE));
+        availabilityTopic.put(TOPIC, formatTopic(topic, STATE));
         availability.add(availabilityTopic);
 
         device = new DeviceAvailability(topic, model);
@@ -75,33 +82,62 @@ public abstract class Availability {
         uniqueId = topic + stateDeviceType.toLowerCase() + id;
     }
 
+    public static String getDefault(String current, String defaultValue) {
+        return Optional.of(current).orElse(defaultValue);
+    }
+
+
     public static String formatTopic(String... args) {
         List<String> filtered = Arrays.stream(args).map(v -> v.replaceAll("[^a-zA-Z0-9_-]", "_")).collect(Collectors.toList());
         return String.join(Availability.TOPIC_SEPARATOR, filtered);
 
     }
 
-    public static String getDefault(String current, String defaultValue) {
-        return Optional.of(current).orElse(defaultValue);
-    }
-
-
-/*    public static DeviceTriggerAvailability getDeviceTriggerAvailability(InputSwitchConfig config, ButtonState state) {
-        String id = config.getPin();
-        String name = Optional.of(config.getId()).orElse(config.getPin());
-
-        return new DeviceTriggerAvailability(id, name, state);
-    }*/
-
     public static DeviceTriggerAvailability getDeviceTriggerAvailability(InputSwitchConfig config, List<ButtonState> states) {
         String id = String.valueOf(config.getInput());
-        String name = Optional.of(config.getId()).orElse(id);
+        String name = Optional.of(config.getName()).orElse(id);
 
         return new DeviceTriggerAvailability(id, name, states);
     }
 
+    public static Availability getSensorAvailability(SensorConfig config) {
+        if (config instanceof AnalogSensorConfig) {
+            return getSensorAvailability((AnalogSensorConfig) config);
+        } else if (config instanceof ResistanceConfig) {
+            return getSensorAvailability((ResistanceConfig) config);
+        } else if (config instanceof NtcConfig) {
+            return getTempSensorAvailability(config);
+        } else if (config instanceof DS18B20) {
+            return getTempSensorAvailability(config);
+        } else if (config instanceof Lm75SensorConfig) {
+            return getTempSensorAvailability(config);
+        } else if (config instanceof InputSwitchConfig) {
+            return getDeviceTriggerAvailability((InputSwitchConfig) config);
+        } else if (config instanceof InputSensorConfig) {
+            return getBinarySensorAvailability((InputSensorConfig) config);
+        } else if (config instanceof ModbusSensorConfig) {
+            return getModbusSensorAvailability((ModbusSensorConfig) config);
+        }
+        throw new IllegalArgumentException("unknown sensor config");
+    }
 
-    public static Availability getSensorAvailability(InputConfig<?> config) {
+    private static IterableAvailability getDeviceTriggerAvailability(InputSwitchConfig config) {
+        switch (config.getClickDetection()) {
+            default:
+            case SINGLE:
+                return Availability.getDeviceTriggerAvailability(config,
+                        List.of(ButtonState.SINGLE));
+            case DOUBLE:
+                return Availability.getDeviceTriggerAvailability(config,
+                        List.of(ButtonState.SINGLE, ButtonState.DOUBLE));
+            case LONG:
+                return Availability.getDeviceTriggerAvailability(config,
+                        List.of(ButtonState.SINGLE, ButtonState.DOUBLE, ButtonState.LONG, ButtonState.RELEASE));
+        }
+    }
+
+
+    public static Availability getSensorAvailability(InputConfig config) {
         switch (config.getKind()) {
             case SWITCH:
                 return getInputAvailability((InputSwitchConfig) config);
@@ -117,30 +153,23 @@ public abstract class Availability {
 
     }
 
-    public static Availability getSensorAvailability(SensorConfig config) {
-        return getTempSensorAvailability(config);
+    public static Availability getTempSensorAvailability(SensorConfig config) {
 
+        return new TempSensorAvailability(config.getName(), config.getName());
     }
 
+    public static Availability getSensorAvailability(AnalogSensorConfig config) {
 
-    private static Availability getTempSensorAvailability(Lm75SensorConfig config) {
-
-        return new TempSensorAvailability(config.getId(), config.getId());
+        return new AnalogSensorAvailability(config.getName(), config.getName());
     }
 
-    private static Availability getTempSensorAvailability(SensorConfig config) {
-
-        return new TempSensorAvailability(config.getId(), config.getId());
-    }
-
-    public static Availability getSensorAvailability(AdcSensorConfig config) {
-
-        return new AdcSensorAvailability(config.getId(), config.getId());
+    public static Availability getSensorAvailability(ResistanceConfig config) {
+        return new ResistanceSensorAvailability(config.getName(), config.getName());
     }
 
     public static InputAvailability getInputAvailability(InputSwitchConfig config) {
         String id = String.valueOf(config.getInput());
-        String name = Optional.of(config.getId()).orElse(id);
+        String name = Optional.of(config.getName()).orElse(id);
 
         InputAvailability availability = new InputAvailability(id, name);
         if (null != config.getDeviceClass()) {
@@ -151,7 +180,7 @@ public abstract class Availability {
 
     private static BinarySensorAvailability getBinarySensorAvailability(InputSensorConfig config) {
         String id = String.valueOf(config.getInput());
-        String name = Optional.of(config.getId()).orElse(id);
+        String name = Optional.of(config.getName()).orElse(id);
 
         BinarySensorAvailability availability = new BinarySensorAvailability(id, name);
         if (null != config.getDeviceClass()) {
@@ -162,18 +191,22 @@ public abstract class Availability {
 
     public static Availability getActuatorAvailability(ActuatorConfig config) {
         String id = String.valueOf(config.getOutput());
-        String name = Optional.of(config.getId()).orElse(config.getKind() + "_" + id);
+        String name = Optional.of(config.getName()).orElse(config.getKind() + "_" + id);
         switch (config.getOutputType()) {
+            default:
             case SWITCH:
                 return new SwitchAvailability(id, name);
             case LIGHT:
                 return new LightAvailability(id, name);
             case LED:
                 return new LedAvailability(id, name);
-            case NONE:
-            default:
-                return null;
+            case COVER:
+                return new CoverAvailability(id, name, ((CoverConfig) config).getDeviceClass());
         }
+    }
+
+    public static TextFieldAvailability getTextFieldActuatorAvailability(String id, String name) {
+        return new TextFieldAvailability(id, name);
     }
 
     public static void setModel(String model) {
@@ -184,15 +217,21 @@ public abstract class Availability {
         Availability.version = version;
     }
 
-    public static Availability getModbusSensorAvailability(Register register, ModbusSensor device, String model, int registerBase) {
-        ModbusSensorAvailability availability = null;
+    public static Availability getModbusSensorAvailabilityOld(Register register, ModbusSensor device, String model, int registerBase) {
+        ModbusSensorAvailabilityOld availability = null;
         try {
-            availability = new ModbusSensorAvailability(register, device, model, registerBase);
+            availability = new ModbusSensorAvailabilityOld(register, device, model, registerBase);
         } catch (RuntimeException e) {
-            Logger.error(e);
+            log.error(e.getMessage(), e);
         }
 
         return availability;
+    }
+
+    public static Availability getModbusSensorAvailability(ModbusSensorConfig sensorConfig) {
+        ModbusSensorDefinition def = ModbusFactory.getDevice(sensorConfig.getModel());
+        return new ModbusSensorAvailability(sensorConfig, def);
+
     }
 
     @JsonIgnore

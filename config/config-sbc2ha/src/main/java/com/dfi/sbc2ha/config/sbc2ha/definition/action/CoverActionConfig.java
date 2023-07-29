@@ -10,7 +10,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class CoverActionConfig extends ActionConfig {
 
-    String pin;
+    int output;
+
     @JsonProperty("action_cover")
     ActionCoverType actionCover;
 

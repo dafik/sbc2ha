@@ -1,19 +1,21 @@
 package com.dfi.sbc2ha.sensor;
 
+import com.dfi.sbc2ha.event.StateEvent;
+import com.dfi.sbc2ha.state.State;
 import com.diozero.api.DeviceInterface;
 import com.diozero.api.RuntimeIOException;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.function.Consumer;
-
-public abstract class Sensor<D extends DeviceInterface, E extends StateEvent<S>, S> implements DeviceInterface {
+@Slf4j
+public abstract class Sensor implements DeviceInterface {
     protected final String name;
-    protected final Map<S, Collection<Consumer<E>>> listeners = new HashMap<>();
-    protected final Collection<Consumer<E>> listenersAny = new LinkedHashSet<>();
+    protected final Map<State, Collection<Consumer<StateEvent>>> listeners = new HashMap<>();
+    protected final Collection<Consumer<StateEvent>> listenersAny = new LinkedHashSet<>();
     private boolean delegateListenerEnabled;
 
     public Sensor(String name) {
@@ -36,7 +38,7 @@ public abstract class Sensor<D extends DeviceInterface, E extends StateEvent<S>,
      *
      * @param listener Callback instance
      */
-    public void addListener(Consumer<E> listener, S event) {
+    public void addListener(Consumer<StateEvent> listener, State event) {
         if (listenersEmpty()) {
             enableDelegateListener();
         }
@@ -50,14 +52,14 @@ public abstract class Sensor<D extends DeviceInterface, E extends StateEvent<S>,
      *
      * @param listener Callback instance to remove
      */
-    public void removeListener(Consumer<E> listener, S event) {
+    public void removeListener(Consumer<StateEvent> listener, State event) {
         listeners.get(event).remove(listener);
         if (listenersEmpty()) {
             disableDelegateListener();
         }
     }
 
-    public void addListenerAny(Consumer<E> listener) {
+    public void addListenerAny(Consumer<StateEvent> listener) {
         if (listenersEmpty()) {
             enableDelegateListener();
         }
@@ -71,7 +73,7 @@ public abstract class Sensor<D extends DeviceInterface, E extends StateEvent<S>,
      *
      * @param listener Callback instance to remove
      */
-    public void removeListenerAny(Consumer<E> listener) {
+    public void removeListenerAny(Consumer<StateEvent> listener) {
         listenersAny.remove(listener);
         if (listenersEmpty()) {
             disableDelegateListener();
@@ -112,16 +114,16 @@ public abstract class Sensor<D extends DeviceInterface, E extends StateEvent<S>,
 
     @Override
     public void close() throws RuntimeIOException {
-        Logger.trace("close()");
+        log.trace("close()");
         closeDelegate();
         removeAllListeners();
     }
 
-    protected void handleAny(E event) {
+    protected void handleAny(StateEvent event) {
         listenersAny.forEach(listener -> listener.accept(event));
     }
 
-    public void whenAny(Consumer<E> consumer) {
+    public void whenAny(Consumer<StateEvent> consumer) {
         addListenerAny(consumer);
     }
 

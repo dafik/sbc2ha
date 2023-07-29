@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.stats.provider;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HWPartition;
 import oshi.hardware.HardwareAbstractionLayer;
@@ -8,7 +8,8 @@ import oshi.hardware.HardwareAbstractionLayer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class DiskDataProvider extends DataProvider<List<String>> {
+@Slf4j
+public class DiskDataProvider extends DataProvider {
 
     private List<HWDiskStore> diskStore;
 
@@ -27,7 +28,7 @@ public class DiskDataProvider extends DataProvider<List<String>> {
             HWDiskStore hwDiskStore = diskStore.get(0);
             List<HWPartition> partitions = hwDiskStore.getPartitions();
         } catch (Exception e) {
-            Logger.error(e);
+            log.error(e.getMessage(),e);
         }
         onChange();
     }

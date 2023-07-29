@@ -18,14 +18,6 @@ import lombok.Data;
 @Data
 public abstract class ActionConfig {
     
-    /*
-
-      - action: output
-        pin: 23 DZWONEK
-        action_output: turn_on
-
-     */
-
     protected ActionType action = ActionType.OUTPUT;
 
 }

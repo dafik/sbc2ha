@@ -1,14 +1,17 @@
 package com.dfi.sbc2ha.config;
 
-import com.dfi.sbc2ha.config.sbc2ha.definition.AppConfig;
 import com.dfi.sbc2ha.config.loader.ConfigLoaderJackson;
+import com.dfi.sbc2ha.config.sbc2ha.definition.AppConfig;
 import com.dfi.sbc2ha.helper.JarHelper;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.cfg.EnumFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,34 +22,64 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 public class ConfigHelper {
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = JsonMapper.builder()
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
+            .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false)
+            .configure(EnumFeature.WRITE_ENUMS_TO_LOWERCASE, true)
+            .addModule(new JavaTimeModule())
+            .build();
     private static Map<String, FileStat> statMap;
 
     public static AppConfig loadConfig(String configLocation) throws IOException, URISyntaxException {
 
-        Logger.info("Loading config");
+        log.info("Loading config");
 
         File configFile = resolveFile(configLocation);
         configLocation = configFile.getPath();
+
 
         if (isCached(configLocation)) {
             if (isNotModified(configFile)) {
                 try {
                     return loadFromCache(configFile);
-                } catch (Exception ignored) {
-
+                } catch (Exception e) {
+                    log.error(e.getMessage(),e);
                 }
 
             }
         }
 
-        AppConfig appConfig = ConfigLoaderJackson.loadConfig(configLocation);
+        AppConfig appConfig;
+        if(isBoneIoConfig(configLocation)){
+            if(isNotConverted(configLocation)){
+                appConfig = convertFile(configLocation);
+            }else {
+                configLocation = "";
+                appConfig = ConfigLoaderJackson.loadConfig(configLocation);
+            }
+        }else {
+            appConfig = ConfigLoaderJackson.loadConfig(configLocation);
+        }
+
+
         saveCache(configLocation, appConfig);
 
 
         return appConfig;
+    }
+
+    private static AppConfig convertFile(String configLocation) {
+        return null;
+    }
+
+    private static boolean isNotConverted(String configLocation) {
+        return false;
+    }
+
+    private static boolean isBoneIoConfig(String configLocation) {
+        return false;
     }
 
     private static File resolveFile(String configLocation) throws FileNotFoundException, URISyntaxException {
@@ -71,14 +104,11 @@ public class ConfigHelper {
         File originalFile = new File(originalLocation).getAbsoluteFile();
 
         String cacheFileName = getCacheFileName(originalFile);
-        Logger.info("save in cache file: {}", cacheFileName);
+        log.info("save in cache file: {}", cacheFileName);
 
         File cacheFile = new File(cacheFileName);
         try {
-            mapper
-                    .registerModule(new JavaTimeModule())
-                    .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false)
-                    .writerWithDefaultPrettyPrinter().writeValue(cacheFile, appConfig);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(cacheFile, appConfig);
         } catch (IOException e) {
             e.printStackTrace();
 
@@ -91,20 +121,18 @@ public class ConfigHelper {
 
 
     }
+
     private static void saveCacheYaml(String originalLocation, AppConfig appConfig) {
 
 
         File originalFile = new File(originalLocation).getAbsoluteFile();
 
         String cacheFileName = getCacheFileNameYaml(originalFile);
-        Logger.info("save in cache file: {}", cacheFileName);
+        log.info("save in cache file: {}", cacheFileName);
 
         File cacheFile = new File(cacheFileName);
         try {
-            mapper
-                    .registerModule(new JavaTimeModule())
-                    .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false)
-                    .writerWithDefaultPrettyPrinter().writeValue(cacheFile, appConfig);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(cacheFile, appConfig);
         } catch (IOException e) {
             e.printStackTrace();
 
@@ -182,6 +210,7 @@ public class ConfigHelper {
         return directory + "/" + String.join(".", List.of(file + "Optimized", extension));
 
     }
+
     private static String getCacheFileNameYaml(File originalFile) {
 
         File absoluteFile = originalFile.getAbsoluteFile();
@@ -203,8 +232,7 @@ public class ConfigHelper {
     private static AppConfig loadFromCache(File configFile) throws IOException {
         String cacheFileName = getStats().get(configFile.getPath()).cachedFileName;
 
-        Logger.info("Loading from cache file {}", cacheFileName);
-        mapper.registerModule(new JavaTimeModule());
+        log.info("Loading from cache file {}", cacheFileName);
         return mapper.readValue(new FileInputStream(cacheFileName), AppConfig.class);
     }
 

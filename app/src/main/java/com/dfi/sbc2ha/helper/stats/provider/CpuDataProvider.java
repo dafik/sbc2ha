@@ -1,14 +1,15 @@
 package com.dfi.sbc2ha.helper.stats.provider;
 
 import com.diozero.util.SleepUtil;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class CpuDataProvider extends DataProvider<List<String>> {
+@Slf4j
+public class CpuDataProvider extends DataProvider {
 
     private CentralProcessor cpu;
     private double[] average = {-1, -1, 1};
@@ -31,7 +32,7 @@ public class CpuDataProvider extends DataProvider<List<String>> {
 
             current = cpu.getProcessorCpuLoadBetweenTicks(startTick);
         } catch (Exception e) {
-            Logger.error(e);
+            log.error(e.getMessage(),e);
         }
         onChange();
     }

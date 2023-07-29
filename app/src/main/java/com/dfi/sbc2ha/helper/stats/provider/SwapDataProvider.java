@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.stats.provider;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.VirtualMemory;
@@ -9,7 +9,8 @@ import oshi.util.FormatUtil;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class SwapDataProvider extends DataProvider<List<String>> {
+@Slf4j
+public class SwapDataProvider extends DataProvider {
 
     private GlobalMemory memory;
     private String used = "reading..";
@@ -36,7 +37,7 @@ public class SwapDataProvider extends DataProvider<List<String>> {
             vmMax = FormatUtil.formatBytes(virtualMemory.getVirtualMax());
 
         } catch (Exception e) {
-            Logger.error(e);
+            log.error(e.getMessage(),e);
         }
         onChange();
     }

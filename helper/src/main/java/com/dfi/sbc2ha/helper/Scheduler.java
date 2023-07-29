@@ -32,12 +32,13 @@ package com.dfi.sbc2ha.helper;
  */
 
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 public class Scheduler {
     private static Scheduler instance;
     private final ScheduledExecutorService scheduler;
@@ -77,9 +78,9 @@ public class Scheduler {
     public static void statusAll() {
         Map<Thread, StackTraceElement[]> stacks = Thread.getAllStackTraces();
         for (Map.Entry<Thread, StackTraceElement[]> entry : stacks.entrySet()) {
-            Logger.debug("Stack trace elements for Thread " + entry.getKey().getName() + ":");
+            log.debug("Stack trace elements for Thread " + entry.getKey().getName() + ":");
             for (StackTraceElement element : entry.getValue()) {
-                Logger.debug(element.toString());
+                log.debug(element.toString());
             }
         }
         instance.status();
@@ -101,11 +102,15 @@ public class Scheduler {
         return scheduler.scheduleAtFixedRate(command, initialDelay, period, unit);
     }
 
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long period, TimeUnit unit) {
+        return scheduler.scheduleAtFixedRate(command, initialDelay, period, unit);
+    }
+
 
     private void shutdown() {
         scheduler.shutdownNow();
         executor.shutdownNow();
-        Logger.trace("Shutdown - done");
+        log.trace("Shutdown - done");
     }
 
     public boolean isShutdown() {
@@ -137,7 +142,7 @@ public class Scheduler {
         }
 
         void status() {
-            Logger.debug("activeCount=" + group.activeCount()
+            log.debug("activeCount=" + group.activeCount()
                     + ", activeGroupCount=" + group.activeGroupCount());
         }
     }

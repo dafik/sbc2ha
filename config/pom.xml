@@ -18,7 +18,6 @@
         <module>converter</module>
         <module>config-boneio</module>
         <module>config-sbc2ha</module>
-        <module>config-sbc2ha-new</module>
     </modules>
 
 

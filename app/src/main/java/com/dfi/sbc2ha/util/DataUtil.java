@@ -21,4 +21,20 @@ public class DataUtil {
 
         return result;
     }
+
+    public static <T> List<List<T>> split(List<T> originalSet, int count) {
+        int length = (int) Math.ceil((double) originalSet.size() / count);
+        List<List<T>> result = new ArrayList<>(count);
+        for (int i = 0; i < length; i++) {
+            result.add(new ArrayList<>());
+        }
+        int index = 0;
+        for (T object : originalSet) {
+            List<T> rs = result.get(index++ / count);
+
+            rs.add(object);
+        }
+
+        return result;
+    }
 }

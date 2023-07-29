@@ -1,7 +1,7 @@
 package com.dfi.sbc2ha.sensor.temperature.oneWire;
 
 import com.dfi.sbc2ha.config.sbc2ha.definition.filters.ValueFilterType;
-import com.dfi.sbc2ha.sensor.temperature.TempSensor;
+import com.dfi.sbc2ha.sensor.TempSensor;
 import com.diozero.devices.oneWire.OneWireThermSensor;
 
 import java.time.Duration;

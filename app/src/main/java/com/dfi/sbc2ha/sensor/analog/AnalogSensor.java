@@ -3,31 +3,27 @@ package com.dfi.sbc2ha.sensor.analog;
 
 import com.dfi.sbc2ha.config.sbc2ha.definition.filters.ValueFilterType;
 import com.dfi.sbc2ha.helper.deserializer.DurationStyle;
-import com.dfi.sbc2ha.sensor.scheduled.ScheduledSensor;
-import com.dfi.sbc2ha.sensor.temperature.TempSensor;
+import com.dfi.sbc2ha.sensor.ScalarSensor;
+import com.dfi.sbc2ha.sensor.TempSensor;
 import com.diozero.api.AnalogInputDevice;
+import com.diozero.api.AnalogInputEvent;
 import com.diozero.api.GpioPullUpDown;
 import com.diozero.api.PinInfo;
-import com.diozero.api.RuntimeIOException;
 import com.diozero.internal.spi.AnalogInputDeviceFactoryInterface;
 import com.diozero.sbc.DeviceFactoryHelper;
-import org.tinylog.Logger;
 
 import java.time.Duration;
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 
-import static com.dfi.sbc2ha.sensor.analog.AnalogState.CHANGED;
+import static com.dfi.sbc2ha.state.sensor.ScalarState.CHANGED;
 
-public class AnalogSensor extends ScheduledSensor<AnalogInputDevice, AnalogEvent, AnalogState> {
-
+public class AnalogSensor extends ScalarSensor {
     public static final Duration UPDATE_INTERVAL = DurationStyle.detectAndParse("60s");
-
     protected final AnalogInputDevice delegate;
-    private final List<Map<ValueFilterType, Number>> filters = new ArrayList<>();
-
-    protected float lastRawValue;
-    protected float lastValue;
+    private final Duration updateInterval;
 
     public AnalogSensor(AnalogInputDevice delegate, String name) {
         this(delegate, name, UPDATE_INTERVAL);
@@ -36,70 +32,43 @@ public class AnalogSensor extends ScheduledSensor<AnalogInputDevice, AnalogEvent
     public AnalogSensor(AnalogInputDevice delegate, String name, Duration updateInterval) {
         this(delegate, name, updateInterval, new ArrayList<>());
     }
-
     public AnalogSensor(AnalogInputDevice delegate, String name, Duration updateInterval, List<Map<ValueFilterType, Number>> filters) {
-        super(name, updateInterval);
+        super(name);
         this.delegate = delegate;
+        this.updateInterval = updateInterval;
 
         this.filters.addAll(filters);
-
         listeners.put(CHANGED, new LinkedHashSet<>());
     }
-
     @Override
-    public void run() {
-        Logger.debug("Refreshing analog sensor {}", name);
-        if (stopScheduler.get()) {
-            throw new RuntimeException("Stopping scheduler due to close request, device key=" + getName());
-        }
-
-        float temperature = getValue();
-        if (temperature != lastValue) {
-            lastValue = temperature;
-            handleChanged(temperature);
-        }
-        Logger.debug("Refreshed analog sensor {} : {}", name, temperature);
-
-    }
-
-    public void handleChanged(float temperature) {
-        AnalogEvent e = new AnalogEvent(CHANGED, temperature);
-        listeners.get(CHANGED).forEach(consumer -> consumer.accept(e));
-        handleAny(e);
-    }
-
-    public void whenChanged(Consumer<AnalogEvent> consumer) {
-        addListener(consumer, CHANGED);
-
-    }
-
-
-    private float applyFilters(float rawValue) {
-        for (var filter : filters) {
-            for (Map.Entry<ValueFilterType, Number> entry : filter.entrySet()) {
-                ValueFilterType valueFilterType = entry.getKey();
-                Number number = entry.getValue();
-                rawValue = valueFilterType.getFilter().apply(rawValue, number.floatValue());
-            }
-        }
-        return rawValue;
-    }
-
-
-    public float getValue() throws RuntimeIOException {
-        float rawValue = getRawValue();
-        if (lastValue != 0 && rawValue == lastRawValue) {
-            return lastValue;
-        }
-        lastRawValue = rawValue;
-        return applyFilters(rawValue);
-
-    }
-
     public float getRawValue() {
         return delegate.getScaledValue();
     }
 
+
+    @Override
+    protected float calculate(float value) {
+        return value;
+    }
+
+    private void onDelegateChange(AnalogInputEvent analogInputEvent) {
+        handleChanged(getValue(analogInputEvent.getScaledValue()));
+    }
+
+    @Override
+    protected void setDelegateListener() {
+        delegate.addListener(this::onDelegateChange, 0.001f, (int) updateInterval.toMillis());
+    }
+
+    @Override
+    protected void removeDelegateListener() {
+        delegate.removeListener(this::onDelegateChange);
+    }
+
+    public float getRange() {
+        return delegate.getRange();
+
+    }
 
     @Override
     protected void closeDelegate() {

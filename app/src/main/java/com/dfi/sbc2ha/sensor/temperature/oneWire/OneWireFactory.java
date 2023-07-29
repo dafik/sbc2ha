@@ -46,7 +46,7 @@ public class OneWireFactory {
             throw new RuntimeException(e);
         }
 
-        return new W1TempSensor(delegate, config.getId(), config.getUpdateInterval());
+        return new W1TempSensor(delegate, config.getName(), config.getUpdateInterval());
 
     }
 
@@ -70,7 +70,7 @@ public class OneWireFactory {
         OneWireThermDevice device = new FsThermDevice(bus, OneWireDevice.Type.DS18B20, deviceAddress);
         OneWireThermSensor delegate = new OneWireThermSensor(device);
 
-        return new W1TempSensor(delegate, config.getId(), config.getUpdateInterval());
+        return new W1TempSensor(delegate, config.getName(), config.getUpdateInterval());
 
     }
 

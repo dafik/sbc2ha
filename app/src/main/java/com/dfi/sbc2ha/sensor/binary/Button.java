@@ -1,19 +1,24 @@
 package com.dfi.sbc2ha.sensor.binary;
 
+import com.dfi.sbc2ha.event.StateEvent;
+import com.dfi.sbc2ha.event.sensor.ButtonEvent;
 import com.dfi.sbc2ha.helper.detector.ClickDetector;
 import com.dfi.sbc2ha.helper.detector.ClickDetectorFactory;
+import com.dfi.sbc2ha.sensor.BinarySensor;
+import com.dfi.sbc2ha.state.sensor.ButtonState;
 import com.diozero.api.DigitalInputDevice;
 import com.diozero.api.PinInfo;
 import lombok.Setter;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
-import static com.dfi.sbc2ha.sensor.binary.ButtonState.*;
+import static com.dfi.sbc2ha.state.sensor.ButtonState.*;
 
+@Slf4j
 @Setter
-public class Button extends BinarySensor<ButtonEvent, ButtonState> {
+public class Button extends BinarySensor {
     public static final int DOUBLE_CLICK_DURATION_MS = 350;
     public static final int LONG_PRESS_DURATION_MS = 700;
     private ClickDetector clickDetector;
@@ -31,56 +36,56 @@ public class Button extends BinarySensor<ButtonEvent, ButtonState> {
 
     protected void setDelegateListener() {
         delegate.whenActivated(e -> {
-            Logger.debug("onActivated on {}, time:{}", name, e);
+            log.trace("onActivated {}, time:{}", name, e);
             clickDetector.detect(e, inverted ? Direction.PRESS : Direction.RELEASE);
         });
         delegate.whenDeactivated(e -> {
-            Logger.debug("onDeactivated on {}, time:{}", name, e);
+            log.trace("onDeactivated {}, time:{}", name, e);
             clickDetector.detect(e, inverted ? Direction.RELEASE : Direction.PRESS);
         });
     }
 
     private void handleLongPress(long e) {
-        Logger.info("onLongPress on {}, time:{}", name, e);
-        ButtonEvent event = new ButtonEvent(LONG);
+        log.debug("onLongPress {}, time:{}", name, e);
+        StateEvent event = new ButtonEvent(LONG);
         listeners.get(LONG).forEach(listener -> listener.accept(event));
         handleAny(event);
         //handleAny(new ButtonEvent(System.currentTimeMillis(), RELEASE));
     }
 
     private void handleDoubleClick(long e) {
-        Logger.info("onDoubleClik on {}, time:{}", name, e);
-        ButtonEvent event = new ButtonEvent( DOUBLE);
+        log.debug("onDoubleClick {}, time:{}", name, e);
+        StateEvent event = new ButtonEvent(DOUBLE);
         listeners.get(DOUBLE).forEach(listener -> listener.accept(event));
         handleAny(event);
         //handleAny(new ButtonEvent(System.currentTimeMillis(), RELEASE));
     }
 
     private void handleCLick(long e) {
-        Logger.info("onClik on {}, time:{}", name, e);
-        ButtonEvent event = new ButtonEvent( SINGLE);
+        log.debug("onClick {}, time:{}", name, e);
+        StateEvent event = new ButtonEvent(SINGLE);
         listeners.get(SINGLE).forEach(listener -> listener.accept(event));
         handleAny(event);
         //handleAny(new ButtonEvent(System.currentTimeMillis(), RELEASE));
     }
 
     private void handleRelease(long e) {
-        Logger.info("onRelease on {}, time:{}", name, e);
-        ButtonEvent event = new ButtonEvent( RELEASE);
+        log.debug("onRelease {}, time:{}", name, e);
+        StateEvent event = new ButtonEvent(RELEASE);
         listeners.get(RELEASE).forEach(listener -> listener.accept(event));
         handleAny(event);
 
     }
 
-    public void whenClick(Consumer<ButtonEvent> consumer) {
+    public void whenClick(Consumer<StateEvent> consumer) {
         addListener(consumer, SINGLE);
     }
 
-    public void whenDoubleClick(Consumer<ButtonEvent> consumer) {
+    public void whenDoubleClick(Consumer<StateEvent> consumer) {
         addListener(consumer, DOUBLE);
     }
 
-    public void whenLongPress(Consumer<ButtonEvent> consumer) {
+    public void whenLongPress(Consumer<StateEvent> consumer) {
         addListener(consumer, LONG);
     }
 

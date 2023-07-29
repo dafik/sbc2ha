@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.detector;
 
-import com.dfi.sbc2ha.sensor.binary.ButtonState;
+import com.dfi.sbc2ha.state.sensor.ButtonState;
 
 import java.util.function.LongConsumer;
 
@@ -19,7 +19,7 @@ public class ClickDetectorFactory {
                         clickConsumer, doubleClickConsumer, longPressConsumer);
             case LONG:
             default:
-                return new DefaultClickDetector(doubleClickDurationMs, longPressDurationMs,
+                return new LongClickDetector(doubleClickDurationMs, longPressDurationMs,
                         releaseConsumer,
                         clickConsumer, doubleClickConsumer, longPressConsumer);
 

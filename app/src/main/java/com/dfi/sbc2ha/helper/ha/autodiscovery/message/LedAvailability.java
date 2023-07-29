@@ -1,54 +1,45 @@
 package com.dfi.sbc2ha.helper.ha.autodiscovery.message;
 
-import com.dfi.sbc2ha.Easing;
-import com.dfi.sbc2ha.helper.Constants;
+import com.dfi.sbc2ha.EasingOld;
+import com.dfi.sbc2ha.EasingType;
+import com.dfi.sbc2ha.EasingVariant;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.HaDeviceType;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
+import com.dfi.sbc2ha.state.actuator.ActuatorState;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-
+@Getter
 public class LedAvailability extends Availability {
     public static final int DEFAULT_BRIGHTNESS_SCALE = 65535;
-    public static final int LOCAL_BRIGHTNES_SCALE = 1;
+    public static final int LOCAL_BRIGHTNESS_SCALE = 1;
 
 
     @JsonProperty("command_topic")
     String commandTopic;
-    //@JsonProperty("brightness_state_topic")
-    //String brightnessStateTopic;
-    //@JsonProperty("brightness_command_topic")
-    //String brightnessCommandTopic;
     @JsonProperty("brightness_scale")
     int brightnessScale = DEFAULT_BRIGHTNESS_SCALE;
     @JsonProperty("payload_off")
-    String payloadOff = Constants.OFF;
+    String payloadOff = ActuatorState.OFF.toString().toLowerCase();
     @JsonProperty("payload_on")
-    String payloadOn = Constants.ON;
+    String payloadOn = ActuatorState.ON.toString().toLowerCase();
     @JsonProperty("state_value_template")
     String stateValueTemplate = "{{ value_json.state }}";
     @JsonProperty("brightness_value_template")
     String brightnessValueTemplate = "{{ value_json.brightness }}";
-
-
-    //name: mqtt_json_light_1
-    //state_topic: "home/rgb1"
-    //command_topic: "home/rgb1/set"
-
-    @JsonProperty("schema")
     String schema = "json";
-
-    @JsonProperty("brightness")
     boolean brightness = true;
     @JsonProperty("color_mode")
     boolean colorMode = true;
     @JsonProperty("supported_color_modes")
     List<String> supportedColorModes = List.of("brightness");
-
     boolean effect = true;
     @JsonProperty("effect_list")
-    List<String> effectList = Easing.names();
+    List<String> effectList = EasingOld.names();
 
     public LedAvailability(String id, String name) {
         super(id, name, HaDeviceType.LIGHT, SbcDeviceType.RELAY);
@@ -56,17 +47,25 @@ public class LedAvailability extends Availability {
         String stateDeviceTypeName = getStateDeviceTypeName();
 
         commandTopic = Availability.formatTopic(Availability.topicPrefix, Availability.CMD, stateDeviceTypeName, id, Availability.SET);
-        //brightnessStateTopic = Availability.formatTopic(Availability.topicPrefix, stateDeviceTypeName, id);
-        //brightnessCommandTopic = Availability.formatTopic(Availability.topicPrefix, Availability.CMD, stateDeviceTypeName, id, Availability.SET_BRIGHTNESS);
 
+
+        if (System.getProperty("usePwmFadingLed") != null) {
+            List<String> effectList = new ArrayList<>();
+            Arrays.stream(EasingType.values()).forEach(easingType -> {
+                Arrays.stream(EasingVariant.values()).forEach(variant -> {
+                    effectList.add(easingType.name() + "-" + variant.name());
+                });
+            });
+            this.effectList = effectList;
+        }
     }
 
     public static int convertToHa(Float value) {
-        return (int) (DEFAULT_BRIGHTNESS_SCALE * value / LOCAL_BRIGHTNES_SCALE);
+        return (int) (DEFAULT_BRIGHTNESS_SCALE * value / LOCAL_BRIGHTNESS_SCALE);
     }
 
     public static float convertFromHa(int value) {
-        return (float) value * LOCAL_BRIGHTNES_SCALE / DEFAULT_BRIGHTNESS_SCALE;
+        return (float) value * LOCAL_BRIGHTNESS_SCALE / DEFAULT_BRIGHTNESS_SCALE;
 
     }
 }

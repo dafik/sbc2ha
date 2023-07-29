@@ -1,38 +1,48 @@
 package com.dfi.sbc2ha.sensor.modbus;
 
-import com.dfi.sbc2ha.modbus.Modbus;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.ModbusSensorDefinition;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.Register;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.RegisterBase;
-import com.dfi.sbc2ha.helper.ha.DeviceState;
-import com.dfi.sbc2ha.sensor.NullDelegate;
-import com.dfi.sbc2ha.sensor.scheduled.ScheduledSensor;
-import org.tinylog.Logger;
+import com.dfi.sbc2ha.event.sensor.ModbusEvent;
+import com.dfi.sbc2ha.helper.Scheduler;
+import com.dfi.sbc2ha.modbus.Modbus;
+import com.dfi.sbc2ha.sensor.Sensor;
+import com.dfi.sbc2ha.state.device.DeviceState;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class ModbusSensor extends ScheduledSensor<NullDelegate, ModbusEvent, ModbusState> {
+import static com.dfi.sbc2ha.state.sensor.ScalarState.CHANGED;
 
+@Slf4j
+public class ModbusSensor extends Sensor implements Runnable {
+    protected final Duration updateInterval;
+    protected final AtomicBoolean stopScheduler;
     protected final Map<Register, LinkedHashSet<Consumer<ModbusEvent>>> listenersAnyRegister = new LinkedHashMap<>();
     private final String id;
     private final int unitId;
     private final Modbus bus;
     private final ModbusSensorDefinition definition;
     private final List<Consumer<DeviceState>> stateListeners = new ArrayList<>();
+    private ScheduledFuture<?> scheduledFuture;
     private DeviceState state = DeviceState.OFFLINE;
 
     public ModbusSensor(String name, String id, int unitId, Duration updateInterval, Modbus bus, ModbusSensorDefinition definition) {
-        super(name, updateInterval);
+        super(name);
         this.id = id;
         this.unitId = unitId;
-
-
         this.bus = bus;
         this.definition = definition;
 
-        listeners.put(ModbusState.CHANGED, new LinkedHashSet<>());
+        this.updateInterval = updateInterval;
+        stopScheduler = new AtomicBoolean(true);
+
+        listeners.put(CHANGED, new LinkedHashSet<>());
     }
 
     public String getId() {
@@ -46,6 +56,20 @@ public class ModbusSensor extends ScheduledSensor<NullDelegate, ModbusEvent, Mod
     @Override
     protected void closeDelegate() {
 
+    }
+
+    @Override
+    protected void setDelegateListener() {
+        stopScheduler.set(false);
+        scheduledFuture = Scheduler.getInstance()
+                .scheduleAtFixedRate(this, updateInterval.toNanos(), updateInterval.toNanos(),
+                        TimeUnit.NANOSECONDS);
+
+    }
+
+    protected void removeDelegateListener() {
+        stopScheduler.set(true);
+        scheduledFuture.cancel(true);
     }
 
     public boolean isAvailable() {
@@ -68,37 +92,38 @@ public class ModbusSensor extends ScheduledSensor<NullDelegate, ModbusEvent, Mod
 
     @Override
     public void run() {
-        Logger.debug("refreshing modbus: {}", name);
+        log.trace("refreshing modbus: {}", name);
         try {
-
 
             for (RegisterBase base : definition.getRegistersBase()) {
                 short[] responseData = bus.readMany(unitId, base.getBase(), base.getLength(), base.getModbusRegisterType());
-                onChaneState(DeviceState.ONLINE);
+                if(responseData.length > 0) {
+                    onChaneState(DeviceState.ONLINE);
 
-                List<Register> registers = base.getRegisters();
-                for (Register register : registers) {
-                    try {
-                        Number number = register.decode(responseData, base.getBase());
-                        handleChanged(register, number);
-                    } catch (RuntimeException e) {
-                        Logger.error(e);
+                    List<Register> registers = base.getRegisters();
+                    for (Register register : registers) {
+                        try {
+                            float number = register.decode(responseData, base.getBase());
+                            handleChanged(register, number);
+                        } catch (RuntimeException e) {
+                            log.error(e.getMessage(), e);
+                        }
+
                     }
-
                 }
             }
         } catch (RuntimeException logged) {
-            Logger.error(logged);
+            log.error(logged.getMessage(), logged);
             onChaneState(DeviceState.OFFLINE);
         }
     }
 
-    public void handleChanged(Register register, Number value) {
-        ModbusEvent evt = new ModbusEvent(ModbusState.CHANGED, register, value);
+    public void handleChanged(Register register, float value) {
+        ModbusEvent evt = new ModbusEvent(register, value);
         if (listenersAnyRegister.containsKey(register)) {
             listenersAnyRegister.get(register).forEach(consumer -> consumer.accept(evt));
         }
-        listeners.get(ModbusState.CHANGED).forEach(consumer -> consumer.accept(evt));
+        listeners.get(CHANGED).forEach(consumer -> consumer.accept(evt));
         handleAny(evt);
     }
 

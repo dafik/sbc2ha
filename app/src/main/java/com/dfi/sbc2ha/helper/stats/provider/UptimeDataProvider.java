@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.stats.provider;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 import oshi.hardware.HardwareAbstractionLayer;
 
 import java.io.BufferedReader;
@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class UptimeDataProvider extends DataProvider<List<String>> {
+@Slf4j
+public class UptimeDataProvider extends DataProvider {
 
     private String hostName = "reading..";
     private String systemUptime = "reading..";
@@ -54,7 +55,7 @@ public class UptimeDataProvider extends DataProvider<List<String>> {
             systemUptime = getSystemUptime();
         } catch (Exception e) {
             //throw new RuntimeException(e);
-            Logger.error(e);
+            log.error(e.getMessage(),e);
         }
         if (!Objects.equals(lastHostname, hostName) || !Objects.equals(lastUptime, systemUptime)) {
             onChange();

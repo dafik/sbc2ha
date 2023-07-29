@@ -6,7 +6,8 @@ public enum SbcDeviceType {
     INPUT,
     RELAY,
     BUTTON,
-    COVER;
+    COVER,
+    TEXT;
 
     public String toLowerCase() {
         return name().toLowerCase();

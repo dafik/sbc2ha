@@ -13,9 +13,6 @@ public class TempSensorAvailability extends Availability {
     String deviceClass = ThermDeviceClassType.TEMPERATURE.getSensorDeviceClassType().getLabel();
     @JsonProperty("state_class")
     String stateClass = StateClassType.MEASUREMENT.getLabel();
-    @JsonProperty("value_template")
-    String valueTemplate = "{{ value_json.state }}";
-
     @JsonProperty("unit_of_measurement")
     String unitOfMeasurement = "°C";
 

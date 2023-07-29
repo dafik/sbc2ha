@@ -1,14 +1,15 @@
 package com.dfi.sbc2ha.helper.stats.provider;
 
+import com.dfi.sbc2ha.event.sensor.ScalarEvent;
 import com.dfi.sbc2ha.helper.StateManager;
 import com.dfi.sbc2ha.helper.StateManagerListener;
-import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
+import lombok.Data;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class OutputDataProvider extends DataProvider<Map<String, String>> implements StateManagerListener {
+public class OutputDataProvider extends DataProvider implements StateManagerListener {
     private static final char ON = '0';
     private static final char OFF = ' ';
     private final StateManager manger;
@@ -47,14 +48,15 @@ public class OutputDataProvider extends DataProvider<Map<String, String>> implem
         return b;
     }
 
-    public Map<String, String> getOutputStates() {
+    public List<?> getOutputStates() {
 
-        Map<String, String> out = new LinkedHashMap<>();
+        List<KeyValue> out = new LinkedList<>();
         Set<String> currentPageKeys = getCurrentPageKeys(keys);
 
         for (String k : currentPageKeys) {
-            boolean value = (int) manger.get(SbcDeviceType.RELAY.toString(), k) > 0;
-            out.put(k, value ? String.valueOf(ON) : String.valueOf(OFF));
+            ScalarEvent stateEvent = (ScalarEvent) manger.get(k);
+            boolean value = stateEvent== null ? false : stateEvent.getValue() > 0;
+            out.add(new KeyValue(k, value ? String.valueOf(ON) : String.valueOf(OFF)));
         }
 
         return out;
@@ -69,25 +71,23 @@ public class OutputDataProvider extends DataProvider<Map<String, String>> implem
     }
 
     @Override
-    public DataProvider<Map<String, String>> schedule() {
+    public void schedule() {
         manger.addListener(this);
-        return this;
     }
 
     @Override
-    public DataProvider<Map<String, String>> stop() {
+    public void stop() {
         manger.removeListener(this);
-        return this;
     }
 
     @Override
-    public void addListener(Consumer<Map<String, String>> consumer) {
+    public void addListener(Consumer<List<?>> consumer) {
         super.addListener(consumer);
     }
 
     @Override
     protected void onChange() {
-        Map<String, String> outputStates = getLines();
+        List<?> outputStates = getLines();
         synchronized (listeners) {
             listeners.forEach(c -> c.accept(outputStates));
         }
@@ -95,7 +95,7 @@ public class OutputDataProvider extends DataProvider<Map<String, String>> implem
 
 
     @Override
-    public Map<String, String> getLines() {
+    public List<?> getLines() {
         return getOutputStates();
     }
 
@@ -126,5 +126,11 @@ public class OutputDataProvider extends DataProvider<Map<String, String>> implem
             this.outputsPerPage = outputsPerPage;
             page = 0;
         }
+    }
+
+    @Data
+    public static class KeyValue {
+        final String key;
+        final String value;
     }
 }

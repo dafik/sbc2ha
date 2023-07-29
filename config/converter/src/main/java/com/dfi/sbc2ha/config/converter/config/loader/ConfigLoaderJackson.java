@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-
+@Slf4j
 public class ConfigLoaderJackson {
 
 
@@ -45,9 +45,9 @@ public class ConfigLoaderJackson {
         om.registerModule(new JavaTimeModule());
 
         try {
-            Logger.info("parsing config");
+            log.info("parsing config");
             BoneIoConfig boneIoConfig = om.readValue(io, BoneIoConfig.class);
-            Logger.info("config parsed");
+            log.info("config parsed");
 
             return boneIoConfig;
         } catch (IOException e) {
@@ -69,7 +69,6 @@ public class ConfigLoaderJackson {
                 Path file = Paths.get(resource1.toURI().getPath());
                 BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
                 FileTime message = attr.lastModifiedTime();
-                Logger.info(message);
 
             } catch (URISyntaxException | IOException e) {
                 throw new RuntimeException(e);

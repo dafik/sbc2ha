@@ -32,11 +32,11 @@ package com.diozero.devices.oled;
  */
 
 import com.diozero.api.I2CDeviceInterface;
-import org.tinylog.Logger;
 
 /**
  * Comms for OLED devices.
  */
+
 public interface ShOledCommunicationChannel extends AutoCloseable {
     /**
      * Send to the device.
@@ -110,7 +110,7 @@ public interface ShOledCommunicationChannel extends AutoCloseable {
 
         @Override
         public void close() {
-            Logger.trace("close()");
+            log.trace("close()");
             device.close();
         }
 
@@ -177,7 +177,6 @@ public interface ShOledCommunicationChannel extends AutoCloseable {
 
         @Override
         public void close() {
-            Logger.trace("close()");
             device.close();
         }
 

@@ -1,10 +1,15 @@
 package com.dfi.sbc2ha.helper;
 
-import com.dfi.sbc2ha.actuator.*;
-import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
+import com.dfi.sbc2ha.actuator.Actuator;
+import com.dfi.sbc2ha.config.sbc2ha.definition.enums.ActuatorType;
+import com.dfi.sbc2ha.event.StateEvent;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.tinylog.Logger;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,14 +19,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class StateManager {
     private static final String FILE_NAME = "state.json";
     private static StateManager instance;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
     private final List<StateManagerListener> listeners = new ArrayList<>();
-    private Map<String, Map<String, Number>> states = new HashMap<>();
+    private final ObjectWriter objectWriter;
+    private Map<ActuatorType, States> states = new HashMap<>();
 
     private StateManager() {
+        mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+        filterProvider.setDefaultFilter(SimpleBeanPropertyFilter.serializeAll());
+        //objectWriter = mapper.writer(filterProvider).withDefaultPrettyPrinter();
+        objectWriter = mapper.writer(filterProvider).withDefaultPrettyPrinter();
         loadState();
     }
 
@@ -63,25 +75,32 @@ public class StateManager {
         if (!statsFile.exists()) {
             return;
         }
-        TypeReference<Map<String, Map<String, Number>>> typeRef = new TypeReference<>() {
+        TypeReference<Map<ActuatorType, States>> typeRef = new TypeReference<>() {
         };
 
         try {
             states = mapper.readValue(new FileInputStream(statsFile), typeRef);
         } catch (IOException e) {
-            Logger.error("unable load last state, skip reason: {}", e.getMessage());
+            log.error("unable load last state, skip reason: {}", e.getMessage());
             states = new HashMap<>();
         }
     }
 
     private synchronized void saveState() throws IOException {
         File statsFile = new File(getFileLocation()).getAbsoluteFile();
-        mapper.writeValue(statsFile, states);
+        try {
+            objectWriter.writeValue(statsFile, states);
+            String s = objectWriter.writeValueAsString(states);
+            var x = 1;
+        } catch (RuntimeException e) {
+            log.error("write error", e);
+        }
+
     }
 
-    public void save(String type, String attr, Number value) {
+    public void save(ActuatorType type, String attr, StateEvent value) {
         if (!states.containsKey(type)) {
-            states.put(type, new HashMap<>());
+            states.put(type, new States());
         }
         states.get(type).put(attr, value);
         onChange();
@@ -93,33 +112,40 @@ public class StateManager {
         }
     }
 
-    public Number get(String type, String attr) {
+    public StateEvent get(ActuatorType type, String attr) {
         if (!states.containsKey(type) || !states.get(type).containsKey(attr)) {
-            return 0;
+            return null;
         }
         return states.get(type).get(attr);
     }
 
-    public void remove(String type, String attr) {
+    public StateEvent get(String attr) {
+        for (States entries : states.values()) {
+            if (entries.containsKey(attr)) {
+                return entries.get(attr);
+            }
+        }
+        return null;
+    }
+
+    public void remove(ActuatorType type, String attr) {
         if (states.containsKey(type)) {
             return;
         }
-        Map<String, Number> typeStates = states.get(type);
+        Map<String, StateEvent> typeStates = states.get(type);
         typeStates.remove(attr);
         if (typeStates.isEmpty()) {
             states.remove(type);
         }
     }
 
-    public void handlerState(Actuator<?, ?, ?> actuator, RelayEvent actuatorEvent) {
-        if (actuator instanceof Relay) {
-            save(SbcDeviceType.RELAY.toString(), actuator.getName(), actuatorEvent.toInt());
-        }
+
+    public void handlerState(ActuatorType outputType, Actuator actuator, StateEvent actuatorEvent) {
+        save(outputType, actuator.getName(), actuatorEvent);
+
     }
 
-    public void handlerState(Actuator<?, ?, ?> actuator, LedEvent actuatorEvent) {
-        if (actuator instanceof Led) {
-            save(SbcDeviceType.RELAY.toString(), actuator.getName(), actuatorEvent.getBrightnessRaw());
-        }
+    public static class States extends HashMap<String, StateEvent> {
+
     }
 }

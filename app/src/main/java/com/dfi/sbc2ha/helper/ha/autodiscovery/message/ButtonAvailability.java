@@ -3,9 +3,11 @@ package com.dfi.sbc2ha.helper.ha.autodiscovery.message;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.HaDeviceType;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 
 public class ButtonAvailability extends Availability {
+    @Getter
     @JsonProperty("command_topic")
     String commandTopic;
 

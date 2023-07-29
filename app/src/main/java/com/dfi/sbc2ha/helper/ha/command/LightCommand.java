@@ -1,6 +1,5 @@
 package com.dfi.sbc2ha.helper.ha.command;
 
-import com.dfi.sbc2ha.Easing;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -8,6 +7,8 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LightCommand {
+    public static final String ON = "ON";
+    public static final String OFF = "OFF";
 
     int brightness;
     @JsonProperty("color_mode")
@@ -15,7 +16,7 @@ public class LightCommand {
     @JsonProperty("color_temp")
     int colorTemp;
     ColorCommand color;
-    Easing effect;
+    String effect;
     String state;
     int transition;
 }

@@ -4,8 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public enum OutputKindType {
     GPIO,
+    GPIOPWM,
     MCP,
-    PCA;
+    PCA,
+
+    COVER;
 
     @JsonIgnore
     public String toLowerCase() {

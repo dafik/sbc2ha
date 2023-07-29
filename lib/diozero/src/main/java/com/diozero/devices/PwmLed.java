@@ -31,16 +31,18 @@ package com.diozero.devices;
  * #L%
  */
 
-import com.dfi.sbc2ha.Easing;
+import com.dfi.sbc2ha.EasingOld;
 import com.dfi.sbc2ha.helper.Scheduler;
 import com.diozero.api.PwmOutputDevice;
 import com.diozero.api.RuntimeIOException;
 import com.diozero.api.RuntimeInterruptedException;
 import com.diozero.api.function.FloatConsumer;
 import com.diozero.internal.spi.PwmOutputDeviceFactoryInterface;
+import com.diozero.sbc.DeviceFactoryHelper;
 import com.diozero.util.SleepUtil;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -53,7 +55,9 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * PWM controlled LED. @see com.diozero.sampleapps.PwmLedTest PwmLedTest
  */
+@Slf4j
 public class PwmLed extends PwmOutputDevice {
+    private static final int DEFAULT_PWM_FREQUENCY = 50;
     private final AtomicBoolean runningEasing = new AtomicBoolean();
     private final List<FloatConsumer> changeListeners = new ArrayList<>();
 
@@ -61,13 +65,14 @@ public class PwmLed extends PwmOutputDevice {
 
     private AtomicInteger cylcle = new AtomicInteger(0);
     private Lock lock = new ReentrantLock();
+    private int range;
 
     /**
      * @param gpio The GPIO to which the LED is attached to.
      * @throws RuntimeIOException If an I/O error occurred.
      */
     public PwmLed(int gpio) throws RuntimeIOException {
-        this(gpio, 0);
+        this(DeviceFactoryHelper.getNativeDeviceFactory(), gpio, 0);
     }
 
     /**
@@ -76,7 +81,7 @@ public class PwmLed extends PwmOutputDevice {
      * @throws RuntimeIOException If an I/O error occurred.
      */
     public PwmLed(int gpio, float initialValue) throws RuntimeIOException {
-        super(gpio, initialValue);
+        this(DeviceFactoryHelper.getNativeDeviceFactory(), gpio, initialValue);
     }
 
     /**
@@ -96,12 +101,55 @@ public class PwmLed extends PwmOutputDevice {
      */
     public PwmLed(PwmOutputDeviceFactoryInterface deviceFactory, int gpio, float initialValue)
             throws RuntimeIOException {
-        super(deviceFactory, gpio, initialValue);
+        this(deviceFactory, gpio, DEFAULT_PWM_FREQUENCY, initialValue);
     }
 
     public PwmLed(PwmOutputDeviceFactoryInterface deviceFactory, int gpio, int pwmFrequency, float initialValue)
             throws RuntimeIOException {
         super(deviceFactory, gpio, pwmFrequency, initialValue);
+        detectRange(deviceFactory, gpio, pwmFrequency);
+    }
+
+    private static float calculateInitialDelta(EasingOld effect, float fromBrightness, float delta) {
+        if (fromBrightness == 0) return 0;
+        if (fromBrightness == 1) return 1;
+        float deltaValue = 0;
+
+        if (effect.getRevert() != null) {
+            deltaValue = effect.getRevert().apply(fromBrightness);
+        } else {
+            deltaValue += delta;
+            float tmpB = 0;
+            while (tmpB < fromBrightness) {
+                deltaValue += delta;
+                tmpB = effect.getOperator().apply(deltaValue);
+            }
+        }
+
+        return deltaValue;
+    }
+
+    private void detectRange(PwmOutputDeviceFactoryInterface deviceFactory, int gpio, int pwmFrequency) {
+        if (deviceFactory instanceof PCA9685) {
+            range = (int) Math.pow(2, 12);
+        } else if (deviceFactory.getClass().getSimpleName().equals("PigpioJDeviceFactory")) {
+            try {
+                Field delegateField = PwmOutputDevice.class.getDeclaredField("delegate");
+                delegateField.setAccessible(true);
+                Object delegate = delegateField.get(this);
+                delegateField.setAccessible(false);
+
+                Field rangeFiled = delegate.getClass().getDeclaredField("range");
+                rangeFiled.setAccessible(true);
+                range = (int) rangeFiled.get(delegate);
+                rangeFiled.setAccessible(false);
+
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            range = 200;
+        }
     }
 
     @Override
@@ -135,31 +183,31 @@ public class PwmLed extends PwmOutputDevice {
         runInBackgroundWithLock(super::off);
     }
 
-    @Override
-    public void toggle() throws RuntimeIOException {
-        runInBackgroundWithLock(super::toggle);
-    }
-
 /*    public void effectBackground(Easing effect, int transition, float fromBrightness, float toBrightness) {
         stopEasing();
         final int c = cylcle.incrementAndGet();
 
-        Logger.trace("c={} new background request", c);
+        log.trace("c={} new background request", c);
         easingFuture = Scheduler.getInstance().submit(() -> {
             try {
                 lock.lock();
 
                 effect(effect, transition, fromBrightness, toBrightness, c);
 
-                Logger.trace("c={} Background easing finished bright: {}", c, this.getValue());
+                log.trace("c={} Background easing finished bright: {}", c, this.getValue());
             } finally {
                 lock.unlock();
             }
         });
-        Logger.trace("c={} Background submited", c);
+        log.trace("c={} Background submited", c);
     }*/
 
-    public void effectBackgroundDirection(Easing effect, int transition, float limit, boolean off) {
+    @Override
+    public void toggle() throws RuntimeIOException {
+        runInBackgroundWithLock(super::toggle);
+    }
+
+    public void effectBackgroundDirection(EasingOld effect, int transition, float limit, boolean off) {
         runInBackgroundWithLock(() -> {
             float fromBrightness = getValue();
             float toBrightness = off ? 0 : limit;
@@ -172,20 +220,19 @@ public class PwmLed extends PwmOutputDevice {
         stopEasing();
         final int c = cylcle.incrementAndGet();
 
-        Logger.trace("c={} new background request", c);
+        log.trace("c={} new background request", c);
         easingFuture = Scheduler.getInstance().submit(() -> {
             try {
                 lock.lock();
 
                 runnable.run();
-                Logger.trace("c={} Background easing finished bright: {}", c, this.getValue());
+                log.trace("c={} Background easing finished bright: {}", c, this.getValue());
             } finally {
                 lock.unlock();
             }
         });
-        Logger.trace("c={} Background submited", c);
+        log.trace("c={} Background submited", c);
     }
-
 
     private void stopEasing() {
         runningEasing.getAndSet(false);
@@ -194,78 +241,68 @@ public class PwmLed extends PwmOutputDevice {
         }
     }
 
-    public void effect(Easing effect, int transition, float fromBrightness, float toBrightness) {
+    public void effect(EasingOld effect, int transition, float fromBrightness, float toBrightness) {
         if (fromBrightness == toBrightness) {
             return;
         }
-        Logger.debug(" effect: {}, length: {}s, from: {}s, to: {}", effect.name(), transition, fromBrightness, toBrightness);
-        //float fadeTime, int steps, int iterations, boolean background
-        float fadeTime = (float) transition;
-        int steps = 100;
-        float sleepTime = fadeTime / steps;
-        float delta = 1f / steps;
-        Logger.debug(" fadeTime={}, steps={}, sleep_time={}s, delta={}", fadeTime, steps, sleepTime, delta);
-        runningEasing.getAndSet(true);
-        Comparator<Float> floatComparator = fromBrightness > toBrightness ? new Lower() : new Greater();
-        float deltaValue = 0;
-        if (fromBrightness > 0 && fromBrightness < 1) {
-            if (effect.getRevert() != null) {
-                deltaValue = effect.getRevert().apply(fromBrightness);
-            } else {
-                deltaValue += delta;
-                float tmpB = 0;
-                while (tmpB < fromBrightness) {
-                    deltaValue += delta;
-                    tmpB = effect.getOperator().apply(deltaValue);
-                }
-            }
-        }
+        boolean increasing = toBrightness > fromBrightness;
 
+        log.debug(" effect: {}, length: {}s, from: {}%, to: {}%", effect.name(), transition, fromBrightness * 100, toBrightness * 100);
+        float fadeTime = (float) transition;
+        int steps = 200;
+        float sleepTime = fadeTime / steps;
+        float delta = Math.abs(fromBrightness - toBrightness) / steps;
+        log.debug(" fadeTime={}, steps={}, sleep_time={}s, delta={}", fadeTime, steps, sleepTime, delta);
+        runningEasing.getAndSet(true);
+
+        float deltaValue = calculateInitialDelta(effect, fromBrightness, delta);
+        int step = 0;
+        Comparator<Float> floatComparator = fromBrightness > toBrightness ? new Lower() : new Greater();
         try {
             float value = fromBrightness;
             int compare = floatComparator.compare(value, toBrightness);
             while (compare > 0 && runningEasing.get()) {
-                Logger.trace(" delta: {}, value: {}, comp:{}", deltaValue, value, compare);
+                step++;
+                log.trace(" delta: {}, value: {}, step:{}", deltaValue, value, step);
                 setValueInternal(value);
                 SleepUtil.sleepSeconds(sleepTime);
-                deltaValue += delta;
-                if (fromBrightness < toBrightness) {
-                    value = effect.getOperator().apply(deltaValue);
+                if (increasing) {
+                    deltaValue += delta;
                 } else {
-                    value = 1 - effect.getOperator().apply(deltaValue);
+                    deltaValue -= delta;
                 }
+                value = effect.getOperator().apply(deltaValue);
                 compare = floatComparator.compare(value, toBrightness);
             }
             if (runningEasing.get()) {
                 setValueInternal(toBrightness);
             }
             if (compare > 0) {
-                Logger.trace("interuped by runningEasing val:{} ", value);
+                log.trace("interuped by runningEasing val:{} ", value);
             }
             //setValueInternal(toBrightness);
             runningEasing.getAndSet(false);
         } catch (RuntimeInterruptedException e) {
             runningEasing.set(false);
-            Logger.trace(" interrupted by thread");
-            //Logger.error(e);
+            log.trace(" interrupted by thread");
+            //log.error(e);
         }
-
-
     }
+
 
     @Override
     public void close() {
-        Logger.trace("close()");
+        log.trace("close()");
         stopEasing();
         if (easingFuture != null) {
-            Logger.debug("Interrupting easing thread ");
+            log.debug("Interrupting easing thread ");
             easingFuture.cancel(true);
         }
 
         super.close();
     }
 
-    class Lower implements Comparator<Float> {
+    static class Lower implements Comparator<Float> {
 
         @Override
         public int compare(Float o1, Float o2) {
@@ -278,7 +315,7 @@ public class PwmLed extends PwmOutputDevice {
         }
     }
 
-    class Greater implements Comparator<Float> {
+    static class Greater implements Comparator<Float> {
 
         @Override
         public int compare(Float o1, Float o2) {

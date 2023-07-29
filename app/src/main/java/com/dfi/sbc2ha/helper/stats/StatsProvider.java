@@ -11,34 +11,45 @@ import oshi.hardware.HardwareAbstractionLayer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class StatsProvider implements Runnable {
-    private final Map<ScreenType, DataProvider<?>> providers = new HashMap<>();
+    private final Map<ScreenType, DataProvider> providers = new HashMap<>();
     private final StateManager stateManager;
     private final List<String> ids;
     protected HardwareAbstractionLayer hal;
+    private Future<?> process;
 
     public StatsProvider(StateManager stateManager, List<String> ids) {
         this.stateManager = stateManager;
         this.ids = ids;
-        Scheduler.getInstance().submit(this);
     }
 
-    public <T> void addListener(ScreenType screenType, Consumer<T> consumer) {
+    public void start() {
+        process = Scheduler.getInstance().submit(this);
+    }
+
+    public void stop() {
+        if (process != null) {
+            process.cancel(true);
+        }
+    }
+
+    public void addListener(ScreenType screenType, Consumer<List<?>> consumer) {
         while (!providers.containsKey(screenType)) {
             SleepUtil.sleepSeconds(1);
         }
-        DataProvider<T> dataProvider = (DataProvider<T>) providers.get(screenType);
+        DataProvider dataProvider = providers.get(screenType);
         dataProvider.addListener(consumer);
         dataProvider.schedule();
     }
 
     public void removeTypeListeners(ScreenType screenType) {
-        providers.get(screenType)
-                .stop()
-                .clearListeners();
+        DataProvider dataProvider = providers.get(screenType);
+        dataProvider.stop();
+        dataProvider.clearListeners();
     }
 
     public void clearListeners() {

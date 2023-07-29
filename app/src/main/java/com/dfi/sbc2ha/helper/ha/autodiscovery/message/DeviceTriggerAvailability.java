@@ -2,18 +2,19 @@ package com.dfi.sbc2ha.helper.ha.autodiscovery.message;
 
 import com.dfi.sbc2ha.helper.ha.autodiscovery.HaDeviceType;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
-import com.dfi.sbc2ha.sensor.binary.ButtonState;
+import com.dfi.sbc2ha.state.sensor.ButtonState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
-import java.util.Iterator;
 import java.util.List;
 
 @Getter
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class DeviceTriggerAvailability extends Availability implements Iterable<DeviceTriggerAvailability>, Iterator<DeviceTriggerAvailability> {
+@JsonIgnoreProperties({"uniqueId", "stateTopic", "name", "availability"})
+public class DeviceTriggerAvailability extends IterableAvailability {
 
     //<discovery_prefix>/device_automation/[<node_id>/]<object_id>/config
 
@@ -83,8 +84,6 @@ public class DeviceTriggerAvailability extends Availability implements Iterable<
     public DeviceTriggerAvailability(String id, String name, List<ButtonState> states) {
         super(id, name, HaDeviceType.DEVICE_AUTOMATION, SbcDeviceType.INPUT);
 
-        //<discovery_prefix>/device_automation/[<node_id>/]<object_id>/config
-        //    "topic": "zigbee2mqtt/0x90fd9ffffedf1266/action",
         this.topic = formatTopic(Availability.topicPrefix, getStateDeviceTypeName(), id);
 
 
@@ -96,6 +95,15 @@ public class DeviceTriggerAvailability extends Availability implements Iterable<
         setAvailability(null);
     }
 
+    @Override
+    public String getStateTopic() {
+        return topic;
+    }
+
+    @JsonIgnore
+    public String getName() {
+        return subtype;
+    }
 
     @Override
     public String getNodeName() {
@@ -104,7 +112,7 @@ public class DeviceTriggerAvailability extends Availability implements Iterable<
 
 
     @Override
-    public DeviceTriggerAvailability iterator() {
+    public IterableAvailability iterator() {
         payload = null;
         return this;
     }
@@ -123,7 +131,7 @@ public class DeviceTriggerAvailability extends Availability implements Iterable<
     }
 
     @Override
-    public DeviceTriggerAvailability next() {
+    public IterableAvailability next() {
         ButtonState state;
         if (payload == null) {
             state = states.get(0);

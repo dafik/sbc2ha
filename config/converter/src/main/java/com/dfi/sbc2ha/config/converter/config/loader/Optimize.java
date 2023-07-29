@@ -2,7 +2,7 @@ package com.dfi.sbc2ha.config.converter.config.loader;
 
 import com.dfi.sbc2ha.helper.JarHelper;
 import com.dfi.sbc2ha.helper.ProcessRunner;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-
+@Slf4j
 public class Optimize {
     public static boolean checkIncludes(String inputStream) {
         String text;
@@ -28,13 +28,13 @@ public class Optimize {
                 .collect(Collectors.joining("\n"));*/
         boolean contains = text.contains("!include");
         if (contains) {
-            Logger.info("config file contains !include");
+            log.info("config file contains !include");
         }
         return contains;
     }
 
     public static String convert(String configPath) {
-        Logger.info("trying convert");
+        log.info("trying convert");
         if (!checkPythonYaml()) {
             setupPytonYaml();
         }
@@ -44,7 +44,7 @@ public class Optimize {
     }
 
     private static String runPythonConversion(String configPath) {
-        Logger.info("call conversion");
+        log.info("call conversion");
         String pwd = System.getProperty("user.dir");
 
         String pytonDir = getPytonDir();
@@ -80,7 +80,7 @@ public class Optimize {
         builder.command(commands);
 
         ProcessRunner.runSystemCommand(builder, "Python conversion failed");
-        Logger.info("conversion done");
+        log.info("conversion done");
 
         getNewPath(configPath);
         return getNewPath(configPath);
@@ -105,7 +105,7 @@ public class Optimize {
     }
 
     private static void setupPytonYaml() {
-        Logger.info("python setup start");
+        log.info("python setup start");
         String pytonDir = getPytonDir();
         List<String> lines = List.of(
                 "export TMP_YAML=" + pytonDir,
@@ -121,7 +121,7 @@ public class Optimize {
         ProcessRunner.runSystemCommand(builder, "Setup pyton failed");
 
 
-        Logger.info("python setup done");
+        log.info("python setup done");
     }
 
     private static String getPytonDir() {

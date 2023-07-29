@@ -6,18 +6,20 @@ import com.dfi.sbc2ha.helper.MockHelper;
 import com.diozero.adapter.modbus.DiozeroSerialPortProvider;
 import com.diozero.api.DeviceInterface;
 import com.diozero.api.RuntimeIOException;
+import lombok.extern.slf4j.Slf4j;
 import net.solarnetwork.io.modbus.ModbusBlockType;
 import net.solarnetwork.io.modbus.ModbusClient;
 import net.solarnetwork.io.modbus.ModbusMessage;
+import net.solarnetwork.io.modbus.ModbusTimeoutException;
 import net.solarnetwork.io.modbus.netty.msg.RegistersModbusMessage;
 import net.solarnetwork.io.modbus.rtu.jsc.JscSerialPortProvider;
 import net.solarnetwork.io.modbus.rtu.netty.NettyRtuModbusClientConfig;
 import net.solarnetwork.io.modbus.rtu.netty.RtuNettyModbusClient;
 import net.solarnetwork.io.modbus.serial.BasicSerialParameters;
-import org.tinylog.Logger;
 
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 public class Modbus implements DeviceInterface {
 
     private final ModbusClient client;
@@ -45,8 +47,7 @@ public class Modbus implements DeviceInterface {
         config.setAutoReconnect(false);
 
         // create the client, passing in the JSC SerialPortProvider
-        final ModbusClient client = new RtuNettyModbusClient(config, new JscSerialPortProvider());
-        return client;
+        return new RtuNettyModbusClient(config, new JscSerialPortProvider());
     }
 
     public boolean isDeviceAvailable(int unitId, int address, ModbusRegisterType type) {
@@ -60,11 +61,13 @@ public class Modbus implements DeviceInterface {
             ModbusMessage response = client.send(request);
             RegistersModbusMessage responseMessage = response.unwrap(RegistersModbusMessage.class);
 
-            client.stop();
+            if (System.getProperty("useDiozeroSerial") != null) {
+                client.stop();
+            }
 
 
         } catch (ExecutionException | InterruptedException e) {
-            Logger.error(e);
+            log.error("device available check error", e);
             return false;
         }
         return true;
@@ -85,10 +88,13 @@ public class Modbus implements DeviceInterface {
             ModbusMessage response = client.send(request);
             RegistersModbusMessage responseMessage = response.unwrap(RegistersModbusMessage.class);
             short[] shorts = responseMessage.dataDecode();
-            client.stop();
+            if (System.getProperty("useDiozeroSerial") != null) {
+                client.stop();
+            }
             return shorts;
-        } catch (ExecutionException | InterruptedException e) {
-            Logger.error(e);
+        } catch (ExecutionException | InterruptedException | ModbusTimeoutException e) {
+            client.stop();
+            log.error("read many", e);
             return new short[]{0};
         }
     }

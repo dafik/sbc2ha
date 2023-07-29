@@ -9,16 +9,13 @@ import com.dfi.sbc2ha.manager.Manager;
 import com.diozero.api.RuntimeInterruptedException;
 import com.diozero.util.Diozero;
 import com.diozero.util.SleepUtil;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-
+@Slf4j
 public class App {
 
     public static final String DIOZERO_DEVICEFACTORY = "diozero.devicefactory";
@@ -29,10 +26,11 @@ public class App {
 
 
         long startTime = System.currentTimeMillis();
-        Logger.info("App starting {}", Version.VERSION);
+        log.info("App starting {}", Version.VERSION);
 
         try {
             configureDeviceFactory();
+            System.setProperty("useDiozeroSerial", "1");
 
             String configFile = getConfigFile(args);
             AppConfig appConfig = getAppConfig(startTime, configFile);
@@ -48,7 +46,7 @@ public class App {
 
         long millis = System.currentTimeMillis() - startTime;
         String took = String.format("%d sec", TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
-        Logger.info("App started in {}", took);
+        log.info("App started in {}", took);
 
         runLoop();
     }
@@ -63,9 +61,8 @@ public class App {
     private static void runLoop() {
         while (true) {
             try {
-                SleepUtil.sleepSeconds(1);
+                SleepUtil.sleepSeconds(100);
             } catch (RuntimeInterruptedException e) {
-                Logger.error(e);
                 System.exit(0);
             }
 
@@ -77,10 +74,10 @@ public class App {
             AppConfig appConfig = ConfigHelper.loadConfig(configFile);
             long millis = System.currentTimeMillis() - startTime;
             String took = String.format("%d sec", TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
-            Logger.info("config loaded in {}", took);
+            log.info("config loaded in {}", took);
             return appConfig;
         } catch (URISyntaxException | IOException | RuntimeException e) {
-            Logger.error("load config failed {}", e.getMessage());
+            log.error("load config failed {}", e.getMessage());
             System.exit(1);
             throw new MissingConfigException(e);
         }
@@ -93,42 +90,23 @@ public class App {
         throw new MissingConfigException("no config file provided as first argument");
     }
 
+    public static void configureLogging(LoggerConfig logger) {
 
-    private static void configureLogging(LoggerConfig config) {
-        if (config == null) {
-            return;
-        }
-
-        // Here, the original entries of `tinylog.properties` are overwritten via system properties. However, you can
-        // also manipulate your `tinylog.properties` file directly, if it is in a writable location and not part of the
-        // classpath.
-
-        List<String> skip = new ArrayList<>();
-
-        Map<String, String> originalConfig = ReconfigurableLoggingProvider.getOriginalConfig();
-
-        System.setProperty("tinylog.level", config.getDefaultLevel().toString().toLowerCase());
-        config.getLogs().forEach((pkg, level) -> {
-            if (!pkg.contains("boneio")) {
-                System.setProperty(pkg, level.toLowerCase());
-            } else {
-                skip.add(pkg + "=" + level);
-            }
+        System.setProperty("tinylog.level", logger.getDefaultLevel().toString());
+        logger.getLogs().forEach((pkg, level) -> {
+            System.setProperty("tinylog.level@" + pkg, level);
+        });
+        logger.getWriter().forEach((pkg, level) -> {
+            System.setProperty("tinylog.writerConsole." + pkg, level);
         });
 
-        Map<String, String> reload;
         try {
-            reload = ReconfigurableLoggingProvider.reload();
-        } catch (InterruptedException | ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-        if (!originalConfig.equals(reload)) {
-            Logger.warn("Original: {}", originalConfig);
-            Logger.warn("New: {}", reload);
-            Logger.warn("Skipped: {}", skip);
+            ReconfigurableLoggingProvider.reload();
+        } catch (InterruptedException e) {
+            log.info("on interrupt");
+        } catch (ReflectiveOperationException e) {
+            log.error("configure loging failed interrupt",e);
         }
     }
-
-
 }
 

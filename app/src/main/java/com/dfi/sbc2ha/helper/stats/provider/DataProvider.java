@@ -9,8 +9,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public abstract class DataProvider<C> implements Runnable {
-    protected final List<Consumer<C>> listeners = new ArrayList<>();
+public abstract class DataProvider implements Runnable {
+    protected final List<Consumer<List<?>>> listeners = new ArrayList<>();
     protected final HardwareAbstractionLayer hal;
     private final long initialDelay;
     private final long period;
@@ -26,41 +26,38 @@ public abstract class DataProvider<C> implements Runnable {
 
     }
 
-    public void addListener(Consumer<C> consumer) {
+    public void addListener(Consumer<List<?>> consumer) {
         synchronized (listeners) {
             listeners.add(consumer);
         }
         schedule();
     }
 
-    public DataProvider<C> clearListeners() {
+    public void clearListeners() {
         stop();
         synchronized (listeners) {
             listeners.clear();
         }
-
-        return this;
     }
 
-    public DataProvider<C> schedule() {
+    public void schedule() {
         stop();
         scheduledFuture = Scheduler.getInstance().scheduleAtFixedRate(this, initialDelay, period, unit);
-        return this;
+
     }
 
-    public DataProvider<C> stop() {
+    public void stop() {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
         }
-        return this;
     }
 
     protected void onChange() {
-        C lines = getLines();
+        List<?> lines = getLines();
         listeners.forEach(c -> c.accept(lines));
     }
 
 
-    public abstract C getLines();
+    public abstract List<?> getLines();
 }
 

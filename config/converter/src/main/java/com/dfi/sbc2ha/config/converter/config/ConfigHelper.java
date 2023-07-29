@@ -5,7 +5,6 @@ import com.dfi.sbc2ha.config.boneio.definition.BoneIoConfig;
 import com.dfi.sbc2ha.config.converter.config.loader.ConfigLoaderJackson;
 import com.dfi.sbc2ha.helper.JarHelper;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.EnumFeature;
@@ -15,7 +14,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,14 +24,14 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 public class ConfigHelper {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static Map<String, FileStat> statMap;
 
     public static BoneIoConfig loadConfig(String configLocation) throws IOException, URISyntaxException {
 
-        Logger.info("Loading config");
+        log.info("Loading config");
 
         File configFile = resolveFile(configLocation);
         configLocation = configFile.getPath();
@@ -56,7 +55,7 @@ public class ConfigHelper {
         File originalFile = new File(originalLocation).getAbsoluteFile();
 
         String cacheFileName = getCacheFileName(originalFile);
-        Logger.info("save in cache file: {}", cacheFileName);
+        log.info("save in cache file: {}", cacheFileName);
 
         File cacheFile = new File(cacheFileName);
         try {
@@ -83,7 +82,7 @@ public class ConfigHelper {
         File originalFile = new File(originalLocation).getAbsoluteFile();
 
         String cacheFileName = getCacheFileNameYaml(originalFile, fileSuffix);
-        Logger.info("save yaml config: {}", cacheFileName);
+        log.info("save yaml config: {}", cacheFileName);
 
         File cacheFile = new File(cacheFileName);
         try {
@@ -198,7 +197,7 @@ public class ConfigHelper {
     private static BoneIoConfig loadFromCache(File configFile) throws IOException {
         String cacheFileName = getStats().get(configFile.getPath()).cachedFileName;
 
-        Logger.info("Loading from cache file {}", cacheFileName);
+        log.info("Loading from cache file {}", cacheFileName);
         mapper.registerModule(new JavaTimeModule());
         return mapper.readValue(new FileInputStream(cacheFileName), BoneIoConfig.class);
     }

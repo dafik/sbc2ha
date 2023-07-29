@@ -1,5 +1,8 @@
 package com.dfi.sbc2ha.sensor.binary;
 
+import com.dfi.sbc2ha.event.StateEvent;
+import com.dfi.sbc2ha.event.sensor.BinaryEvent;
+import com.dfi.sbc2ha.sensor.BinarySensor;
 import com.diozero.api.DigitalInputDevice;
 import com.diozero.api.PinInfo;
 import lombok.Setter;
@@ -7,11 +10,11 @@ import lombok.Setter;
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
-import static com.dfi.sbc2ha.sensor.binary.BinaryState.PRESSED;
-import static com.dfi.sbc2ha.sensor.binary.BinaryState.RELEASED;
+import static com.dfi.sbc2ha.state.sensor.BinaryState.PRESSED;
+import static com.dfi.sbc2ha.state.sensor.BinaryState.RELEASED;
 
 @Setter
-public class Binary extends BinarySensor<BinaryEvent, BinaryState> {
+public class Binary extends BinarySensor {
 
     public Binary(DigitalInputDevice delegate, String name, boolean inverted) {
         super(delegate, name, inverted);
@@ -32,7 +35,7 @@ public class Binary extends BinarySensor<BinaryEvent, BinaryState> {
     }
 
     private void handlePressed(long e) {
-        BinaryEvent event = new BinaryEvent(PRESSED);
+        StateEvent event = new BinaryEvent(PRESSED);
         listeners.get(PRESSED).forEach(listener -> listener.accept(event));
         handleAny(event);
     }
@@ -43,12 +46,20 @@ public class Binary extends BinarySensor<BinaryEvent, BinaryState> {
         handleAny(event);
     }
 
-    public void whenPressed(Consumer<BinaryEvent> consumer) {
+    public void whenPressed(Consumer<StateEvent> consumer) {
         addListener(consumer, PRESSED);
     }
 
-    public void whenReleased(Consumer<BinaryEvent> consumer) {
+    public void whenReleased(Consumer<StateEvent> consumer) {
         addListener(consumer, RELEASED);
+    }
+
+    public StateEvent getInitialState() {
+        if (inverted) {
+            return new BinaryEvent(delegate.getValue() ? PRESSED : RELEASED);
+        } else {
+            return new BinaryEvent(delegate.getValue() ? RELEASED : PRESSED);
+        }
     }
 
     @Setter

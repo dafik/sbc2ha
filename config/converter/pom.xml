@@ -21,7 +21,7 @@
         </dependency>
         <dependency>
             <groupId>com.dfi.sbc2ha.config</groupId>
-            <artifactId>config-sbc2ha-new</artifactId>
+            <artifactId>config-sbc2ha</artifactId>
             <version>0.0.1</version>
             <scope>compile</scope>
         </dependency>
@@ -30,6 +30,11 @@
             <artifactId>helper</artifactId>
             <version>0.0.1</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.82</version>
         </dependency>
     </dependencies>
 

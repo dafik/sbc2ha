@@ -10,7 +10,9 @@ import lombok.EqualsAndHashCode;
 @Data
 public class OutputActionConfig extends ActionConfig {
 
-    String pin;
+    @JsonProperty("output")
+    int output;
+
     @JsonProperty("action_output")
     ActionOutputType actionOutput;
 

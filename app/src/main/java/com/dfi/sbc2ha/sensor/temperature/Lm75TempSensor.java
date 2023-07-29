@@ -1,6 +1,7 @@
 package com.dfi.sbc2ha.sensor.temperature;
 
 import com.dfi.sbc2ha.config.sbc2ha.definition.filters.ValueFilterType;
+import com.dfi.sbc2ha.sensor.TempSensor;
 import com.diozero.api.I2CDevice;
 import com.diozero.devices.LM75;
 

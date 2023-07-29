@@ -8,12 +8,13 @@ import com.diozero.api.RuntimeIOException;
 import com.diozero.devices.oneWire.OneWireGenericSensor;
 import com.diozero.devices.oneWire.OneWireSensor;
 import com.diozero.devices.oneWire.OneWireThermSensor;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class DS2482BusImpl implements DS2482Bus {
 
     private final DiozeroDS2482Adapter adapter;
@@ -21,7 +22,7 @@ public class DS2482BusImpl implements DS2482Bus {
 
     public DS2482BusImpl(DiozeroDS2482Adapter adapter) {
         this.adapter = adapter;
-        Logger.debug("1-wire adapter " + adapter.toString() + " created");
+        log.debug("1-wire adapter " + adapter.toString() + " created");
     }
 
     public OneWireContainer getContainer(long address) {
@@ -96,7 +97,7 @@ public class DS2482BusImpl implements DS2482Bus {
 
             devices.add(container);
 
-            Logger.info("found 1-Wire {} name: {}", container.getAddressAsString(), container.getName() + " device");
+            log.info("found 1-Wire {} name: {}", container.getAddressAsString(), container.getName() + " device");
 
             firstDevice = adapter.findNextDevice();
         }

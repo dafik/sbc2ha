@@ -2,11 +2,10 @@ package com.dfi.sbc2ha.helper.ha.autodiscovery.message;
 
 import com.dfi.sbc2ha.helper.ha.autodiscovery.HaDeviceType;
 import com.dfi.sbc2ha.helper.ha.autodiscovery.SbcDeviceType;
-import com.dfi.sbc2ha.sensor.binary.BinaryState;
+import com.dfi.sbc2ha.state.sensor.BinaryState;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 
 public class BinarySensorAvailability extends Availability {
 
@@ -17,8 +16,6 @@ public class BinarySensorAvailability extends Availability {
     String payload_on = BinaryState.PRESSED.name().toLowerCase();
     @JsonProperty("payload_off")
     String payload_off = BinaryState.RELEASED.name().toLowerCase();
-    @JsonProperty("state_topic")
-    String state_topic;
 
     public BinarySensorAvailability(String id, String name) {
         super(id, name, HaDeviceType.BINARY_SENSOR, SbcDeviceType.INPUTSENSOR);

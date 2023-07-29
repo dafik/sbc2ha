@@ -1,33 +1,42 @@
 package com.dfi.sbc2ha.actuator;
 
 
-import com.dfi.sbc2ha.Easing;
+import com.dfi.sbc2ha.EasingOld;
+import com.dfi.sbc2ha.event.StateEvent;
+import com.dfi.sbc2ha.event.actuator.LedEvent;
+import com.dfi.sbc2ha.event.sensor.ScalarEvent;
 import com.dfi.sbc2ha.helper.ha.command.LightCommand;
+import com.dfi.sbc2ha.state.actuator.ActuatorState;
 import com.diozero.api.PinInfo;
+import com.diozero.api.RuntimeIOException;
 import com.diozero.api.function.FloatConsumer;
 import com.diozero.devices.PwmLed;
-import com.diozero.internal.spi.NativeDeviceFactoryInterface;
+import com.diozero.internal.spi.PwmOutputDeviceFactoryInterface;
 import com.diozero.sbc.DeviceFactoryHelper;
 import lombok.Setter;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
-import static com.dfi.sbc2ha.actuator.ActuatorState.OFF;
-import static com.dfi.sbc2ha.actuator.ActuatorState.ON;
+import static com.dfi.sbc2ha.state.actuator.ActuatorState.OFF;
+import static com.dfi.sbc2ha.state.actuator.ActuatorState.ON;
 
+@Slf4j
 @Setter
-public class Led extends Actuator<PwmLed, LedEvent, ActuatorState> implements FloatConsumer {
+public class Led extends Actuator implements FloatConsumer {
 
+    protected final PwmLed delegate;
     private float lastBrightness = 0;
     private float limitBrightness;
     private String lastEasing;
 
     private ActuatorState state;
+    private int percentageDefaultBrightness;
 
-    public Led(PwmLed delegate, String name, float initialValue) {
-        super(delegate, name);
+    public Led(PwmLed delegate, String name, int id, float initialValue) {
+        super(name, id);
+        this.delegate = delegate;
 
         limitBrightness = initialValue == 0 ? 1 : initialValue;
         setState(initialValue > 0);
@@ -38,68 +47,64 @@ public class Led extends Actuator<PwmLed, LedEvent, ActuatorState> implements Fl
         delegate.whenChange(this);
     }
 
+
+    private void setPercentageDefaultBrightness(int percentageDefaultBrightness) {
+        this.percentageDefaultBrightness = percentageDefaultBrightness;
+    }
+
     private void setState(boolean state) {
         this.state = state ? ON : OFF;
     }
 
     private void handleTurnOn(long e) {
-        LedEvent evt = new LedEvent();
-        evt.setEventTime(e);
-        evt.setState(state);
+        LedEvent evt = new LedEvent(state);
         listeners.get(ON).forEach(listener -> listener.accept(evt));
 
         handleChangeBrightness(e, lastBrightness);
-/*
-        LedEvent change = LedEvent.CHANGE;
-        change.setValue(lastBrightness);
-        handleAny(e, change);
-        //handleBrightness(e,change);*/
+
     }
 
     private void handleTurnOff(long e) {
-        LedEvent evt = new LedEvent();
-        evt.setEventTime(e);
-        evt.setState(state);
+        LedEvent evt = new LedEvent(state);
         listeners.get(OFF).forEach(listener -> listener.accept(evt));
 
         handleChangeBrightness(e, lastBrightness);
 
-        /*LedEvent change = LedEvent.CHANGE;
-        change.setValue(lastBrightness);
-        handleAny(e, change);*/
     }
 
     private void handleChangeBrightness(long e, float value) {
-        LedEvent evt = new LedEvent(e, value, state);
+        LedEvent evt = new LedEvent(state, value);
+
         listeners.get(state).forEach(listener -> listener.accept(evt));
         handleAny(evt);
     }
 
 
-    public void whenTurnOn(Consumer<LedEvent> consumer) {
+    public void whenTurnOn(Consumer<StateEvent> consumer) {
         addListener(consumer, ON);
     }
 
-    public void whenTurnOff(Consumer<LedEvent> consumer) {
+    public void whenTurnOff(Consumer<StateEvent> consumer) {
         addListener(consumer, OFF);
     }
 
     public void turnOn(LightCommand cmd) {
-        Logger.debug("turn On {} state: {}", name, state);
+
+        log.info("turnOn  id:{},{} state: {}", id, name, state);
         setState(true);
         if (cmd.getTransition() > 0) {
-            Logger.debug("turn On {} bright: {}", name, limitBrightness, cmd.getTransition(), cmd.getEffect());
-            delegate.effectBackgroundDirection(cmd.getEffect(), cmd.getTransition(),
+            log.debug("turnOn {} bright: {} trans:{}, effect:{}", name, limitBrightness, cmd.getTransition(), cmd.getEffect());
+            delegate.effectBackgroundDirection(EasingOld.valueOf(cmd.getEffect().toUpperCase()), cmd.getTransition(),
                     limitBrightness, false
             );
         } else if (cmd.getEffect() != null && cmd.getTransition() == 0) {
-            Logger.debug("turn On {} bright: {}", name, limitBrightness, 5, cmd.getEffect());
-            delegate.effectBackgroundDirection(cmd.getEffect(), 5,
+            log.debug("turnOn {} bright: {} trans:{}, effect:{}", name, limitBrightness, 5, cmd.getEffect());
+            delegate.effectBackgroundDirection(EasingOld.valueOf(cmd.getEffect().toUpperCase()), 5,
                     limitBrightness, false
             );
-            lastEasing = cmd.getEffect().name();
+            lastEasing = cmd.getEffect();
         } else {
-            Logger.debug("turn On {} bright: {}", name, limitBrightness);
+            log.debug("turnOn {} bright: {}", name, limitBrightness);
             lastEasing = null;
             delegate.setValue(limitBrightness);
         }
@@ -107,29 +112,29 @@ public class Led extends Actuator<PwmLed, LedEvent, ActuatorState> implements Fl
     }
 
     public void turnOff(LightCommand cmd) {
-        Logger.debug("turn Off {} state: {}", name, state);
+        log.info("turnOff id:{},{} state: {}", id, name, state);
         setState(false);
         if (cmd.getTransition() > 0) {
             if (cmd.getEffect() == null) {
-                cmd.setEffect(Easing.linerIn);
+                cmd.setEffect(EasingOld.linerIn.name());
             }
             if (lastEasing == null) {
-                lastEasing = cmd.getEffect().name();
+                lastEasing = cmd.getEffect();
             }
-            Easing easing = Easing.valueOf(lastEasing);
-            Logger.debug("turn Off {} bright: {}", name, limitBrightness, cmd.getTransition(), cmd.getEffect());
-            delegate.effectBackgroundDirection(easing, cmd.getTransition(),
+            EasingOld easingOld = EasingOld.valueOf(lastEasing);
+            log.debug("turn Off {} bright: {} trans:{}, effect:{}", name, limitBrightness, cmd.getTransition(), cmd.getEffect());
+            delegate.effectBackgroundDirection(easingOld, cmd.getTransition(),
                     limitBrightness, true
             );
         } else if (lastEasing != null) {
-            Easing easing = Easing.valueOf(lastEasing.replace("In", "Out"));
-            Logger.debug("turn Off {} bright: {}", name, limitBrightness, 5, cmd.getEffect());
-            delegate.effectBackgroundDirection(easing, 5,
+            EasingOld easingOld = EasingOld.valueOf(lastEasing.replace("In", "Out"));
+            log.debug("turn Off {} bright: {} trans:{}, effect:{}", name, limitBrightness, 5, cmd.getEffect());
+            delegate.effectBackgroundDirection(easingOld, 5,
                     limitBrightness, true
             );
             lastEasing = null;
         } else {
-            Logger.debug("turn Off {} bright: {}", name, limitBrightness);
+            log.debug("turn Off {} bright: {}", name, limitBrightness);
             delegate.off();
         }
     }
@@ -143,7 +148,7 @@ public class Led extends Actuator<PwmLed, LedEvent, ActuatorState> implements Fl
     }
 
     public void setBrightness(float value) {
-        Logger.debug("set brightness {}% {}", (int) (value * 100), name);
+        log.debug("set brightness {}% {}", (int) (value * 100), name);
         setState(value > 0);
         limitBrightness = value;
         delegate.setValue(value);
@@ -155,14 +160,21 @@ public class Led extends Actuator<PwmLed, LedEvent, ActuatorState> implements Fl
         handleChangeBrightness(System.currentTimeMillis(), value);
     }
 
+    @Override
+    public void close() throws RuntimeIOException {
+        delegate.close();
+        super.close();
+    }
 
     @Setter
     public static class Builder extends Actuator.Builder<Builder, PwmLed> {
 
-        private static final int DEFAULT_FREQUENCY = 100;
 
-        private NativeDeviceFactoryInterface nativeDeviceFactory = DeviceFactoryHelper.getNativeDeviceFactory();
+        private static final int DEFAULT_FREQUENCY = 100;
         private int pwmFrequency = DEFAULT_FREQUENCY;
+        private PwmOutputDeviceFactoryInterface pwmDeviceFactory = DeviceFactoryHelper.getNativeDeviceFactory();
+
+        private int percentageDefaultBrightness;
 
         public Builder(int gpio) {
             super(gpio);
@@ -189,7 +201,11 @@ public class Led extends Actuator<PwmLed, LedEvent, ActuatorState> implements Fl
             if (delegate == null) {
                 setupDelegate();
             }
-            return new Led(delegate, name, initialValue.floatValue());
+            Led led = new Led(delegate, name, id, initialState == null ? 0 : ((ScalarEvent) initialState).getValue());
+            led.setMomentaryTurnOff(momentaryTurnOff);
+            led.setMomentaryTurnOn(momentaryTurnOn);
+            led.setPercentageDefaultBrightness(percentageDefaultBrightness);
+            return led;
         }
 
         public Builder setPwmFrequency(int pwmFrequency) {
@@ -197,20 +213,30 @@ public class Led extends Actuator<PwmLed, LedEvent, ActuatorState> implements Fl
             return self();
         }
 
-        public Builder setDeviceFactory(NativeDeviceFactoryInterface deviceFactory) {
-            nativeDeviceFactory = deviceFactory;
-            return self();
-        }
-
         protected Builder setupDelegate() {
             if (pinInfo == null) {
-                pinInfo = nativeDeviceFactory.getBoardPinInfo().getByGpioNumberOrThrow(gpio);
+                pinInfo = pwmDeviceFactory.getBoardPinInfo().getByGpioNumberOrThrow(gpio);
             }
-            PwmLed pwmLed = new PwmLed(nativeDeviceFactory, pinInfo.getDeviceNumber(), pwmFrequency, initialValue.floatValue());
-
-
-            delegate = pwmLed;
+            delegate = new PwmLed(pwmDeviceFactory, pinInfo.getDeviceNumber(), pwmFrequency, getInitialValue());
             return self();
         }
+
+        public Builder setPwmDeviceFactory(PwmOutputDeviceFactoryInterface deviceFactory) {
+            pwmDeviceFactory = deviceFactory;
+            return self();
+        }
+
+        public Builder setPercentageDefaultBrightness(int percentageDefaultBrightness) {
+            this.percentageDefaultBrightness = percentageDefaultBrightness;
+            return self();
+        }
+
+        private float getInitialValue() {
+            if (initialState == null) {
+                return 0;
+            }
+            return ((ScalarEvent) initialState).getValue();
+        }
+
     }
 }

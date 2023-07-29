@@ -1,66 +1,81 @@
 package com.dfi.sbc2ha.actuator;
 
+import com.dfi.sbc2ha.event.StateEvent;
+import com.dfi.sbc2ha.event.actuator.RelayEvent;
 import com.diozero.api.DigitalOutputDevice;
 import com.diozero.api.PinInfo;
+import com.diozero.api.RuntimeIOException;
 import com.diozero.sbc.DeviceFactoryHelper;
 import lombok.Setter;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
-import static com.dfi.sbc2ha.actuator.ActuatorState.OFF;
-import static com.dfi.sbc2ha.actuator.ActuatorState.ON;
+import static com.dfi.sbc2ha.state.actuator.ActuatorState.OFF;
+import static com.dfi.sbc2ha.state.actuator.ActuatorState.ON;
 
+@Slf4j
 @Setter
-public class Relay extends Actuator<DigitalOutputDevice, RelayEvent, ActuatorState> {
+public class Relay extends Actuator {
 
-    public Relay(DigitalOutputDevice delegate, String name) {
-        super(delegate, name);
+    protected final DigitalOutputDevice delegate;
 
+    public Relay(DigitalOutputDevice delegate, String name, int id) {
+        super(name, id);
+        this.delegate = delegate;
         listeners.put(ON, new LinkedHashSet<>());
         listeners.put(OFF, new LinkedHashSet<>());
     }
 
     private void handleTurnOn(long e) {
-        RelayEvent evt = RelayEvent.ofOn(e);
+        RelayEvent evt = new RelayEvent(ON);
         listeners.get(ON).forEach(listener -> listener.accept(evt));
         handleAny(evt);
     }
 
     private void handleTurnOff(long e) {
-        RelayEvent evt = RelayEvent.ofOff(e);
+        RelayEvent evt = new RelayEvent(OFF);
         listeners.get(OFF).forEach(listener -> listener.accept(evt));
         handleAny(evt);
     }
 
-    public void whenTurnOn(Consumer<RelayEvent> consumer) {
+    public void whenTurnOn(Consumer<StateEvent> consumer) {
         addListener(consumer, ON);
     }
 
-    public void whenTurnOff(Consumer<RelayEvent> consumer) {
+    public void whenTurnOff(Consumer<StateEvent> consumer) {
         addListener(consumer, OFF);
     }
 
     public void turnOn() {
-        Logger.debug("turnOn on: {}", name);
+        log.info("turnOn id:{},{}", id, name);
         delegate.on();
+        handleMomentaryTurnOn(this::turnOff);
         handleTurnOn(System.currentTimeMillis());
     }
 
+
     public void turnOff() {
-        Logger.debug("turnOff on: {}", name);
+        log.info("turnOff id:{},{}", id, name);
         delegate.off();
+        handleMomentaryTurnOff(this::turnOn);
         handleTurnOff(System.currentTimeMillis());
     }
 
     public void toggle() {
-        Logger.debug("toggle on: {}", name);
+        log.debug("toggle id:{},{}", id, name);
         if (delegate.isOn()) {
             turnOff();
         } else {
             turnOn();
         }
+    }
+
+    @Override
+    public void close() throws RuntimeIOException {
+        delegate.close();
+        super.close();
     }
 
     @Setter
@@ -92,7 +107,10 @@ public class Relay extends Actuator<DigitalOutputDevice, RelayEvent, ActuatorSta
             if (delegate == null) {
                 setupDelegate();
             }
-            return new Relay(delegate, name);
+            Relay relay = new Relay(delegate, name, id);
+            relay.setMomentaryTurnOff(momentaryTurnOff);
+            relay.setMomentaryTurnOn(momentaryTurnOn);
+            return relay;
         }
 
         protected Builder setupDelegate() {
@@ -107,10 +125,17 @@ public class Relay extends Actuator<DigitalOutputDevice, RelayEvent, ActuatorSta
                     .builder(pinInfo)
                     .setDeviceFactory(deviceFactory)
                     .setActiveHigh(activeHigh)
-                    .setInitialValue((int) initialValue > 0);
+                    .setInitialValue(getInitialValue());
 
             delegate = builder.build();
             return self();
         }
+        private boolean getInitialValue(){
+            if(initialState == null){
+                return false;
+            }
+            return ((RelayEvent) initialState).toBoolean();
+        }
     }
 }
+

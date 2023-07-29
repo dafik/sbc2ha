@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.helper.stats.provider;
 
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.util.FormatUtil;
@@ -8,7 +8,8 @@ import oshi.util.FormatUtil;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class MemoryDataProvider extends DataProvider<List<String>> {
+@Slf4j
+public class MemoryDataProvider extends DataProvider {
     private GlobalMemory memory;
     private String total = "-1";
     private String avail = "-1";
@@ -30,7 +31,7 @@ public class MemoryDataProvider extends DataProvider<List<String>> {
             inUse = FormatUtil.formatBytes(memory.getTotal() - memory.getAvailable());
 
         } catch (Exception e) {
-            Logger.error(e);
+            log.error(e.getMessage(),e);
         }
         onChange();
     }

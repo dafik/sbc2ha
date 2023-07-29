@@ -32,7 +32,7 @@ package com.diozero.devices.oled;
  */
 
 import com.diozero.api.DeviceInterface;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -92,6 +92,7 @@ import java.util.Arrays;
  * <li><a href="https://community.oracle.com/docs/DOC-982272">Java ME / JDK Device IO implementation</a></li>
  * </ul>
  */
+@Slf4j
 @SuppressWarnings("unused")
 public class SH1106 implements DeviceInterface {
     public static final int WIDTH = 128;
@@ -384,7 +385,7 @@ public class SH1106 implements DeviceInterface {
 
     @Override
     public void close() {
-        Logger.trace("close()");
+        log.trace("close()");
         clear();
         setDisplayOn(false);
         device.close();
