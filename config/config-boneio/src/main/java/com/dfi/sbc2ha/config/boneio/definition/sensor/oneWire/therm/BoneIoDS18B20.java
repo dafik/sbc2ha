@@ -1,7 +1,6 @@
 package com.dfi.sbc2ha.config.boneio.definition.sensor.oneWire.therm;
 
 
-import com.dfi.sbc2ha.config.boneio.definition.enums.PlatformType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

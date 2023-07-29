@@ -27,7 +27,6 @@
 package com.dalsemi.onewire.container;
 
 import com.dalsemi.onewire.OneWireException;
-import com.dalsemi.onewire.adapter.OneWireIOException;
 
 /**
  * <p>Interface class for 1-Wire&reg; devices that perform analog measuring

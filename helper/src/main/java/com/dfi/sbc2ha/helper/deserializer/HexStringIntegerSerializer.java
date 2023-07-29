@@ -3,7 +3,6 @@ package com.dfi.sbc2ha.helper.deserializer;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.std.NumberDeserializers;
 
 import java.io.IOException;
 import java.math.BigInteger;

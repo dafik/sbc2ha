@@ -27,7 +27,6 @@
 package com.dalsemi.onewire.container;
 
 import com.dalsemi.onewire.OneWireException;
-import com.dalsemi.onewire.adapter.OneWireIOException;
 
 /**
  * Public interface for all devices which implement some form of

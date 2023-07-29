@@ -140,3 +140,6 @@ build/
 /config/config-typescript/config.json
 /config/config-typescript/package.json
 /config/config-typescript/sbc2ha.zip
+/config/config-typescript/out/Duration.ts
+/config/config-typescript/out/platform/HaDiscoveryConfig.ts
+/config/config-typescript/out/extentsionBoard/ExtensionBoardsDef.ts

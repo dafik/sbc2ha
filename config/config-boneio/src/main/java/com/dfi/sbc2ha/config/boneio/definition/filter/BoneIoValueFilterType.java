@@ -54,6 +54,6 @@ public enum BoneIoValueFilterType {
      * <p>
      * }
      */
-    FILTER_OUT_LOWER;
+    FILTER_OUT_LOWER
 }
 

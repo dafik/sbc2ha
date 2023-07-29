@@ -12,7 +12,7 @@ public interface OneWireDevice {
 
     void close();
 
-    public static enum Type {
+    enum Type {
         DS18S20(0x10), DS1822(0x22), DS18B20(0x28), DS1825(0x3B), DS28EA00(0x42), MAX31850K(0x3B),
         GENERIC(0x00);
 
@@ -20,7 +20,7 @@ public interface OneWireDevice {
 
         private int id;
 
-        private Type(int id) {
+        Type(int id) {
             this.id = id;
 
             addType();

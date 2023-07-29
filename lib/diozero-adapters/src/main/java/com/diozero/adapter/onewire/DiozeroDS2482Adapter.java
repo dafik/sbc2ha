@@ -492,7 +492,6 @@ public class DiozeroDS2482Adapter extends com.dalsemi.onewire.adapter.DSPortAdap
         int poll_count = 0;
         byte received = 0;
         direction = search_direction > 0 ? (byte) 0xFF : 0x0;
-        @SuppressWarnings("LocalVariableHidesMemberVariable")
         byte[] temp = {DS2482_1WireTripletCmd, direction};
         I2CwriteBlock(temp);
 
