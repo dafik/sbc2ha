@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.dfi.sbc2ha</groupId>
         <artifactId>lib</artifactId>
-        <version>0.0.1</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>diozero-adapters</artifactId>
