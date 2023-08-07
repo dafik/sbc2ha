@@ -1,0 +1,24 @@
+1  | P8 37
+2  | P8 38
+9  | P8 45
+10 | P8 46
+19 | P9 22
+20 | P9 21
+
+
+
+
+P8,31,gpio_pu
+P8,32,gpio_pu
+P8,33,gpio_pu
+P8,34,gpio_pu
+P8,35,gpio_pu
+P8,36,gpio_pu
+P8,37,gpio_pu
+P8,38,gpio_pu
+P8,45,gpio_pu
+P8,46,gpio_pu
+P9,11,gpio_pu
+P9,12,gpio_pu
+P9,21,gpio_pu
+P9,22,gpio_pu
