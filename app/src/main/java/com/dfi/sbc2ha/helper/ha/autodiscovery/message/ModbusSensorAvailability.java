@@ -39,7 +39,7 @@ public class ModbusSensorAvailability extends IterableAvailability {
         this.def = def;
 
         DeviceAvailability deviceAvailability = getDevice();
-        deviceAvailability.setName("boneIO " + sensorConfig.getName().toUpperCase());
+        deviceAvailability.setName(sensorConfig.getName().toUpperCase());
         deviceAvailability.setModel(sensorConfig.getModel().toUpperCase());
         deviceAvailability.setIdentifiers(List.of(deviceId));
 

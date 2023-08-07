@@ -24,31 +24,36 @@ public class App {
 
     public static void main(String[] args) {
 
-
-        long startTime = System.currentTimeMillis();
-        log.info("App starting {}", Version.VERSION);
-
         try {
-            configureDeviceFactory();
-            System.setProperty("useDiozeroSerial", "1");
 
-            String configFile = getConfigFile(args);
-            AppConfig appConfig = getAppConfig(startTime, configFile);
 
-            configureLogging(appConfig.getLogger());
+            long startTime = System.currentTimeMillis();
+            log.info("App starting {}", Version.VERSION);
 
-            Manager manager = new Manager(appConfig);
-            Diozero.registerForShutdown(manager);
+            try {
+                configureDeviceFactory();
 
-        } catch (MissingConfigException e) {
-            throw new RuntimeException(e);
+                String configFile = getConfigFile(args);
+                AppConfig appConfig = getAppConfig(startTime, configFile);
+
+                configureLogging(appConfig.getLogger());
+
+                Manager manager = new Manager(appConfig);
+                Diozero.registerForShutdown(manager);
+
+            } catch (MissingConfigException e) {
+                throw new RuntimeException(e);
+            }
+
+            long millis = System.currentTimeMillis() - startTime;
+            String took = String.format("%d sec", TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+            log.info("App started in {}", took);
+
+            runLoop();
+        }catch (Exception e){
+           log.error("main exit",e);
+           System.exit(0);
         }
-
-        long millis = System.currentTimeMillis() - startTime;
-        String took = String.format("%d sec", TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
-        log.info("App started in {}", took);
-
-        runLoop();
     }
 
     private static void configureDeviceFactory() {
@@ -63,9 +68,9 @@ public class App {
             try {
                 SleepUtil.sleepSeconds(100);
             } catch (RuntimeInterruptedException e) {
+                log.error("main loop interrupted",e);
                 System.exit(0);
             }
-
         }
     }
 

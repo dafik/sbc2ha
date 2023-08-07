@@ -329,7 +329,7 @@ public abstract class Availability {
             manufacturer = "boneIO";
             identifiers.add(topic);
             this.model = model;
-            name = "boneIO " + topic;
+            name = topic;
             swVersion = Version.VERSION;
         }
     }
