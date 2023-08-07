@@ -65,7 +65,7 @@ public class BusFactory {
         ConfigurePin.configureUart(txPinInfo);
         ConfigurePin.configureUart(rxPinInfo);
 
-        Modbus modbus = new Modbus(busConfig.getUart());
+        Modbus modbus = new Modbus(busConfig.getUart(),busConfig.isUseDiozero());
         Diozero.registerForShutdown(modbus);
 
         return modbus;
