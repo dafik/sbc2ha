@@ -11,6 +11,7 @@ import com.diozero.api.GpioPullUpDown;
 import com.diozero.api.PinInfo;
 import com.diozero.internal.spi.AnalogInputDeviceFactoryInterface;
 import com.diozero.sbc.DeviceFactoryHelper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import static com.dfi.sbc2ha.state.sensor.ScalarState.CHANGED;
 
+@Slf4j
 public class AnalogSensor extends ScalarSensor {
     public static final Duration UPDATE_INTERVAL = DurationStyle.detectAndParse("60s");
     protected final AnalogInputDevice delegate;
@@ -48,6 +50,7 @@ public class AnalogSensor extends ScalarSensor {
 
     @Override
     protected float calculate(float value) {
+        log.debug("{} - Voltage {}V", name, value);
         return value;
     }
 
