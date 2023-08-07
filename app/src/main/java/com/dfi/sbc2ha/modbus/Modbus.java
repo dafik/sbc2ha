@@ -23,12 +23,16 @@ import java.util.concurrent.ExecutionException;
 public class Modbus implements DeviceInterface {
 
     private final ModbusClient client;
+    private final boolean useDiozero;
 
-    public Modbus(UartType uart) {
+    public Modbus(UartType uart, boolean useDiozero) {
+        this.useDiozero = useDiozero;
         BasicSerialParameters params = new BasicSerialParameters();
         params.setBaudRate(9600);
+        params.setReadTimeout(3000);
+        params.setWaitTime(500);
 
-        if (System.getProperty("useDiozeroSerial") != null) {
+        if (useDiozero) {
             client = getModbusClientDiozero(uart, params);
         } else {
             client = getModbusClientJsc(uart, params);
@@ -46,7 +50,6 @@ public class Modbus implements DeviceInterface {
         NettyRtuModbusClientConfig config = new NettyRtuModbusClientConfig(uart.uartConfig.file, params);
         config.setAutoReconnect(false);
 
-        // create the client, passing in the JSC SerialPortProvider
         return new RtuNettyModbusClient(config, new JscSerialPortProvider());
     }
 
@@ -61,7 +64,7 @@ public class Modbus implements DeviceInterface {
             ModbusMessage response = client.send(request);
             RegistersModbusMessage responseMessage = response.unwrap(RegistersModbusMessage.class);
 
-            if (System.getProperty("useDiozeroSerial") != null) {
+            if (useDiozero) {
                 client.stop();
             }
 
@@ -88,14 +91,14 @@ public class Modbus implements DeviceInterface {
             ModbusMessage response = client.send(request);
             RegistersModbusMessage responseMessage = response.unwrap(RegistersModbusMessage.class);
             short[] shorts = responseMessage.dataDecode();
-            if (System.getProperty("useDiozeroSerial") != null) {
+            if (useDiozero) {
                 client.stop();
             }
             return shorts;
         } catch (ExecutionException | InterruptedException | ModbusTimeoutException e) {
             client.stop();
-            log.error("read many", e);
-            return new short[]{0};
+            log.error("read many id:{} length:{}", unitId, length, e);
+            throw new RuntimeException(e);
         }
     }
 }

@@ -93,29 +93,26 @@ public class ModbusSensor extends Sensor implements Runnable {
     @Override
     public void run() {
         log.trace("refreshing modbus: {}", name);
-        try {
 
-            for (RegisterBase base : definition.getRegistersBase()) {
+        for (RegisterBase base : definition.getRegistersBase()) {
+            try {
                 short[] responseData = bus.readMany(unitId, base.getBase(), base.getLength(), base.getModbusRegisterType());
-                if(responseData.length > 0) {
-                    onChaneState(DeviceState.ONLINE);
-
-                    List<Register> registers = base.getRegisters();
-                    for (Register register : registers) {
-                        try {
-                            float number = register.decode(responseData, base.getBase());
-                            handleChanged(register, number);
-                        } catch (RuntimeException e) {
-                            log.error(e.getMessage(), e);
-                        }
-
+                onChaneState(DeviceState.ONLINE);
+                List<Register> registers = base.getRegisters();
+                for (Register register : registers) {
+                    try {
+                        float number = register.decode(responseData, base.getBase());
+                        handleChanged(register, number);
+                    } catch (RuntimeException e) {
+                        log.error("decode: {}", e.getMessage(), e);
                     }
                 }
+            } catch (RuntimeException logged) {
+                log.error(logged.getMessage(), logged);
+                onChaneState(DeviceState.OFFLINE);
             }
-        } catch (RuntimeException logged) {
-            log.error(logged.getMessage(), logged);
-            onChaneState(DeviceState.OFFLINE);
         }
+
     }
 
     public void handleChanged(Register register, float value) {
