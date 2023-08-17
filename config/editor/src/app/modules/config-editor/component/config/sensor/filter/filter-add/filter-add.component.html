@@ -1,0 +1,23 @@
+<h1 mat-dialog-title>Add filter</h1>
+<div mat-dialog-content>
+  <form [formGroup]="platform" class="form1">
+
+    <mat-form-field>
+      <mat-label>Filter</mat-label>
+      <mat-select [formControl]="typeCtrl" >
+        <mat-option *ngFor="let type of ValueFilterType | keyvalue" value="{{type.key}}">{{type.key}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Value</mat-label>
+      <input matInput [formControl]="valueCtrl">
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.filter">Add</button>
+  <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.filter">Save</button>
+</div>
+

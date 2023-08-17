@@ -1,0 +1,49 @@
+<mat-stepper [linear]="true" #stepper [animationDuration]="'1000'" orientation="horizontal" class="content">
+  <mat-step [stepControl]="vendorFormGroup">
+    <form [formGroup]="vendorFormGroup" class="form1">
+      <ng-template matStepLabel>Chose board</ng-template>
+      <mat-form-field>
+        <mat-label>Vendor</mat-label>
+        <mat-select>
+          <mat-option *ngFor="let v of getVendors()" value="{{v}}" formControlName="vendorCtrl" required>{{v}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div>
+        <button mat-button matStepperNext>Next</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step [stepControl]="extensionsFormGroup">
+    <form [formGroup]="extensionsFormGroup">
+      <ng-template matStepLabel>Choose extensions</ng-template>
+      <mat-form-field>
+        <mat-label>Inputs</mat-label>
+        <mat-select>
+          <mat-option *ngFor="let v of getInputs()" value="{{v}}" formControlName="inputCtrl" required>{{v}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Outputs</mat-label>
+        <mat-select>
+          <mat-option *ngFor="let v of getOutputs()" value="{{v}}" formControlName="outputCtrl" required>{{v}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperNext>Next</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>Done</ng-template>
+    You are now done.
+    <div>
+      <button mat-button matStepperPrevious>Back</button>
+      <button mat-button (click)="stepper.reset()">Reset</button>
+    </div>
+  </mat-step>
+</mat-stepper>
+
+<div class="content" role="main">
+  <p>creator works!</p>
+</div>

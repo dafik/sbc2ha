@@ -1,0 +1,45 @@
+<h1 mat-dialog-title>mcp actuator</h1>
+<div mat-dialog-content>
+  <form [formGroup]="platform" class="form1">
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput [formControl]="nameCtrl">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Output</mat-label>
+      <mat-select [formControl]="outputCtrl" >
+        <mat-option *ngFor="let output of getOutput()" value="{{output}}">{{output}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <mat-select [formControl]="outputTypeCtrl" >
+        <mat-option *ngFor="let type of getType()" value="{{type}}">{{type}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-label>Restore state</mat-label>
+    <mat-checkbox [formControl]="restoreStateCtrl" ></mat-checkbox>
+
+    <mat-form-field>
+      <mat-label>Momentary turn on</mat-label>
+      <input matInput [formControl]="momentaryTurnOnCtrl">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Momentary turn off</mat-label>
+      <input matInput [formControl]="momentaryTurnOffCtrl">
+    </mat-form-field>
+
+    <mat-label>Show in Ha </mat-label>
+    <mat-checkbox [formControl]="showInHaCtrl" ></mat-checkbox>
+
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config">Add</button>
+  <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config">Save</button>
+</div>

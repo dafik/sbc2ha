@@ -1,0 +1,23 @@
+<div class="content" role="main">
+  <h2>Config editor</h2>
+  <div class="card-container">
+    <a class="card" [routerLink]="'../'+links['creator'].path">
+      <mat-icon fontIcon="add"></mat-icon>
+      <span>New config</span>
+    </a>
+    <a class="card" (click)="downloadConfig()">
+      <mat-icon fontIcon="edit"></mat-icon>
+      <span>Edit current config</span>
+    </a>
+    <a class="card"  (click)="fileUpload.click()" >
+      <mat-icon fontIcon="upload_file"></mat-icon>
+      <span>Upload config file</span>
+      <input #fileUpload type="file" hidden="hidden" (change)="uploadFile($event.target)" accept=".json, .yaml">
+    </a>
+    <a class="card" (click)="fileConvert.click()" >
+      <mat-icon fontIcon="transform"></mat-icon>
+      <span>Convert boneIo config</span>
+      <input #fileConvert type="file" hidden="hidden" (change)="readFile($event.target)" accept=".yaml">
+    </a>
+  </div>
+</div>

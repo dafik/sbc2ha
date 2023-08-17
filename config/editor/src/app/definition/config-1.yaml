@@ -1,0 +1,505 @@
+---
+platform:
+
+  - platform: mqtt
+    host: 192.168.1.10
+    username: boneio
+    password: boneio
+    port: 1883
+    topic_prefix: boneio-1
+    ha_discovery:
+      enabled: true
+      topic_prefix: homeassistant
+
+  - platform: oled
+    enabled: true
+
+  - platform: mcp23017
+    address: 0x20
+    bus_id: mcp1
+
+  - platform: mcp23017
+    address: 0x21
+    bus_id: mcp2
+
+  - platform: lm75
+    address: 0x48
+    bus_id: lm75
+
+sensor:
+  - platform: lm75
+    name: BoneIo-1 temp
+    bus_id: lm75
+
+  - platform: gpio
+    name: Klatka 1
+    kind: switch
+    input: 1
+    actions:
+      single:
+        - action: output
+          output: 1
+          action_output: toggle
+    click_detection: double
+
+  - platform: gpio
+    name: Klatka 2L
+    kind: switch
+    input: 2
+    actions:
+      single:
+        - action: mqtt
+          topic: boneio-2/cmd/relay/3/set
+          action_mqtt_msg: TOGGLE
+
+  - platform: gpio
+    name: Klatka 2P
+    kind: switch
+    input: 3
+    actions:
+      single:
+        - action: mqtt
+          topic: boneio-2/cmd/relay/2/set
+          action_mqtt_msg: TOGGLE
+
+  - platform: gpio
+    name: Gabinet P
+    kind: switch
+    input: 4
+    actions:
+      single:
+        - action: output
+          output: 13
+          action_output: toggle
+
+  - platform: gpio
+    name: Gabinet L
+    kind: switch
+    input: 5
+    actions:
+      single:
+        - action: output
+          output: 12
+          action_output: toggle
+
+  - platform: gpio
+    name: Salon 2
+    kind: switch
+    input: 6
+    actions:
+      single:
+        - action: output
+          output: 14
+          action_output: toggle
+
+  - platform: gpio
+    name: Salon 1P
+    kind: switch
+    input: 7
+    actions:
+      single:
+        - action: output
+          output: 15
+          action_output: toggle
+
+  - platform: gpio
+    name: Salon 1L
+    kind: switch
+    input: 8
+    actions:
+      single:
+        - action: output
+          output: 16
+          action_output: toggle
+
+  - platform: gpio
+    name: Sypialnia L
+    kind: switch
+    input: 9
+    actions:
+      single:
+        - action: output
+          output: 17
+          action_output: toggle
+
+  - platform: gpio
+    name: Sypialnia P
+    kind: switch
+    input: 10
+    actions:
+      single:
+        - action: output
+          output: 18
+          action_output: toggle
+
+  - platform: gpio
+    name: Kuchnia 1P
+    kind: switch
+    input: 11
+    click_detection: long
+
+  - platform: gpio
+    name: Kuchnia 1L
+    kind: switch
+    input: 12
+    actions:
+      single:
+        - action: output
+          output: 19
+          action_output: toggle
+
+  - platform: gpio
+    name: Kuchnia 2
+    kind: switch
+    input: 13
+    click_detection: long
+
+  - platform: gpio
+    name: Łazienka 1P
+    kind: switch
+    input: 14
+    actions:
+      single:
+        - action: output
+          output: 3
+          action_output: toggle
+    click_detection: long
+
+  - platform: gpio
+    name: Łazienka 1L
+    kind: switch
+    input: 15
+    actions:
+      single:
+        - action: output
+          output: 4
+          action_output: toggle
+    click_detection: long
+
+  - platform: gpio
+    name: Łazienka 4L
+    kind: switch
+    input: 16
+    actions:
+      single:
+        - action: output
+          output: 3
+          action_output: toggle
+
+
+  - platform: gpio
+    name: WC P
+    kind: switch
+    input: 17
+    actions:
+      single:
+        - action: output
+          output: 22
+          action_output: toggle
+    click_detection: long
+
+  - platform: gpio
+    name: WC L
+    kind: switch
+    input: 18
+
+  - platform: gpio
+    name: Hall 3L
+    kind: switch
+    input: 19
+    actions:
+      single:
+        - action: output
+          output: 20
+          action_output: toggle
+
+  - platform: gpio
+    name: Hall 3P
+    kind: switch
+    input: 20
+    actions:
+      single:
+        - action: output
+          output: 21
+          action_output: toggle
+
+  - platform: gpio
+    name: Hall 2P
+    kind: switch
+    input: 21
+    actions:
+      single:
+        - action: output
+          output: 21
+          action_output: toggle
+
+  - platform: gpio
+    name: Hall 2L
+    kind: switch
+    input: 22
+    actions:
+      single:
+        - action: output
+          output: 20
+          action_output: toggle
+
+  - platform: gpio
+    name: Hall 1
+    kind: switch
+    input: 23
+    actions:
+      single:
+        - action: output
+          output: 1
+          action_output: toggle
+
+  - platform: gpio
+    name: Pralnia P
+    kind: switch
+    input: 24
+    actions:
+      single:
+        - action: output
+          output: 7
+          action_output: toggle
+
+  - platform: gpio
+    name: Pralnia L
+    kind: switch
+    input: 25
+    actions:
+      single:
+        - action: output
+          output: 10
+          action_output: toggle
+
+  - platform: gpio
+    name: Garderoba
+    kind: switch
+    input: 26
+    actions:
+      single:
+        - action: output
+          output: 8
+          action_output: toggle
+
+  - platform: gpio
+    name: Spiżarnia
+    kind: switch
+    input: 27
+    actions:
+      single:
+        - action: output
+          output: 9
+          action_output: toggle
+
+  - platform: gpio
+    name: Łazienka 4P
+    kind: switch
+    input: 28
+    actions:
+      single:
+        - action: output
+          output: 4
+          action_output: toggle
+
+  - platform: gpio
+    name: Salon 3
+    kind: switch
+    input: 29
+    click_detection: long
+
+  - platform: gpio
+    name: Ruch Schowek
+    kind: sensor
+    input: 31
+    inverted: true
+
+  - platform: gpio
+    name: Schowek
+    kind: switch
+    input: 32
+    actions:
+      single:
+        - action: output
+          output: 11
+          action_output: toggle
+
+  - platform: gpio
+    name: Łazienka 3
+    kind: switch
+    input: 33
+    actions:
+      single:
+        - action: output
+          output: 6
+          action_output: toggle
+
+  - platform: gpio
+    name: Łazienka 2P
+    kind: switch
+    input: 34
+    actions:
+      single:
+        - action: output
+          output: 3
+          action_output: toggle
+
+  - platform: gpio
+    name: Łazienka 2L
+    kind: switch
+    input: 35
+    actions:
+      single:
+        - action: output
+          output: 5
+          action_output: toggle
+
+actuator:
+  - kind: mcp
+    output: 1
+    name: Klatka
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 2
+    name: Łazienka nastopnice
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 3
+    name: Łazienka sufit
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 4
+    name: Łazienka schody
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 5
+    name: Łazienka Lustro
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 6
+    name: Piwnica wejście
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 7
+    name: Pralnia 1
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 8
+    name: Garderoba
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 9
+    name: Spiżarnia
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 10
+    name: Pralnia 2
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 11
+    name: Schowek
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 12
+    name: Gabinet 1
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 13
+    name: Gabinet 2
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 14
+    name: Salon Sofa
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 15
+    name: Salon stół 1
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 16
+    name: Salon stół  2
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 17
+    name: Sypialnia 1
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 18
+    name: Sypialnia 2
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 19
+    name: Kuchnia
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 20
+    name: Hall 1
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 21
+    name: Hall 2
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 22
+    name: Wc
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 23
+    name: Wc wentylator
+    output_type: switch
+    restore_state: true
+
+logger:
+  logs:
+    com.dfi.sbc2ha: trace
+  default: info
+
+extension_boards:
+  vendor: boneio
+  inputBoard: input-v0.3
+  outputBoard: output-24x16A-v0.4

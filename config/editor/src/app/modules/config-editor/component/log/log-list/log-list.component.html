@@ -1,0 +1,45 @@
+<mat-list>
+    <div mat-subheader>
+        <button mat-raised-button class="mat-primary" (click)="addLog()" *ngIf="log == undefined">Add</button>
+    </div>
+    <ng-template [ngIf]="log">
+        <div mat-subheader>
+            <button mat-raised-button class="mat-primary" (click)="addDefault()" *ngIf="!log.default">Add default
+                level
+            </button>
+        </div>
+        <div mat-subheader>
+            <button mat-raised-button class="mat-primary" (click)="addPackage()">Add package level</button>
+        </div>
+        <div mat-subheader>
+            <button mat-raised-button class="mat-primary" (click)="addWriter()" *ngIf="!getWriterFormat()">Add writer
+                format
+            </button>
+        </div>
+        <mat-list-item *ngIf="log.default">
+            <span matListItemTitle>{{log!.default}}</span>
+            <span matListItemMeta>
+                <button mat-button (click)="addDefault()"><mat-icon>edit</mat-icon></button>
+                <button mat-button (click)="deleteDefault()"><mat-icon>delete</mat-icon></button>
+            </span>
+            <span matListItemLine>Default log level</span>
+        </mat-list-item>
+        <mat-list-item *ngFor="let v of log.logs | keyvalue">
+            <span matListItemTitle>{{v.value}}</span>
+            <span matListItemMeta>
+                <button mat-button (click)="editPackage(v.key)"><mat-icon>edit</mat-icon></button>
+                <button mat-button (click)="deletePackage(v.key)"><mat-icon>delete</mat-icon></button>
+            </span>
+            <span matListItemLine>{{v.key}}</span>
+        </mat-list-item>
+        <mat-list-item *ngIf="getWriterFormat() != null">
+            <span matListItemTitle>{{getWriterFormat()}}</span>
+            <span matListItemMeta>
+                <button mat-button (click)="editWriter()"><mat-icon>edit</mat-icon></button>
+                <button mat-button (click)="deleteWriter()"><mat-icon>delete</mat-icon></button>
+            </span>
+            <span matListItemLine>writer format</span>
+        </mat-list-item>
+
+    </ng-template>
+</mat-list>

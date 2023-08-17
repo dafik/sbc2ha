@@ -1,0 +1,42 @@
+<h1 mat-dialog-title>platform mqtt</h1>
+<div mat-dialog-content>
+    <form [formGroup]="platform" class="form1">
+        <mat-form-field>
+            <mat-label>Host</mat-label>
+            <input matInput [formControl]="hostCtrl" type="url">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Username</mat-label>
+            <input matInput [formControl]="usernameCtrl">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Password</mat-label>
+            <input matInput [formControl]="passwordCtrl">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Port</mat-label>
+            <input matInput [formControl]="portCtrl" type="number" [placeholder]="PORT.toString()">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Topic prefix</mat-label>
+            <input matInput [formControl]="topicPrefixCtrl" [placeholder]="BONEIO">
+        </mat-form-field>
+
+        <mat-label>Ha discovery enabled</mat-label>
+        <mat-checkbox [formControl]="haDiscoveryEnabledCtrl"></mat-checkbox>
+
+        <mat-form-field *ngIf="haDiscoveryEnabledCtrl.value">
+            <mat-label>Ha discovery topic prefix</mat-label>
+            <input matInput [formControl]="haDiscoveryTopicPrefixCtrl" [placeholder]="HOMEASSISTANT">
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config"
+            [disabled]="!platform.valid">Add
+    </button>
+    <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config"
+            [disabled]="!platform.valid">Save
+    </button>
+</div>

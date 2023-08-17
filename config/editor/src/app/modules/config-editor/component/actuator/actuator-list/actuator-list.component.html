@@ -1,0 +1,10 @@
+<mat-list>
+  <div mat-subheader><button mat-raised-button class="mat-primary" (click)="addActuator()" >Add</button></div>
+  <mat-list-item *ngFor="let sensor of actuators; let i = index">
+    <span matListItemTitle>{{sensor.name | titlecase}} {{sensor.kind}} {{sensor.outputType}}</span>
+    <span matListItemMeta>
+      <button mat-button (click)="edit(sensor)"><mat-icon>edit</mat-icon></button>
+      <button mat-button (click)="delete(i)"><mat-icon>delete</mat-icon></button>
+    </span>
+  </mat-list-item>
+</mat-list>

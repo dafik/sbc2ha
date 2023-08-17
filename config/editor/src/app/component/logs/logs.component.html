@@ -1,0 +1,17 @@
+<h2>logs</h2>
+
+<log-monitor
+        [logStream]="messages$ | async"
+        theme="dark"
+        title="Device logs"
+        [animated]="true"
+        [icons]="false"
+        [history]="restoredLogs"
+></log-monitor>
+
+<!--
+<mat-list>
+    <mat-list-item *ngFor="let message of messages$ | async">{{message.timestamp | date:'long' }}  [{{message.level}}] {{message.className}} - {{message.message}}</mat-list-item>
+</mat-list>
+-->
+

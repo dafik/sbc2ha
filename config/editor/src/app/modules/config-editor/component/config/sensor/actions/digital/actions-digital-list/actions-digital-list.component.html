@@ -1,0 +1,10 @@
+<mat-list>
+  <div mat-subheader><button mat-raised-button class="mat-primary" (click)="addFilter()" >Add filter</button></div>
+  <mat-list-item *ngFor="let filter of actions; let i = index ">
+    <span matListItemTitle>{{filter.type | titlecase}}({{filter.value}})</span>
+    <span matListItemMeta>
+      <button mat-button (click)="edit(filter)"><mat-icon>edit</mat-icon></button>
+      <button mat-button (click)="delete(i)"><mat-icon>delete</mat-icon></button>
+    </span>
+  </mat-list-item>
+</mat-list>

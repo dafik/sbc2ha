@@ -1,0 +1,45 @@
+<mat-stepper [linear]="true" #stepper [animationDuration]="'1000'" orientation="horizontal" class="content">
+  <mat-step [stepControl]="vendorFG">
+    <form [formGroup]="vendorFG" class="form1">
+      <ng-template matStepLabel>Chose board</ng-template>
+      <mat-form-field>
+        <mat-label>Vendor</mat-label>
+        <mat-select formControlName="vendorCtrl" required>
+          <mat-option *ngFor="let v of getVendors()" value="{{v}}">{{v}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div>
+        <button mat-button matStepperNext>Next</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step [stepControl]="extensionsFG">
+    <form [formGroup]="extensionsFG">
+      <ng-template matStepLabel>Choose extensions</ng-template>
+      <mat-form-field>
+        <mat-label>Inputs</mat-label>
+        <mat-select formControlName="inputCtrl" required>
+          <mat-option *ngFor="let v of inputs" value="{{v}}">{{v}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Outputs</mat-label>
+        <mat-select formControlName="outputCtrl" required>
+          <mat-option *ngFor="let v of outputs" value="{{v}}">{{v}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperNext>Next</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>Done</ng-template>
+    <button mat-raised-button color="primary" (click)="edit()" >Create config</button>
+    <div>
+      <button mat-button matStepperPrevious>Back</button>
+      <button mat-button (click)="stepper.reset()">Reset</button>
+    </div>
+  </mat-step>
+</mat-stepper>

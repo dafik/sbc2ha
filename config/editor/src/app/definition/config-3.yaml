@@ -1,0 +1,64 @@
+---
+platform:
+  - platform: mqtt
+    host: 192.168.1.10
+    username: boneio
+    password: boneio
+    port: 1883
+    topic_prefix: pi-1
+    ha_discovery:
+      enabled: true
+      topic_prefix: homeassistant
+actuator:
+  - name: Salon klima
+    kind: gpiopwm
+    output: 12
+    output_type: led
+    restore_state: true
+  - name: Salon okno
+    kind: gpiopwm
+    output: 13
+    output_type: led
+    restore_state: true
+  - name: Salon obraz
+    kind: gpiopwm
+    output: 29
+    output_type: led
+    restore_state: true
+  - name: Salon kanapa
+    kind: gpiopwm
+    output: 15
+    output_type: led
+    restore_state: true
+  - name: Hall
+    kind: gpiopwm
+    output: 37
+    output_type: led
+    restore_state: true
+  - name: Wc
+    kind: gpiopwm
+    output: 35
+    output_type: led
+    restore_state: true
+  - name: Kuchnia
+    kind: gpiopwm
+    output: 33
+    output_type: led
+    restore_state: true
+  - name: Łazienka
+    kind: gpiopwm
+    output: 31
+    output_type: led
+    restore_state: true
+logger:
+  default: info
+  logs:
+    com.dfi: trace
+    com.dfi.sbc2ha.platform.mqtt: info
+    com.diozero.sbc.LocalSystemInfo: error
+  writer:
+    format: "{ date:HH:mm:ss } {level|size=5} {message}"
+extension_boards:
+  vendor: rpi
+  inputBoard: nohat
+  outputBoard: nohat

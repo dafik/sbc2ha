@@ -1,0 +1,23 @@
+<div class="content" role="main">
+  <!-- Resources -->
+  <h2>Dashboard</h2>
+
+  <div class="card-container">
+    <a class="card" [routerLink]="appRoutingPaths['config'].path">
+      <mat-icon fontIcon="edit"></mat-icon>
+      <span>Edit config</span>
+    </a>
+    <a class="card" [routerLink]="appRoutingPaths['states'].path">
+      <mat-icon fontIcon="toggle_on"></mat-icon>
+      <span>Device sensors & actuators</span>
+    </a>
+    <a class="card" [routerLink]="appRoutingPaths['settings'].path">
+      <mat-icon fontIcon="settings"></mat-icon>
+      <span>Device settings</span>
+    </a>
+    <a class="card" [routerLink]="appRoutingPaths['logs'].path">
+      <mat-icon fontIcon="zoom_in"></mat-icon>
+      <span>View logs</span>
+    </a>
+  </div>
+</div>

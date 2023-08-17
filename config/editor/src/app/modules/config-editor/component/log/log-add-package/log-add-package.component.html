@@ -1,0 +1,21 @@
+<h1 mat-dialog-title>Package level</h1>
+<div mat-dialog-content>
+    <form [formGroup]="platform" class="form1">
+        <mat-form-field>
+            <mat-label>Package</mat-label>
+            <input matInput [formControl]="packageCtrl">
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Log level</mat-label>
+            <mat-select [formControl]="levelCtrl">
+                <mat-option *ngFor="let output of LogLevel | keyvalue"
+                            value="{{output.value}}">{{output.key}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="add()">{{data ? 'Save' : 'Add'}}</button>
+</div>

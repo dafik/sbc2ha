@@ -1,0 +1,24 @@
+<mat-list>
+    <div mat-subheader *ngIf="getActionTypes(actions).length != actionsType.length">
+        <button mat-raised-button class="mat-primary" (click)="addActionType()">Add action type</button>
+    </div>
+
+    <ng-template ngFor let-trigger [ngForOf]="getActionTypes(actions)">
+        <mat-list-item>
+            <span matListItemTitle>{{trigger}} </span>
+            <span matListItemMeta>
+        <span>count: {{getAction(trigger).length}}</span>
+      <button mat-button (click)="addAction(trigger)"><mat-icon>add</mat-icon></button>
+        <button mat-button (click)="delete(trigger)"><mat-icon>delete</mat-icon></button>
+    </span>
+        </mat-list-item>
+        <mat-list-item *ngFor="let action of getAction(trigger);let i = index;">
+            <span matListItemTitle style="margin-left: 30px">{{action.action}}</span>
+            <span matListItemMeta>
+      <button mat-button (click)="editAction(action)"><mat-icon>edit</mat-icon></button>
+      <button mat-button (click)="deleteAction(trigger,i)"><mat-icon>delete</mat-icon></button>
+    </span>
+        </mat-list-item>
+    </ng-template>
+</mat-list>
+

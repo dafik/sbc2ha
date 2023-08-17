@@ -1,0 +1,122 @@
+<mat-accordion class="example-headers-align" multi>
+    <mat-expansion-panel hideToggle>
+        <mat-expansion-panel-header class="example-button-row">
+            <button mat-raised-button (click)="accordion.openAll()">Expand All</button>
+            <button mat-raised-button (click)="accordion.closeAll()">Collapse All</button>
+
+
+            <button mat-raised-button color="accent" (click)="uploadToCache()">Save in device cache</button>
+            <button mat-raised-button color="warn" (click)="uploadToArgument()">Save as argument file</button>
+
+        </mat-expansion-panel-header>
+    </mat-expansion-panel>
+    <mat-expansion-panel>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <mat-icon>settings</mat-icon>
+                Extension Boards Config
+            </mat-panel-title>
+            <mat-panel-description>
+                Vendor: {{appConfig.extensionBoards?.vendor}}
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+            InputBoard: {{appConfig.extensionBoards?.inputBoard}}<br/>
+            OutputBoard: {{appConfig.extensionBoards?.outputBoard}}
+        </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel [disabled]="false">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <mat-icon>list</mat-icon>
+                Platforms:
+            </mat-panel-title>
+            <mat-panel-description>
+                count: {{appConfig.platform.length}}
+                <mat-icon>visibility</mat-icon>
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+            <app-platform-list [platforms]="appConfig.platform"></app-platform-list>
+        </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel [disabled]="false">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <mat-icon>list</mat-icon>
+                Sensors:
+            </mat-panel-title>
+            <mat-panel-description>
+                count: {{appConfig.sensor.length}}
+                <mat-icon>visibility</mat-icon>
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+            <app-sensor-list [sensors]="appConfig.sensor"></app-sensor-list>
+        </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel [disabled]="false">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <mat-icon>list</mat-icon>
+                Actuators:
+            </mat-panel-title>
+            <mat-panel-description>
+                count: {{appConfig.actuator.length}}
+                <mat-icon>visibility</mat-icon>
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+            <app-actuator-list [actuators]="appConfig.actuator"></app-actuator-list>
+        </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel [disabled]="false">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <mat-icon>list</mat-icon>
+                Log:
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+            <app-log-list [log]="appConfig.logger" (newLog)="addLog($event)"></app-log-list>
+        </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel [disabled]="false">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <mat-icon>list</mat-icon>
+                yaml
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+      <pre>
+<p>{{getConfig()|yaml}}</p>
+</pre>
+        </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel [disabled]="false">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <mat-icon>list</mat-icon>
+                JSON
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+           <pre>
+<p>
+  {{getConfig()|jsonD}}
+</p>
+</pre>
+        </ng-template>
+    </mat-expansion-panel>
+
+</mat-accordion>
+
+
+

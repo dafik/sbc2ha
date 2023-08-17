@@ -1,0 +1,25 @@
+<p>states works!</p>
+<mat-grid-list cols="2" rowHeight="2:1">
+    <mat-grid-tile>
+        <mat-list>
+            <mat-list-item>
+                <span matListItemTitle>Actuators</span>
+            </mat-list-item>
+            <mat-list-item *ngFor="let actuator of actuators$ | async">
+                <span matListItemTitle>{{actuator.name}}</span>
+                <span matListItemLine>{{actuator.kind}} ({{actuator.output}})</span>
+                <span matListItemMeta><mat-slide-toggle>Slide me!</mat-slide-toggle></span>
+            </mat-list-item>
+        </mat-list>
+    </mat-grid-tile>
+    <mat-grid-tile>
+        <mat-list>
+            <mat-list-item>
+                <span matListItemTitle>Sensors</span>
+            </mat-list-item>
+            <mat-list-item *ngFor="let sensor of sensors$ | async">
+                <span matListItemTitle>{{sensor.name}}</span>
+            </mat-list-item>
+        </mat-list>
+    </mat-grid-tile>
+</mat-grid-list>

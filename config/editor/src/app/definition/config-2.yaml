@@ -1,0 +1,187 @@
+---
+platform:
+  - platform: mqtt
+    host: 192.168.1.10
+    username: boneio
+    password: boneio
+    port: 1883
+    topic_prefix: boneio-2
+    ha_discovery:
+      enabled: true
+      topic_prefix: homeassistant
+
+  - platform: oled
+    enabled: true
+
+  - platform: mcp23017
+    address: 0x20
+    bus_id: mcp1
+
+  - platform: mcp23017
+    address: 0x21
+    bus_id: mcp2
+
+  - platform: ds2482
+    address: 0x18
+    bus_id: ds2482
+
+  - platform: modbus
+    uart: uart4
+    bus_id: modbus
+
+  - platform: lm75
+    address: 0x48
+    bus_id: lm75
+
+sensor:
+  - platform: lm75
+    name: Bone2 temp
+    bus_id: lm75
+
+  - platform: modbus
+    name: Licznik Energi
+    address: 1
+    model: sdm630
+    bus_id: modbus
+
+  - platform: ds2482
+    name: t1
+    address: 0x643c04e3819abf28
+    bus_id: ds2482
+    update_interval: 15s
+
+  - platform: ds2482
+    name: t2
+    address: 0x8e3c11e381a61f28
+    bus_id: ds2482
+    update_interval: 15s
+
+  - platform: ds2482
+    name: t4
+    address: 0x693cf2e381cf9528
+    bus_id: ds2482
+    update_interval: 15s
+
+  - platform: ds2482
+    name: t5
+    address: 0x3c3c04e381d3fe28
+    bus_id: ds2482
+    update_interval: 15s
+
+  - platform: ds2482
+    name: t6
+    address: 0x343c5ee3819f3428
+    bus_id: ds2482
+    update_interval: 15s
+
+  - platform: analog
+    name: adc1
+    analog: 1
+    update_interval: 60s
+
+  - platform: gpio
+    name: Ruch Hall
+    kind: sensor
+    input: 1
+    inverted: true
+    device_class: motion
+
+  - platform: gpio
+    name: Drzwi WC
+    kind: sensor
+    input: 4
+    inverted: true
+    device_class: door
+
+  - platform: gpio
+    name: Drzwi Klatka
+    kind: sensor
+    input: 5
+    inverted: true
+    device_class: door
+
+  - platform: gpio
+    name: Drzwi Łazienka
+    kind: sensor
+    input: 6
+    inverted: true
+    device_class: door
+
+  - platform: gpio
+    name: Drzwi Piwnica
+    kind: sensor
+    input: 7
+    inverted: true
+    device_class: door
+
+actuator:
+  - kind: mcp
+    output: 1
+    name: Gniazdko zewnętrzne
+    output_type: switch
+    restore_state: true
+
+  - kind: mcp
+    output: 2
+    name: Dom
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 3
+    name: Drzwi
+    output_type: light
+    restore_state: true
+
+  - kind: mcp
+    output: 4
+    name: Ogrzewanie podłoga
+    output_type: switch
+    restore_state: true
+
+  - kind: mcp
+    output: 5
+    name: Cyrkulacja
+    output_type: switch
+    restore_state: true
+
+  - kind: mcp
+    output: 6
+    name: Pompa podłoga
+    output_type: switch
+    restore_state: true
+
+  - kind: mcp
+    output: 7
+    name: Tablet
+    output_type: switch
+    restore_state: true
+
+  - kind: mcp
+    output: 8
+    name: 12V Salon
+    output_type: switch
+    restore_state: true
+
+  - kind: mcp
+    output: 9
+    name: 12V led
+    output_type: switch
+    restore_state: true
+
+  - kind: mcp
+    output: 10
+    name: Dzwonek
+    output_type: switch
+    restore_state: true
+
+
+logger:
+  logs:
+    com.dfi.sbc2ha: DEBUG
+  default: info
+
+extension_boards:
+  vendor: boneio
+  inputBoard: input-v0.3
+  outputBoard: output-24x16A-v0.3

@@ -1,0 +1,33 @@
+<mat-toolbar>
+  <button mat-icon-button aria-label="menu" [matMenuTriggerFor]="menu">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+  <button mat-button [routerLink]="appRoutingPaths['home'].path">
+    <img width="40" height="40" alt="sbc2ha Logo" ngSrc="../../../../assets/icon.png"/>
+  </button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item [routerLink]="appRoutingPaths['home'].path">
+      <img width="20" height="20" alt="sbc2ha Logo" ngSrc="../../../../assets/icon.png"/>
+      <span>Home</span>
+    </button>
+    <button mat-menu-item [routerLink]="appRoutingPaths['config'].path">
+      <mat-icon>edit</mat-icon>
+      <span>Config editor</span>
+    </button>
+    <button mat-menu-item [routerLink]="appRoutingPaths['states'].path">
+      <mat-icon>toggle_on</mat-icon>
+      <span>States</span>
+    </button>
+    <button mat-menu-item [routerLink]="appRoutingPaths['settings'].path">
+      <mat-icon>settings</mat-icon>
+      <span>Settings</span>
+    </button>
+    <button mat-menu-item [routerLink]="appRoutingPaths['logs'].path">
+      <mat-icon>zoom_in</mat-icon>
+      <span>Logs</span>
+    </button>
+  </mat-menu>
+  <span> </span>
+  <span>Single Board Computer 2 Homeassistant</span>
+  <span class="example-spacer"></span>
+</mat-toolbar>

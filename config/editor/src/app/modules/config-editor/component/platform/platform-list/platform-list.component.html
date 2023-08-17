@@ -1,0 +1,12 @@
+<mat-list>
+  <div mat-subheader><button mat-raised-button class="mat-primary" (click)="addPlatform()" >Add</button></div>
+  <mat-list-item *ngFor="let platform of platforms; let i = index">
+    <span matListItemTitle>{{platform.platform | titlecase}}</span>
+    <span matListItemLine *ngIf="isBusConfig(platform) && !isI2cBusConfig(platform)">name: {{asBusConfig(platform)?.busId}}</span>
+    <span matListItemLine *ngIf="isI2cBusConfig(platform)">name: {{asI2cBusConfig(platform)?.busId}} address: {{asI2cBusConfig(platform)?.address | hex}}</span>
+    <span matListItemMeta>
+      <button mat-button (click)="edit(platform)"><mat-icon>edit</mat-icon></button>
+      <button mat-button (click)="delete(i)"><mat-icon>delete</mat-icon></button>
+    </span>
+  </mat-list-item>
+</mat-list>
