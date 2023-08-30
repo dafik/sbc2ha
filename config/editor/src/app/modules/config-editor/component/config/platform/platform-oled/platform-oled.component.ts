@@ -57,4 +57,8 @@ export class PlatformOledComponent {
   }
 
   protected readonly ScreenType = ScreenType;
+
+    isValid() {
+      return this.platform.valid
+    }
 }

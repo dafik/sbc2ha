@@ -1,48 +1,50 @@
 <h1 mat-dialog-title>Modbus sensor</h1>
 <div mat-dialog-content>
-  <form [formGroup]="platform" class="form1">
-    <mat-form-field>
-      <mat-label>Name</mat-label>
-      <input matInput [formControl]="nameCtrl">
-    </mat-form-field>
+    <form [formGroup]="platform" class="form1">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [formControl]="nameCtrl">
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>BusId</mat-label>
-      <mat-select [formControl]="busIdCtrl" (selectionChange)="onSelectSensor($event)">
-        <mat-option *ngFor="let bus of getBuses()" value="{{bus}}">{{bus}}</mat-option>
-        <mat-option value="add">add
-          <mat-icon>add</mat-icon>
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+        <mat-form-field>
+            <mat-label>BusId</mat-label>
+            <mat-select [formControl]="busIdCtrl" (selectionChange)="onSelectSensor($event)">
+                <mat-option *ngFor="let bus of getBuses()" value="{{bus}}">{{bus}}</mat-option>
+                <mat-option value="add">add
+                    <mat-icon>add</mat-icon>
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>Modbus address</mat-label>
-      <input matInput [formControl]="addressCtrl">
-    </mat-form-field>
+        <mat-form-field>
+            <mat-label>Modbus address</mat-label>
+            <input matInput [formControl]="addressCtrl">
+        </mat-form-field>
 
 
-    <mat-form-field>
-      <mat-label>Model</mat-label>
-      <mat-select [formControl]="modelCtrl">
-        <mat-option *ngFor="let model of getModels()" value="{{model}}">{{model}}</mat-option>
-      </mat-select>
-    </mat-form-field>
+        <mat-form-field>
+            <mat-label>Model</mat-label>
+            <mat-select [formControl]="modelCtrl">
+                <mat-option *ngFor="let model of getModels()" value="{{model}}">{{model}}</mat-option>
+            </mat-select>
+        </mat-form-field>
 
-    <mat-label>Show in Ha</mat-label>
-    <mat-checkbox [formControl]="showInHaCtrl"></mat-checkbox>
+        <mat-label>Show in Ha</mat-label>
+        <mat-checkbox [formControl]="showInHaCtrl"></mat-checkbox>
 
-    <mat-form-field>
-      <mat-label>Update interval</mat-label>
-      <input matInput [formControl]="updateIntervalCtrl">
-    </mat-form-field>
+        <mat-form-field>
+            <mat-label>Update interval</mat-label>
+            <input matInput [formControl]="updateIntervalCtrl">
+        </mat-form-field>
 
-    <app-filter-list [filters]="filters"></app-filter-list>
+        <app-filter-list [filters]="filters"></app-filter-list>
 
-  </form>
+    </form>
 </div>
 <div mat-dialog-actions>
-  <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config">Add</button>
-  <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config">Save</button>
+    <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config" [disabled]="!isValid()">Add
+    </button>
+    <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config" [disabled]="!isValid()">Save
+    </button>
 </div>

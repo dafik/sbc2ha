@@ -92,5 +92,9 @@ export class SensorLm75Component {
 
     }
   }
+
+    isValid() {
+      return this.platform.valid
+    }
 }
 

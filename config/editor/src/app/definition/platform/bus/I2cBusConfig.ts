@@ -5,8 +5,8 @@ import {PlatformType} from "../../enums/PlatformType";
 export class I2cBusConfig extends BusConfig {
     address: number;
 
-  constructor(platform: PlatformType, busId: string, address: number) {
-    super(platform, busId);
-    this.address = address;
-  }
+    constructor(platform: PlatformType, busId: string, address: number) {
+        super(platform, busId);
+        this.address = address;
+    }
 }

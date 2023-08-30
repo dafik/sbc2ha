@@ -6,6 +6,7 @@ import {StatesComponent} from "./component/states/states.component";
 import {SettingsComponent} from "./component/settings/settings.component";
 import {LogsComponent} from "./component/logs/logs.component";
 import {ConfigComponent} from "./component/config/config.component";
+import {Nav1Component} from "./component/nav1/nav1.component";
 
 const routes: Routes = [
   {
@@ -34,6 +35,10 @@ const routes: Routes = [
   {
     path:  appRoutingPaths['config'].path,
     component: ConfigComponent
+  },
+  {
+    path:  'test',
+    component: Nav1Component
   },
   { path: '**', redirectTo: `/${appRoutingPaths['home'].path}` },
 ];

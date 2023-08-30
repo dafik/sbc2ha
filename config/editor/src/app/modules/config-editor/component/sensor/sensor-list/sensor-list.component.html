@@ -1,6 +1,19 @@
 <mat-list>
-  <div mat-subheader><button mat-raised-button class="mat-primary" (click)="addSensor()" >Add</button></div>
-  <mat-list-item *ngFor="let sensor of sensors; let i = index">
+  <mat-list-item>
+    <span matListItemLine>
+        <form [formGroup]="filter" class="form1">
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput [formControl]="nameCtrl">
+    </mat-form-field>
+        </form>
+    </span>
+    <span matListItemMeta>
+      <button mat-raised-button class="mat-primary" (click)="addSensor()">Add</button>
+    </span>
+  </mat-list-item>
+  <div mat-subheader></div>
+  <mat-list-item *ngFor="let sensor of sensors$ | async; let i = index" class="item">
     <span matListItemTitle>{{sensor.name | titlecase}} {{sensor.platform}}</span>
     <span matListItemMeta>
       <button mat-button (click)="edit(sensor)"><mat-icon>edit</mat-icon></button>

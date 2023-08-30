@@ -174,4 +174,7 @@ export class SensorNtcComponent {
     }
   }
 
+    isValid() {
+      return this.platform.valid
+    }
 }

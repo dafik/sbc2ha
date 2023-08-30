@@ -8,6 +8,8 @@ import {YamlPipe} from "../../yaml.pipe";
 import {JsonDPipe} from "../../json-d.pipe";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {LogLevel} from "../../../../definition/enums/LogLevel";
+import {saveAs} from "file-saver";
+
 
 @Component({
     selector: 'app-edit',
@@ -56,7 +58,10 @@ export class EditComponent {
                         outputBoard: params.o
                     }
                     this.es.setConfig(this.appConfig);
+                } else if (isSaved(params)) {
+                    this.es.loadConfig(params.uuid)
                 }
+                this.appConfig = this.es.getConfig()
             });
     }
 
@@ -91,9 +96,15 @@ export class EditComponent {
 
     addLog($event: boolean) {
         this.appConfig.logger = {
-            logs:[],
-            default:LogLevel.INFO,
+            logs: [],
+            default: LogLevel.INFO,
         }
+    }
+
+    downloadYaml() {
+        const data = this.yamlPipe.transform(this.getConfig());
+        const theFile = new Blob([data], { type: "text/yaml" });
+        saveAs(theFile,"config.yaml")
     }
 }
 
@@ -107,9 +118,16 @@ interface EditorParamsConfig {
     config: "current"
 }
 
+interface EditorParamsSaved {
+    uuid: string;
+}
+
 const isCreator = function (object: any): object is EditorParamsCreator {
     return 'v' in object;
 }
 const isConfig = function (object: any): object is EditorParamsConfig {
     return 'config' in object;
+}
+const isSaved = function (object: any): object is EditorParamsSaved {
+    return 'uuid' in object;
 }

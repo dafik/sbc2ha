@@ -54,4 +54,8 @@ export class FilterAddComponent {
 
   protected readonly UartType = UartType;
   protected readonly ValueFilterType = ValueFilterType;
+
+    isValid() {
+      return this.platform.valid
+    }
 }

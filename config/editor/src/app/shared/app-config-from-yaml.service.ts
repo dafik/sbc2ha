@@ -69,11 +69,7 @@ export class AppConfigFromYamlService {
     }
 
     private extensionBoard(src: any): ExtensionBoardsConfig {
-        return {
-            vendor: src.vendor,
-            outputBoard: src.outputBoard,
-            inputBoard: src.inputBoard
-        }
+        return new ExtensionBoardsConfig(src.vendor, src.input_board, src.output_board);
     }
 
     private platform(src: any[]): PlatformConfig[] {
@@ -306,9 +302,6 @@ export class AppConfigFromYamlService {
         }
         if (value.click_detection) {
             config.clickDetection = value.click_detection
-        }
-        if (value.device_class) {
-            config.deviceClass = value.device_class
         }
         if (value.bounce_time) {
             config.bounceTime = new Duration(value.bounce_time);

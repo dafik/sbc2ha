@@ -85,7 +85,7 @@ export const definition: ExtensionBoardsDefs = {
             inputBoard: [{
                 name: "in",
                 digitalInputs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                analogInputs: [1,2,3,4,5],
+                analogInputs: [1, 2, 3, 4, 5],
             }],
             outputBoard: [{
                 name: "out",

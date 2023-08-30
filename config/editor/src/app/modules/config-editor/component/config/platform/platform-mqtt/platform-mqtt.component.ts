@@ -76,4 +76,8 @@ export class PlatformMqttComponent {
 
         this.dialogRef.close();
     }
+
+    isValid() {
+        return this.platform.valid
+    }
 }

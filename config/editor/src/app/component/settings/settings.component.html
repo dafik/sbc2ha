@@ -1,13 +1,25 @@
 <div class="content" role="main">
     <h2>Setting</h2>
     <div class="card-container">
-        <a class="card">
+        <a class="card" (click)="reload()">
             <mat-icon fontIcon="refresh"></mat-icon>
             <span>Reload</span>
         </a>
-        <a class="card">
+        <a class="card" (click)="restart()">
             <mat-icon fontIcon="autorenew"></mat-icon>
             <span>Restart</span>
+        </a>
+        <a class="card" (click)="stop()">
+            <mat-icon fontIcon="stop"></mat-icon>
+            <span>Stop</span>
+        </a>
+        <a class="card" (click)="clearStateCache()">
+            <mat-icon fontIcon="delete"></mat-icon>
+            <span>Clear state cache</span>
+        </a>
+        <a class="card" (click)="clearConfigCache()">
+            <mat-icon fontIcon="delete"></mat-icon>
+            <span>Clear config cache</span>
         </a>
     </div>
 </div>

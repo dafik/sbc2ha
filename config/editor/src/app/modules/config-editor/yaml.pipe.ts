@@ -1,6 +1,7 @@
 import {Pipe, PipeTransform} from '@angular/core';
 import {Duration} from "../../definition/Duration";
 import {stringify} from 'yaml'
+import {instanceToPlain} from "class-transformer";
 
 @Pipe({
     name: 'yaml',
@@ -8,9 +9,9 @@ import {stringify} from 'yaml'
 })
 export class YamlPipe implements PipeTransform {
 
-    transform(value: Object): unknown {
-        let snakeCase = this.convertCase(value);
-        return stringify(snakeCase);
+    transform(value: Object): string {
+        let snakeCase = this.convertCase(instanceToPlain(value));
+        return stringify(instanceToPlain(value));
     }
 
     convertCase(value: Object) {

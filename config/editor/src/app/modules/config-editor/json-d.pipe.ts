@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {Duration} from "../../definition/Duration";
+import {instanceToPlain} from "class-transformer";
 
 @Pipe({
     name: 'jsonD'
@@ -7,7 +7,10 @@ import {Duration} from "../../definition/Duration";
 export class JsonDPipe implements PipeTransform {
 
     transform(value: Object): string {
-        return JSON.stringify(value, (key: string, value: any) => {
+        return JSON.stringify(instanceToPlain(value),null,2)
+
+
+        /*return JSON.stringify(value, (key: string, value: any) => {
             if (value instanceof Duration) {
                 return value.duration
             }
@@ -24,7 +27,7 @@ export class JsonDPipe implements PipeTransform {
                 return replacement;
             }
             return value;
-        }, 2);
+        }, 2);*/
     }
 
     private toSnakeCase(inputString: string) {

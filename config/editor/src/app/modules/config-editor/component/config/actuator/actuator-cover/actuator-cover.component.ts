@@ -150,4 +150,8 @@ export class ActuatorCoverComponent {
   }
 
   protected readonly PlatformType = PlatformType;
+
+    isValid() {
+        return this.platform.valid
+    }
 }

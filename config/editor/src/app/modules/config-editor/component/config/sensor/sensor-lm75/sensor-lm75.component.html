@@ -30,6 +30,6 @@
 </div>
 <div mat-dialog-actions>
   <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config">Add</button>
-  <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config">Save</button>
+  <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config" [disabled]="!isValid()">Add</button>
+  <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config" [disabled]="!isValid()">Save</button>
 </div>

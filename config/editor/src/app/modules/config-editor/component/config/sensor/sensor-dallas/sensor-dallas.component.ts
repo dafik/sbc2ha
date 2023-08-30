@@ -99,5 +99,9 @@ export class SensorDallasComponent {
 
     }
   }
+
+    isValid() {
+      return this.platform.valid
+    }
 }
 

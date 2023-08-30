@@ -96,5 +96,9 @@ export class SensorDs2482Component {
 
     }
   }
+
+    isValid() {
+      return this.platform.valid
+    }
 }
 

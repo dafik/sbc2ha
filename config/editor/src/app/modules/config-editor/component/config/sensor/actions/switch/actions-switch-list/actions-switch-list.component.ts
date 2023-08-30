@@ -9,98 +9,122 @@ import {ActionMqttComponent} from "../../action-mqtt/action-mqtt.component";
 import {ActionOutputComponent} from "../../action-output/action-output.component";
 import {ActionCoverComponent} from "../../action-cover/action-cover.component";
 import {ActionType} from "../../../../../../../../definition/enums/ActionType";
+import {OutputActionConfig} from "../../../../../../../../definition/action/OutputActionConfig";
+import {ExtensionsService} from "../../../../../../extensions.service";
+import {MqttActionConfig} from "../../../../../../../../definition/action/MqttActionConfig";
 
 @Component({
-    selector: 'app-actions-switch-list',
-    templateUrl: './actions-switch-list.component.html',
-    styleUrls: ['./actions-switch-list.component.scss']
+  selector: 'app-actions-switch-list',
+  templateUrl: './actions-switch-list.component.html',
+  styleUrls: ['./actions-switch-list.component.scss']
 })
 export class ActionsSwitchListComponent {
-    @Input({required: true}) actions!: ActionsSwitch;
-    @Input({required: true}) actionsType!: string[];
+  @Input({required: true}) actions!: ActionsSwitch;
+  @Input({required: true}) actionsType!: string[];
 
-    constructor(public dialog: MatDialog) {
+  constructor(public dialog: MatDialog, private es: ExtensionsService) {
+  }
+
+  addActionType() {
+    const dialogRef = this.dialog.open(ActionsAddTypeComponent, {data: {types: this.actionsType.filter(value => !this.getActionTypes(this.actions).includes(value))}});
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        (this.actions as any)[result] = [];
+      }
+    });
+  }
+
+  edit(trigger: string) {
+    const dialogRef = this.dialog.open(FilterAddComponent, {
+      data: {key: trigger, value: (this.actions as any)[trigger] as ActionConfig[]},
+    });
+  }
+
+  delete(trigger: string) {
+    delete (this.actions as any)[trigger];
+  }
+
+  protected readonly Object = Object;
+
+  getAction(trigger: string) {
+    if (trigger == "single") {
+      return this.actions.single as ActionConfig[]
+    } else if (trigger == "double") {
+      return this.actions.double as ActionConfig[]
+    } else {
+      return this.actions.long as ActionConfig[]
     }
+  }
 
-    addActionType() {
-        const dialogRef = this.dialog.open(ActionsAddTypeComponent, {data: {types: this.actionsType.filter(value => !this.getActionTypes(this.actions).includes(value))}});
+  getActionTypes(actions: ActionsSwitch) {
 
-        dialogRef.afterClosed().subscribe(result => {
-            if (result) {
-                (this.actions as any)[result] = [];
-            }
-        });
-    }
+    return Object.keys(actions)
+  }
 
-    edit(trigger: string) {
-        const dialogRef = this.dialog.open(FilterAddComponent, {
-            data: {key: trigger, value: (this.actions as any)[trigger] as ActionConfig[]},
-        });
-    }
 
-    delete(trigger: string) {
-        delete (this.actions as any)[trigger];
-    }
+  add(trigger: string) {
 
-    protected readonly Object = Object;
+  }
 
-    getAction(trigger: string) {
-        if (trigger == "single") {
-            return this.actions.single as ActionConfig[]
-        } else if (trigger == "double") {
-            return this.actions.double as ActionConfig[]
-        } else {
-            return this.actions.long as ActionConfig[]
+  addAction(trigger: string) {
+
+
+    const dialogRef = this.dialog.open<ActionsAddComponent, any, ActionConfig>(ActionsAddComponent,
+      {
+        data: {
+          actions: (this.actions as any)[trigger] as ActionConfig[]
         }
+      });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        ((this.actions as any)[trigger] as ActionConfig[]).push(result)
+      }
+    });
+
+  }
+
+  editAction(config: ActionConfig) {
+    let component;
+    switch (config.action) {
+      case ActionType.MQTT:
+        component = ActionMqttComponent
+        break;
+      case ActionType.OUTPUT:
+        component = ActionOutputComponent
+        break;
+      case ActionType.COVER:
+        component = ActionCoverComponent
+        break;
     }
 
-    getActionTypes(actions: ActionsSwitch) {
-        return Object.keys(actions)
-    }
+    this.dialog.open<ActionMqttComponent | ActionOutputComponent | ActionCoverComponent, any, ActionConfig>(component, {data: {config: config}});
+  }
 
+  deleteAction(trigger: string, i: number) {
+    ((this.actions as any)[trigger] as ActionConfig[]).splice(i, 1)
+  }
 
-    add(trigger: string) {
+  isOutput(action: ActionConfig) {
+    return action.action == ActionType.OUTPUT
+  }
 
-    }
+  asOutput(action: ActionConfig) {
+    return action as OutputActionConfig
+  }
 
-    addAction(trigger: string) {
+  isMqtt(action: ActionConfig) {
+    return action.action == ActionType.MQTT
+  }
 
+  asMqtt(action: ActionConfig) {
+    return action as MqttActionConfig
+  }
 
-        const dialogRef = this.dialog.open<ActionsAddComponent, any, ActionConfig>(ActionsAddComponent,
-            {
-                data: {
-                    actions: (this.actions as any)[trigger] as ActionConfig[]
-                }
-            });
-
-        dialogRef.afterClosed().subscribe(result => {
-            if (result) {
-                ((this.actions as any)[trigger] as ActionConfig[]).push(result)
-            }
-        });
-
-    }
-
-    editAction(config: ActionConfig) {
-        let component;
-        switch (config.action) {
-            case ActionType.MQTT:
-                component = ActionMqttComponent
-                break;
-            case ActionType.OUTPUT:
-                component = ActionOutputComponent
-                break;
-            case ActionType.COVER:
-                component = ActionCoverComponent
-                break;
-        }
-
-        this.dialog.open<ActionMqttComponent | ActionOutputComponent | ActionCoverComponent, any, ActionConfig>(component, {data: {config: config}});
-    }
-
-    deleteAction(trigger: string, i: number) {
-        ((this.actions as any)[trigger] as ActionConfig[]).splice(i, 1)
-    }
+  getActuatorName(action: OutputActionConfig) {
+    return this.es.getActuator(action.output)?.name
+  }
 }
 
 

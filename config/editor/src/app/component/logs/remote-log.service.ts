@@ -1,6 +1,6 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
-import {delay, filter, map, Observable, of, retry, switchMap} from "rxjs";
+import {delay, filter, map, Observable, of, retry, switchMap, timer} from "rxjs";
 import {webSocket} from "rxjs/webSocket";
 
 @Injectable({
@@ -28,9 +28,21 @@ export class RemoteLogService implements OnDestroy {
                     return this.connection$;
                 }
             }),
+
             retry({
-                delay: (errors) => errors.pipe(delay(this.RETRY_SECONDS))
+                count: 3,
+                delay: (error, count) => {
+                    // Retry forever, but with an exponential step-back
+                    // maxing out at 1 minute.
+                    return timer(Math.min(60000, 2 ^ count * 1000))
+                },
             })
+
+            /*retry({
+                delay: (errors) => {
+                    return errors.pipe(delay(this.RETRY_SECONDS));
+                }
+            })*/
         );
     }
 

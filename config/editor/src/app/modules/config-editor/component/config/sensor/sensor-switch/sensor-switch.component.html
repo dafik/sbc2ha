@@ -1,49 +1,42 @@
 <h1 mat-dialog-title>Switch sensor</h1>
 <div mat-dialog-content>
-    <form [formGroup]="platform" class="form1">
-        <mat-form-field>
-            <mat-label>Name</mat-label>
-            <input matInput [formControl]="nameCtrl">
-        </mat-form-field>
+  <form [formGroup]="platform" class="form1">
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput [formControl]="nameCtrl">
+    </mat-form-field>
 
-        <mat-form-field>
-            <mat-label>Digital input</mat-label>
-            <mat-select [formControl]="inputCtrl">
-                <mat-option *ngFor="let digital of getDigitalInputs()" value="{{digital}}">{{digital}}</mat-option>
-            </mat-select>
-        </mat-form-field>
+    <mat-form-field>
+      <mat-label>Digital input</mat-label>
+      <mat-select [formControl]="inputCtrl">
+        <mat-option *ngFor="let digital of getDigitalInputs()" value="{{digital}}">{{digital}}</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-form-field>
-            <mat-label>Click detection</mat-label>
-            <mat-select [formControl]="clickDetectionCtrl" (selectionChange)="changeClickDetection($event)">
-                <mat-option *ngFor="let detection of getClickDetection()"
-                            value="{{detection}}">{{detection}}</mat-option>
-            </mat-select>
-        </mat-form-field>
+    <mat-form-field>
+      <mat-label>Click detection</mat-label>
+      <mat-select [formControl]="clickDetectionCtrl" (selectionChange)="changeClickDetection($event)">
+        <mat-option *ngFor="let detection of getClickDetection()"
+                    value="{{detection}}">{{detection}}</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-label>Show in Ha</mat-label>
-        <mat-checkbox [formControl]="showInHaCtrl"></mat-checkbox>
+    <mat-label>Show in Ha</mat-label>
+    <mat-checkbox [formControl]="showInHaCtrl"></mat-checkbox>
 
-        <mat-form-field>
-            <mat-label>Bounce time</mat-label>
-            <input matInput [formControl]="bounceTimeCtrl">
-        </mat-form-field>
+    <mat-form-field>
+      <mat-label>Bounce time</mat-label>
+      <input matInput [formControl]="bounceTimeCtrl">
+    </mat-form-field>
 
-        <mat-form-field>
-            <mat-label>Device class</mat-label>
-            <mat-select [formControl]="deviceClassCtrl">
-                <mat-option *ngFor="let deviceClass of SwitchDeviceClassType | keyvalue"
-                            value="{{deviceClass.key}}">{{deviceClass.key}}</mat-option>
-            </mat-select>
-        </mat-form-field>
+    <app-actions-switch-list *ngIf="clickDetectionCtrl.value"
+                             [actions]="actions"
+                             [actionsType]="getActionsType(clickDetectionCtrl.value )"></app-actions-switch-list>
 
-        <app-actions-switch-list [actions]="actions" [actionsType]="getActionsType(clickDetectionCtrl.value )"
-                                 *ngIf="clickDetectionCtrl.value"></app-actions-switch-list>
-
-    </form>
+  </form>
 </div>
 <div mat-dialog-actions>
-    <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
-    <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config" [disabled]="!isValid()">Add</button>
-    <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config" [disabled]="!isValid()">Save</button>
+  <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config" [disabled]="!isValid()">Add</button>
+  <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config" [disabled]="!isValid()">Save</button>
 </div>

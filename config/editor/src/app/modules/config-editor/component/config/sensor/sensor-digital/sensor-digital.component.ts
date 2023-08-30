@@ -86,4 +86,8 @@ export class SensorDigitalComponent {
 
   protected readonly BinarySensorDeviceClassType = BinarySensorDeviceClassType;
     protected readonly zero = zero;
+
+    isValid() {
+      return this.platform.valid
+    }
 }

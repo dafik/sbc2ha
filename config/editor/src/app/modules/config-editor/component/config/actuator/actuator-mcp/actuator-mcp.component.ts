@@ -99,4 +99,8 @@ export class ActuatorMcpComponent {
   getType() {
     return [ActuatorType.LIGHT,ActuatorType.SWITCH]
   }
+
+    isValid() {
+      return this.platform.valid
+    }
 }

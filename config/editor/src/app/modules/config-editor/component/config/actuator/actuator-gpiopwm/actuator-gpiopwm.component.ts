@@ -93,4 +93,7 @@ export class ActuatorGpiopwmComponent {
     return outputs.sort((a, b) => a - b)
   }
 
+    isValid() {
+      return this.platform.valid
+    }
 }

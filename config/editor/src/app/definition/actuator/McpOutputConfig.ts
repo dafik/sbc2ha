@@ -4,7 +4,7 @@ import {ActuatorType} from "../enums/ActuatorType";
 
 
 export class McpOutputConfig extends ActuatorConfig {
-  constructor(name: string, outputType: ActuatorType, output: number) {
-    super(OutputKindType.MCP, name, outputType, output);
-  }
+    constructor(name: string, outputType: ActuatorType, output: number) {
+        super(OutputKindType.MCP, name, outputType, output);
+    }
 }

@@ -110,4 +110,7 @@ export class SensorResistanceComponent {
     }
   }
 
+    isValid() {
+      return this.platform.valid
+    }
 }

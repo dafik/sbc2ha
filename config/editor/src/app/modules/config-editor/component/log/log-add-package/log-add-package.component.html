@@ -17,5 +17,5 @@
 </div>
 <div mat-dialog-actions>
     <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
-    <button mat-raised-button color="primary" (click)="add()">{{data ? 'Save' : 'Add'}}</button>
+    <button mat-raised-button color="primary" (click)="add()" [disabled]="!isValid()">{{data ? 'Save' : 'Add'}}</button>
 </div>

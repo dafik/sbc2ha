@@ -3,6 +3,6 @@ import {PlatformType} from "../../enums/PlatformType";
 
 export class Lm75BusConfig extends I2cBusConfig {
     public constructor(busId: string, address: number) {
-        super(PlatformType.LM75,busId,address);
+        super(PlatformType.LM75, busId, address);
     }
 }

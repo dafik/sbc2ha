@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {NgModule, isDevMode} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {AppRoutingModule} from './app-routing.module';
@@ -23,6 +23,13 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {LogMonitorModule} from "./modules/log-monitor/log-monitor.module";
 import { LenghtPipe } from './shared/lenght.pipe';
 import {MatSnackBarModule} from "@angular/material/snack-bar";
+import { StoreModule } from '@ngrx/store';
+import { reducers, metaReducers } from './reducers';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { EffectsModule } from '@ngrx/effects';
+import { AppEffects } from './app.effects';
+import { Nav1Component } from './component/nav1/nav1.component';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 
 @NgModule({
@@ -35,6 +42,7 @@ import {MatSnackBarModule} from "@angular/material/snack-bar";
         LogsComponent,
         SettingsComponent,
         LenghtPipe,
+        Nav1Component,
     ],
     imports: [
         BrowserModule,
@@ -52,7 +60,11 @@ import {MatSnackBarModule} from "@angular/material/snack-bar";
         MatListModule,
         MatSlideToggleModule,
         LogMonitorModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        StoreModule.forRoot(reducers, { metaReducers }),
+        StoreDevtoolsModule.instrument(),
+        EffectsModule.forRoot([AppEffects]),
+        MatSidenavModule
     ],
     providers: [DatePipe,LenghtPipe],
     bootstrap: [LayoutComponent]

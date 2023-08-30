@@ -46,4 +46,7 @@ export class ActionMqttComponent {
         this.dialogRef.close();
     }
 
+    isValid() {
+        return this.platform.valid
+    }
 }

@@ -17,7 +17,6 @@ export class SensorSwitchComponent {
     showInHaCtrl = new FormControl(true, Validators.required);
     inputCtrl = new FormControl('1', Validators.required);
     bounceTimeCtrl = new FormControl('25ms', Validators.required);
-    deviceClassCtrl = new FormControl(SwitchDeviceClassType.NONE.valueOf(), Validators.required);
     clickDetectionCtrl = new FormControl(ButtonState.SINGLE.valueOf(), Validators.required)
 
 
@@ -27,7 +26,6 @@ export class SensorSwitchComponent {
         input: this.inputCtrl,
         clickDetection: this.clickDetectionCtrl,
         bounceTime: this.bounceTimeCtrl,
-        deviceClass: this.deviceClassCtrl
     });
     public actions: ActionsSwitch = {};
 
@@ -42,7 +40,6 @@ export class SensorSwitchComponent {
             this.showInHaCtrl.patchValue(data.config.showInHa);
             this.inputCtrl.patchValue(data.config.input.toString())
             this.bounceTimeCtrl.patchValue(data.config.bounceTime.duration)
-            this.deviceClassCtrl.patchValue(data.config.deviceClass.valueOf())
             this.clickDetectionCtrl.patchValue(data.config.clickDetection)
             if (data.config.actions) {
                 this.actions = data.config.actions
@@ -63,7 +60,6 @@ export class SensorSwitchComponent {
         config.showInHa = value.showInHa as boolean;
         config.clickDetection = value.clickDetection as ButtonState
         config.bounceTime.duration = value.bounceTime as string
-        config.deviceClass = value.deviceClass as SwitchDeviceClassType
         config.actions = this.actions
 
         this.dialogRef.close(config);
@@ -77,8 +73,9 @@ export class SensorSwitchComponent {
         config.input = Number(value.input)
         config.showInHa = value.showInHa as boolean;
         config.bounceTime.duration = value.bounceTime as string
-        config.deviceClass = value.deviceClass as SwitchDeviceClassType
         config.clickDetection = value.clickDetection as ButtonState
+
+        config.actions = this.actions
 
         this.dialogRef.close();
     }

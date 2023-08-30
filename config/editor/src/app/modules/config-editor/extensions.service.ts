@@ -18,6 +18,8 @@ import {parse} from "yaml";
 import {map} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {AppConfigFromYamlService} from "../../shared/app-config-from-yaml.service";
+import * as uuid from 'uuid';
+import {instanceToPlain, plainToInstance} from "class-transformer";
 
 @Injectable({
     providedIn: 'root'
@@ -174,7 +176,15 @@ export class ExtensionsService {
     getActuators() {
         return this.config.actuator
             .filter(value => value.kind != OutputKindType.COVER)
-            .map(value => value.name)
+            .map(value => ({
+                name: value.name,
+                output: value.output
+            }))
+    }
+
+    getActuator(output: number) {
+        return this.config.actuator
+            .find(value => value.output == output)
     }
 
     getActuatorsCover() {
@@ -215,5 +225,39 @@ export class ExtensionsService {
                     return this.as.fromYaml(parsed)
                 })
             )
+    }
+
+    asPlain(ac: AppConfig): Object {
+        let plain = instanceToPlain(ac, {
+            exposeDefaultValues: false,
+            exposeUnsetFields: false,
+
+        });
+        return plain;
+    }
+
+    asJson(obj: any) {
+        return JSON.stringify(obj)
+    }
+
+    saveConfig(ac: AppConfig) {
+        const id = uuid.v4();
+        const plain = this.asPlain(ac)
+        localStorage.setItem(id, this.asJson(plain))
+        return id
+    }
+
+    loadConfig(uuid: string) {
+        let item = localStorage.getItem(uuid);
+        if (item) {
+            let parsed = JSON.parse(item);
+
+            let appConfig: AppConfig = plainToInstance(AppConfig, parsed, {exposeUnsetFields: false});
+
+            let appConfigOld = new AppConfig();
+            Object.assign(appConfigOld, parsed)
+            this.setConfig(appConfig);
+        }
+
     }
 }

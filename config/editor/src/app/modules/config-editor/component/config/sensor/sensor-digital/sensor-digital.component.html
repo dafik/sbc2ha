@@ -1,6 +1,7 @@
 <h1 mat-dialog-title>Binary sensor</h1>
 <div mat-dialog-content>
   <form [formGroup]="platform" class="form1">
+
     <mat-form-field>
       <mat-label>Name</mat-label>
       <input matInput [formControl]="nameCtrl">
@@ -36,6 +37,6 @@
 </div>
 <div mat-dialog-actions>
   <button mat-raised-button color="warn" (click)="onNoClick()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config">Add</button>
-  <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config">Save</button>
+  <button mat-raised-button color="primary" (click)="add()" *ngIf="!data?.config" [disabled]="!isValid()">Add</button>
+  <button mat-raised-button color="primary" (click)="edit()" *ngIf="data?.config" [disabled]="!isValid()">Save</button>
 </div>

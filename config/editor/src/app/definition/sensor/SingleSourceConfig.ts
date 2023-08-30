@@ -3,10 +3,10 @@ import {PlatformType} from "../enums/PlatformType";
 
 
 export abstract class SingleSourceConfig extends ScalarSensorConfig {
-  sensor: string;
+    sensor: string;
 
-  protected constructor(platform: PlatformType, name: string, sensor: string) {
-    super(platform, name);
-    this.sensor = sensor;
-  }
+    protected constructor(platform: PlatformType, name: string, sensor: string) {
+        super(platform, name);
+        this.sensor = sensor;
+    }
 }

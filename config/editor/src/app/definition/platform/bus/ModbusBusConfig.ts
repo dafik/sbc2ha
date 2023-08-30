@@ -4,11 +4,11 @@ import {PlatformType} from "../../enums/PlatformType";
 
 
 export class ModbusBusConfig extends BusConfig {
-  private static BUS_ID: string = "modbus";
-  uart: UartType
+    private static BUS_ID: string = "modbus";
+    uart: UartType
 
-  public constructor(uart: UartType) {
-    super(PlatformType.MODBUS, ModbusBusConfig.BUS_ID);
-    this.uart = uart;
-  }
+    public constructor(uart: UartType) {
+        super(PlatformType.MODBUS, ModbusBusConfig.BUS_ID);
+        this.uart = uart;
+    }
 }

@@ -42,4 +42,8 @@ export class LogAddPackageComponent {
     }
 
     protected readonly LogLevel = LogLevel;
+
+    isValid() {
+        return this.platform.valid
+    }
 }

@@ -75,4 +75,8 @@ export class SensorAnalogComponent {
     }
     return analogInputs.sort()
   }
+
+    isValid() {
+      return this.platform.valid
+    }
 }

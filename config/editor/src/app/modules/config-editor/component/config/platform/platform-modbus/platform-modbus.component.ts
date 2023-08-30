@@ -51,4 +51,8 @@ export class PlatformModbusComponent {
 
     protected readonly UartType = UartType;
     protected readonly zero = zero;
+
+    isValid() {
+        return this.platform.valid
+    }
 }

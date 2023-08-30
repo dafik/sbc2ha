@@ -47,4 +47,7 @@ export class ActionCoverComponent {
     this.dialogRef.close();
   }
 
+    isValid() {
+      return this.platform.valid
+    }
 }

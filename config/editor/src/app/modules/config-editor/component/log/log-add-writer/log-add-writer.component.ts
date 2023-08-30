@@ -57,4 +57,8 @@ export class LogAddWriterComponent {
             this.formatCtrl.patchValue(newVar)
         }
     }
+
+    isValid() {
+        return this.platform.valid
+    }
 }

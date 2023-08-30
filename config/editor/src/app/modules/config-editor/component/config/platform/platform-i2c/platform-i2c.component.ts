@@ -61,4 +61,7 @@ export class PlatformI2cComponent {
     this.dialogRef.close();
   }
 
+  isValid() {
+    return this.platform.valid
+  }
 }

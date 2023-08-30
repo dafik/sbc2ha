@@ -97,4 +97,8 @@ export class ActuatorGpioComponent {
   getType() {
     return [ActuatorType.LIGHT,ActuatorType.SWITCH]
   }
+
+    isValid() {
+      return this.platform.valid
+    }
 }

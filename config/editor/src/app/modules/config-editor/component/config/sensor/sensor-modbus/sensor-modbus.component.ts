@@ -104,6 +104,10 @@ export class SensorModbusComponent {
   getModels() {
     return ["sdm630"]
   }
+
+    isValid() {
+      return this.platform.valid
+    }
 }
 
 

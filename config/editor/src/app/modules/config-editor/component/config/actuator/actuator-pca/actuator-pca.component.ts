@@ -98,4 +98,8 @@ export class ActuatorPcaComponent {
   getType() {
     return [ActuatorType.LIGHT,ActuatorType.SWITCH,ActuatorType.LED]
   }
+
+    isValid() {
+      return this.platform.valid
+    }
 }
