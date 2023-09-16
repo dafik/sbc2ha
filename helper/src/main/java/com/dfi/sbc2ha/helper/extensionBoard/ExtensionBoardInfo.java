@@ -1,5 +1,6 @@
 package com.dfi.sbc2ha.helper.extensionBoard;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
+@Getter
 public class ExtensionBoardInfo {
     private static final String PIN_SEPARATOR = "_";
     private static ExtensionBoardInfo instance;
@@ -18,11 +20,20 @@ public class ExtensionBoardInfo {
     private final ExtensionInputBoard in;
     private final ExtensionOutputBoard out;
 
+    private final boolean fake;
+
 
     private ExtensionBoardInfo(String vendor, ExtensionInputBoard in, ExtensionOutputBoard out) {
         this.vendor = vendor;
         this.in = in;
         this.out = out;
+
+        this.fake = vendor.equals("fake");
+        if(this.fake) {
+            System.getProperties().setProperty("diozero.devicefactory", "com.diozero.devices.fake.FakeDeviceFactory");
+        }
+
+
     }
 
     public static void initialize(String vendor, String inputBoard, String outputBoard) {
@@ -32,15 +43,17 @@ public class ExtensionBoardInfo {
             ExtensionOutputBoard out = ExtensionOutputBoard.ofBoneIo(loadBoardPinInfoDefinition("extensionBoardDef/" + vendor + "/" + outputBoard + ".txt"));
 
             instance = new ExtensionBoardInfo(vendor, in, out);
-            return;
-        } else if (vendor.equals("rpi")) {
+        } else if(Objects.equals(vendor, "rpi")){
             ExtensionInputBoard in = ExtensionInputBoard.ofRpi(loadBoardPinInfoDefinition("extensionBoardDef/" + vendor + "/" + inputBoard + ".txt"));
             ExtensionOutputBoard out = ExtensionOutputBoard.ofRpi(loadBoardPinInfoDefinition("extensionBoardDef/" + vendor + "/" + outputBoard + ".txt"));
 
             instance = new ExtensionBoardInfo(vendor, in, out);
-            return;
+        } else {
+            ExtensionInputBoard in = ExtensionInputBoard.of(loadBoardPinInfoDefinition("extensionBoardDef/" + vendor + "/" + inputBoard + ".txt"));
+            ExtensionOutputBoard out = ExtensionOutputBoard.of(loadBoardPinInfoDefinition("extensionBoardDef/" + vendor + "/" + outputBoard + ".txt"));
+
+            instance = new ExtensionBoardInfo(vendor, in, out);
         }
-        instance = new ExtensionBoardInfo(vendor, null, null);
     }
 
     public static ExtensionBoardInfo getInstance() {
@@ -106,6 +119,7 @@ public class ExtensionBoardInfo {
         }
         return id;
     }
+
     public int getOutputRpiByGpio(int gpio) {
         int id = getOut().getByGpioId(gpio);
         if (id == -1) {
@@ -114,11 +128,5 @@ public class ExtensionBoardInfo {
         return id;
     }
 
-    public ExtensionInputBoard getIn() {
-        return in;
-    }
 
-    public ExtensionOutputBoard getOut() {
-        return out;
-    }
 }

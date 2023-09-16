@@ -1,8 +1,8 @@
 package com.dfi.sbc2ha.config.boneio.definition;
 
+import com.dfi.sbc2ha.config.boneio.definition.enums.LogLevelType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.tinylog.Level;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +11,8 @@ import java.util.Map;
 public class BoneIoLoggerConfig {
 
     @JsonProperty("default")
-    Level defaultLevel;
-    Map<String, String> logs = new HashMap<>();
+    LogLevelType defaultLevel;
+    Map<String, LogLevelType> logs = new HashMap<>();
 /*
 logger:
   default: INFO

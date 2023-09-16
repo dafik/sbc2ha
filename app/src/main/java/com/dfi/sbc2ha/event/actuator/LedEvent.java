@@ -1,8 +1,8 @@
 package com.dfi.sbc2ha.event.actuator;
 
 import com.dfi.sbc2ha.event.StateEvent;
-import com.dfi.sbc2ha.helper.ha.autodiscovery.message.LedAvailability;
-import com.dfi.sbc2ha.state.actuator.ActuatorState;
+import com.dfi.sbc2ha.components.platform.ha.autodiscovery.message.LedAvailability;
+import com.dfi.sbc2ha.services.state.actuator.ActuatorState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.NoArgsConstructor;

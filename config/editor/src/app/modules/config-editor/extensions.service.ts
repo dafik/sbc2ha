@@ -218,13 +218,22 @@ export class ExtensionsService {
     }
 
     public getCurrentConfig() {
-        return this.hc.get("/api/config/yaml", {observe: "body", responseType: "text"})
+        return this.hc.get("/api/config/json", {observe: "body", responseType: "text"})
+            .pipe(
+                map(src => {
+                    let parsed = parse(src);
+                    let appConfig: AppConfig = plainToInstance(AppConfig, parsed, {exposeUnsetFields: false});
+                    return appConfig
+                })
+            )
+
+        /*return this.hc.get("/api/config/yaml", {observe: "body", responseType: "text"})
             .pipe(
                 map(src => {
                     let parsed = parse(src);
                     return this.as.fromYaml(parsed)
                 })
-            )
+            )*/
     }
 
     asPlain(ac: AppConfig): Object {

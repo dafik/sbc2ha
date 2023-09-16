@@ -1,8 +1,8 @@
 package com.dfi.sbc2ha.config.sbc2ha.definition;
 
+import com.dfi.sbc2ha.config.sbc2ha.definition.enums.LogLevelType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.tinylog.Level;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +11,8 @@ import java.util.Map;
 public class LoggerConfig {
 
     @JsonProperty("default")
-    Level defaultLevel;
-    Map<String, String> logs = new HashMap<>();
+    LogLevelType defaultLevel;
+    Map<String, LogLevelType> logs = new HashMap<>();
     Map<String, String> writer = new HashMap<>();
     //writerConsole.format = {date:HH:mm:ss.SSS} [{thread|size=30}] {level|size=5} {class|size=50}::{method|size=35} - {message}
 

@@ -4,3 +4,6 @@
 mat-list{
   background-color: #333333;
 }
+.mat-mdc-snack-bar-container.error .mdc-snackbar__surface{
+  background-color: red !important;
+}

@@ -15,10 +15,10 @@ import {PCA9685BusConfig} from "../../../../../../definition/platform/bus/PCA968
 })
 export class PlatformI2cComponent {
   busIdCtrl = new FormControl('', Validators.required);
-  addressCtrl = new FormControl(0x20, Validators.required);
+  addressCtrl = new FormControl('0x20', Validators.required);
   platform = this._formBuilder.group({
     busId: this.busIdCtrl,
-    uart: this.addressCtrl
+    address: this.addressCtrl
   });
 
   constructor(private _formBuilder: FormBuilder,
@@ -26,7 +26,7 @@ export class PlatformI2cComponent {
               @Inject(MAT_DIALOG_DATA) public data: { config: I2cBusConfig, platformType: PlatformType },) {
     if (data?.config) {
       this.busIdCtrl.patchValue(data.config.busId);
-      this.addressCtrl.patchValue(data.config.address)
+      this.addressCtrl.patchValue(data.config.address.toString(16))
     }
   }
 
@@ -39,13 +39,13 @@ export class PlatformI2cComponent {
 
     let config: I2cBusConfig;
     if (this.data.platformType == PlatformType.DS2482) {
-      config = new Ds2482BusConfig(value.busId as string, value.uart as number)
+      config = new Ds2482BusConfig(value.busId as string, parseInt(value.address as string,16))
     } else if (this.data.platformType == PlatformType.LM75) {
-      config = new Lm75BusConfig(value.busId as string, value.uart as number)
+      config = new Lm75BusConfig(value.busId as string, parseInt(value.address as string,16))
     } else if (this.data.platformType == PlatformType.MCP23017) {
-      config = new Mcp23017BusConfig(value.busId as string, value.uart as number)
+      config = new Mcp23017BusConfig(value.busId as string, parseInt(value.address as string,16))
     } else if (this.data.platformType == PlatformType.PCA9685) {
-      config = new PCA9685BusConfig(value.busId as string, value.uart as number)
+      config = new PCA9685BusConfig(value.busId as string, parseInt(value.address as string,16))
     } else {
       throw "bad bus config " + this.data.platformType
     }
@@ -56,6 +56,7 @@ export class PlatformI2cComponent {
     let value = this.platform.value;
     let config: I2cBusConfig = this.data.config;
     config.busId = value.busId as string
+    config.address = parseInt(value.address as string,16)
 
 
     this.dialogRef.close();

@@ -1,18 +1,19 @@
 package com.dfi.sbc2ha.helper.detector;
 
-import com.dfi.sbc2ha.sensor.Sensor;
+import com.dfi.sbc2ha.components.sensor.Sensor;
+import com.dfi.sbc2ha.components.sensor.binary.click.detector.LongClickDetector;
 import com.diozero.util.SleepUtil;
-import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 
 import java.util.function.LongConsumer;
 
-import static com.dfi.sbc2ha.sensor.binary.Button.DOUBLE_CLICK_DURATION_MS;
-import static com.dfi.sbc2ha.sensor.binary.Button.LONG_PRESS_DURATION_MS;
+import static com.dfi.sbc2ha.components.sensor.binary.Button.DOUBLE_CLICK_DURATION_MS;
+import static com.dfi.sbc2ha.components.sensor.binary.Button.LONG_PRESS_DURATION_MS;
 
 @Slf4j
-public class LongClickDetectorTest extends TestCase {
+public class LongClickDetectorTest  {
     LongConsumer release = (e) -> log.info("release");
     LongConsumer click = (e) -> log.info("click");
     LongConsumer doubleClick = (e) -> log.info("doubleClick");

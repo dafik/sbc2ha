@@ -1,13 +1,15 @@
-<h2>logs</h2>
-
-<log-monitor
-        [logStream]="messages$ | async"
-        theme="dark"
-        title="Device logs"
-        [animated]="true"
-        [icons]="false"
-        [history]="restoredLogs"
-></log-monitor>
+<mat-card>
+  <mat-card-content>
+    <log-monitor
+      [logStream]="messages$ | async"
+      theme="dark"
+      title="Device logs"
+      [animated]="true"
+      [icons]="false"
+      [history]="restoredLogs"
+    ></log-monitor>
+  </mat-card-content>
+</mat-card>
 
 <!--
 <mat-list>

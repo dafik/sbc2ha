@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.event.actuator;
 
-import com.dfi.sbc2ha.actuator.Cover;
+import com.dfi.sbc2ha.components.actuator.Cover;
 import com.dfi.sbc2ha.event.StateEvent;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Getter;

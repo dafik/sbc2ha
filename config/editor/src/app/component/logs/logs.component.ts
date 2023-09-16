@@ -4,6 +4,8 @@ import {Observable, Subject, takeUntil} from "rxjs";
 import {LogMessage} from "../../modules/log-monitor/models/log-message.model";
 import {DatePipe} from "@angular/common";
 import {LenghtPipe} from "../../shared/lenght.pipe";
+import {environment} from "../../../environments/environment";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
 
@@ -22,20 +24,25 @@ export class LogsComponent implements OnDestroy, OnInit {
 
     constructor(public ls: RemoteLogService,
                 public date: DatePipe,
-                public length: LenghtPipe
+                public length: LenghtPipe,
+                public snackBar:MatSnackBar
     ) {
 
     }
 
 
     ngOnInit() {
-        this.ls.connect()
-            .pipe(
-                takeUntil(this.destroyed$)
-            )
-            .subscribe(message => {
-                this.addMessage(message);
-            });
+        if(!environment.webOnly!) {
+            this.ls.connect()
+                .pipe(
+                    takeUntil(this.destroyed$)
+                )
+                .subscribe(message => {
+                    this.addMessage(message);
+                });
+        }else {
+            this.snackBar.open("Log viewer unavailable in webOnly preview","Ok, i understand",{panelClass:'error'})
+        }
     }
 
 

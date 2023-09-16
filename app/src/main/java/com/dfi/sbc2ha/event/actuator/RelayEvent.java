@@ -1,11 +1,11 @@
 package com.dfi.sbc2ha.event.actuator;
 
 import com.dfi.sbc2ha.event.StateEvent;
-import com.dfi.sbc2ha.state.actuator.ActuatorState;
+import com.dfi.sbc2ha.services.state.actuator.ActuatorState;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.NoArgsConstructor;
 
-import static com.dfi.sbc2ha.state.actuator.ActuatorState.ON;
+import static com.dfi.sbc2ha.services.state.actuator.ActuatorState.ON;
 
 @NoArgsConstructor
 @JsonTypeName("relay")

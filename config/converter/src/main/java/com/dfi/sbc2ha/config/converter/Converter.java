@@ -82,7 +82,7 @@ public class Converter {
             return boneIoConfig;
         } catch (URISyntaxException | IOException | RuntimeException e) {
             log.error("load config failed {}", e.getMessage());
-            System.exit(1);
+            //System.exit(1);
             throw new IllegalArgumentException(e);
         }
     }

@@ -43,6 +43,19 @@ public class ExtensionOutputBoard {
         }
         return extensionOutputBoard;
     }
+    public static ExtensionOutputBoard of(List<String[]> entries) {
+        ExtensionOutputBoard extensionOutputBoard = new ExtensionOutputBoard();
+
+        for (var entry : entries) {
+            int gpio = Integer.parseInt(entry[2]);
+            String type = entry[3].toUpperCase();
+            OutputDefinition od = new OutputDefinition(type, -1, gpio);
+
+
+            extensionOutputBoard.add(Integer.parseInt(entry[0]), od);
+        }
+        return extensionOutputBoard;
+    }
 
 
     public OutputDefinition get(int outputNumber) {

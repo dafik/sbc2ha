@@ -16,9 +16,17 @@ import java.util.stream.Collectors;
 
 @Data
 public class AppConfig {
+
+    /**
+     * Definition of extension board
+     */
     @JsonProperty("extension_boards")
     ExtensionBoardsConfig extensionBoards;
 
+    /**
+     * List of platforms
+     * @see PlatformConfig
+     */
     List<PlatformConfig> platform = new ArrayList<>();
     List<SensorConfig> sensor = new ArrayList<>();
     List<ActuatorConfig> actuator = new ArrayList<>();

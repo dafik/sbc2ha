@@ -1,7 +1,7 @@
 package com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital;
 
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.ButtonState;
-import com.dfi.sbc2ha.config.sbc2ha.definition.enums.InputKindType;
+import com.dfi.sbc2ha.config.sbc2ha.definition.enums.PlatformType;
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.deviceClass.ha.SwitchDeviceClassType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -18,7 +18,6 @@ public class InputSwitchConfig extends InputConfig<InputSwitchAction> {
     private SwitchDeviceClassType deviceClass;
 
     public InputSwitchConfig() {
-        super();
-        kind = InputKindType.SWITCH;
+        super(PlatformType.SWITCH);
     }
 }

@@ -5,6 +5,5 @@ org.tinylog.writers.LogcatWriter
 org.tinylog.writers.RollingFileWriter
 org.tinylog.writers.SharedFileWriter
 org.tinylog.writers.JsonWriter
-com.dfi.sbc2ha.log.BlackHoleWriter
-
-
+com.dfi.sbc2ha.services.log.BlackHoleWriter
+com.dfi.sbc2ha.services.log.RxWriter

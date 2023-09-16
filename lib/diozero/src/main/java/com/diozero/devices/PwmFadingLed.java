@@ -61,6 +61,8 @@ public class PwmFadingLed extends PwmOutputDevice {
     private final AtomicBoolean runningEasing = new AtomicBoolean();
     private final List<Consumer<PwmEvent>> changeListeners = new ArrayList<>();
 
+    private final int gpioNr;
+
     private Future<?> easingFuture;
 
     private AtomicInteger cylcle = new AtomicInteger(0);
@@ -81,6 +83,7 @@ public class PwmFadingLed extends PwmOutputDevice {
      */
     public PwmFadingLed(int gpio, float initialValue) throws RuntimeIOException {
         super(gpio, initialValue);
+        this.gpioNr = gpio;
     }
 
     /**
@@ -101,11 +104,13 @@ public class PwmFadingLed extends PwmOutputDevice {
     public PwmFadingLed(PwmOutputDeviceFactoryInterface deviceFactory, int gpio, float initialValue)
             throws RuntimeIOException {
         super(deviceFactory, gpio, initialValue);
+        this.gpioNr = gpio;
     }
 
     public PwmFadingLed(PwmOutputDeviceFactoryInterface deviceFactory, int gpio, int pwmFrequency, float initialValue)
             throws RuntimeIOException {
         super(deviceFactory, gpio, pwmFrequency, initialValue);
+        this.gpioNr = gpio;
     }
 
     @Override
@@ -157,17 +162,18 @@ public class PwmFadingLed extends PwmOutputDevice {
         stopEasing();
         final int c = cylcle.incrementAndGet();
 
-        log.trace("c={} new background request", c);
+
+        log.trace("gpio:{}  c={} new background request", gpioNr, c);
         easingFuture = Scheduler.getInstance().submit(() -> {
             try {
                 lock.lock();
                 runnable.run();
-                log.trace("c={} Background easing finished bright: {}", c, this.getValue());
+                log.trace("gpio:{} c={} Background easing finished bright: {}", gpioNr, c, this.getValue());
             } finally {
                 lock.unlock();
             }
         });
-        log.trace("c={} Background submited", c);
+        log.trace("gpio:{} c={} Background submited", gpioNr, c);
     }
 
     private void stopEasing() {
@@ -179,7 +185,7 @@ public class PwmFadingLed extends PwmOutputDevice {
 
     public void effect(EasingType easingType, EasingVariant easingVariant, float step, float duration, float maxBrightness, boolean increasing) {
 
-        log.debug(" effect: {}:{}, step: {}, duration: {}, max: {}, direction:{}", easingType, easingVariant, step, duration, maxBrightness, increasing ? "On" : "Off");
+        log.debug("gpio:{} effect: {}:{}, step: {}, duration: {}, max: {}, direction:{}", gpioNr, easingType, easingVariant, step, duration, maxBrightness, increasing ? "On" : "Off");
         int steps = 100;
         float sleepTime = duration / steps;
         runningEasing.getAndSet(true);
@@ -189,7 +195,7 @@ public class PwmFadingLed extends PwmOutputDevice {
             float value = getValue();
             int compare = floatComparator.compare(value, increasing ? maxBrightness : 0);
             while (compare > 0 && runningEasing.get()) {
-                log.trace(" value: {}, step:{}",  value, step);
+                log.trace("gpio:{}  value: {}, step:{}", gpioNr, value, step);
                 setValueInternal(value, step, easingType, easingVariant);
                 SleepUtil.sleepSeconds(sleepTime);
                 if (increasing) {
@@ -201,17 +207,17 @@ public class PwmFadingLed extends PwmOutputDevice {
                 compare = floatComparator.compare(value, increasing ? maxBrightness : 0);
             }
             if (runningEasing.get()) {
-                log.trace(" value: {}, step:{}",  maxBrightness, duration);
+                log.trace("gpio:{} value: {}, step:{}", gpioNr, maxBrightness, duration);
                 setValueInternal(increasing ? maxBrightness : 0, duration, easingType, easingVariant);
             }
             if (compare > 0) {
-                log.trace("interuped by runningEasing val:{} ", value);
+                log.trace("gpio:{} interuped by runningEasing val:{} ", gpioNr, value);
             }
             //setValueInternal(toBrightness);
             runningEasing.getAndSet(false);
         } catch (RuntimeInterruptedException e) {
             runningEasing.set(false);
-            log.trace(" interrupted by thread");
+            log.trace("gpio:{}  interrupted by thread", gpioNr);
             //log.error(e);
         }
 
@@ -220,10 +226,10 @@ public class PwmFadingLed extends PwmOutputDevice {
 
     @Override
     public void close() {
-        log.trace("close()");
+        log.trace("gpio:{} close()", gpioNr);
         stopEasing();
         if (easingFuture != null) {
-            log.debug("Interrupting easing thread ");
+            log.debug("gpio:{} Interrupting easing thread", gpioNr);
             easingFuture.cancel(true);
         }
 

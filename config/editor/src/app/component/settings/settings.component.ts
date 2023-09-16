@@ -1,42 +1,74 @@
 import {Component} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {environment} from "../../../environments/environment";
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.scss']
+    selector: 'app-settings',
+    templateUrl: './settings.component.html',
+    styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent {
 
 
-  constructor(private http: HttpClient, private router: Router) {
-  }
+    constructor(private http: HttpClient, private router: Router, public snackBar: MatSnackBar) {
+    }
 
-  reload() {
-    this.http.get("/api/reload").subscribe(value => {
-      this.router.navigate(['/logs']);
-    })
+    reload() {
+        if (environment.webOnly!) {
+            this.webOnly();
+        } else {
+            this.http.get("/api/reload").subscribe(value => {
+                this.router.navigate(['/logs']);
+            })
+        }
 
-  }
+    }
 
-  restart() {
-    this.http.get("/api/restart").subscribe(value => {
-      this.router.navigate(['/logs']);
-    })
-  }
+    restart() {
+        if (environment.webOnly!) {
+            this.webOnly();
+        } else if (environment.site!) {
+            this.site();
+        } else {
+            this.http.get("/api/restart").subscribe(value => {
+                this.router.navigate(['/logs']);
+            })
+        }
+    }
 
-  stop() {
-    this.http.get("/api/stop").subscribe()
-  }
+    stop() {
+        if (environment.webOnly!) {
+            this.webOnly();
+        } else if (environment.site!) {
+            this.site();
+        } else {
+            this.http.get("/api/stop").subscribe()
+        }
+    }
 
-  clearStateCache() {
-    this.http.get("/api/clear/states").subscribe()
-  }
+    clearStateCache() {
+        if (environment.webOnly!) {
+            this.webOnly();
+        } else {
+            this.http.get("/api/clear/states").subscribe()
+        }
+    }
 
-  clearConfigCache() {
-    this.http.get("/api/clear/config").subscribe()
-  }
+    clearConfigCache() {
+        if (environment.webOnly!) {
+            this.webOnly();
+        } else {
+            this.http.get("/api/clear/config").subscribe()
+        }
+    }
 
+    webOnly() {
+        this.snackBar.open("unavailable in webOnly preview", "Ok, i understand", {panelClass: 'error'})
+    }
 
+    site() {
+        this.snackBar.open("unavailable in docker", "Ok, i understand", {panelClass: 'error'})
+    }
 }

@@ -178,8 +178,13 @@ public class BoneIoConverter {
 
     static LoggerConfig getLogger(BoneIoLoggerConfig s) {
         LoggerConfig d = new LoggerConfig();
-        d.setDefaultLevel(s.getDefaultLevel());
-        Map<String, String> logs = new LinkedHashMap<>(s.getLogs());
+        d.setDefaultLevel(LogLevelType.valueOf(s.getDefaultLevel().level));
+        Map<String, com.dfi.sbc2ha.config.boneio.definition.enums.LogLevelType> logs1 = s.getLogs();
+
+        Map<String, LogLevelType> logs = new LinkedHashMap<>();
+        s.getLogs().forEach((s1, logLevelType) -> {
+            logs.put(s1,LogLevelType.valueOf(s.getDefaultLevel().level));
+        });
         d.setLogs(logs);
         return d;
     }

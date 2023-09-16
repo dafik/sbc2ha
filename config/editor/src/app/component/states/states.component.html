@@ -1,24 +1,49 @@
-<mat-grid-list cols="2" rowHeight="2:1">
-    <mat-grid-tile>
-        <mat-list>
-            <mat-list-item>
-                <span matListItemTitle>Actuators</span>
-            </mat-list-item>
-            <mat-list-item *ngFor="let actuator of actuators$ | async">
-                <span matListItemTitle>{{actuator.name}}</span>
-                <span matListItemLine>{{actuator.kind}} ({{actuator.output}})</span>
-                <span matListItemMeta><mat-slide-toggle>Slide me!</mat-slide-toggle></span>
-            </mat-list-item>
-        </mat-list>
-    </mat-grid-tile>
-    <mat-grid-tile>
-        <mat-list>
-            <mat-list-item>
-                <span matListItemTitle>Sensors</span>
-            </mat-list-item>
-            <mat-list-item *ngFor="let sensor of sensors$ | async">
-                <span matListItemTitle>{{sensor.name}}</span>
-            </mat-list-item>
-        </mat-list>
-    </mat-grid-tile>
-</mat-grid-list>
+<div class="card-container">
+  <mat-card class="stateCard">
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item>
+          <span matListItemTitle>Actuators</span>
+        </mat-list-item>
+        <mat-list-item *ngFor="let actuator of actuators$ | async">
+          <span matListItemTitle>{{actuator.name}}</span>
+          <span matListItemLine>{{actuator.kind}} ({{actuator.output}})</span>
+          <span matListItemMeta><mat-slide-toggle (change)="onChange($event,actuator.output)"
+                                                  [checked]="getActuatorState(actuator.output.toString())"
+                                                  color="primary">Enabled</mat-slide-toggle></span>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="stateCard">
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item>
+          <span matListItemTitle>Sensors</span>
+        </mat-list-item>
+        <mat-list-item *ngFor="let sensor of sensors$ | async">
+          <span matListItemTitle>{{sensor.name}}</span>
+          <span matListItemLine *ngIf="isSwitch(sensor)">
+                <mat-select (selectionChange)="onStateChange($event,sensor)" placeholder="choose event ...">
+                  <mat-option *ngFor="let output of ButtonState | keyvalue"
+                              value="{{output.value}}">{{output.value}}</mat-option>
+                </mat-select>
+            </span>
+
+          <span matListItemLine *ngIf="isDigital(sensor)">
+                 <mat-select (selectionChange)="onStateChange($event,sensor)" placeholder="choose event ...">
+                   <mat-option *ngFor="let output of InputSensorAction | keyvalue"
+                               value="{{output.value}}">{{output.value}}</mat-option>
+                   </mat-select>
+            </span>
+          <span matListItemMeta *ngIf="isBinary(sensor)">
+                <button mat-raised-button color="primary" (click)="sendEvent(sensor)"
+                        [disabled]="!isStateSelected(sensor)">send
+                </button>
+            </span>
+          <span matListItemMeta *ngIf="!isBinary(sensor)">{{getSensorState(sensor.name.toString())}}</span>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+</div>

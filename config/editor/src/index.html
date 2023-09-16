@@ -1,17 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Editor</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!--<link rel="icon" type="image/x-icon" href="favicon.ico">-->
-  <link rel="icon" type="image/png" href="/assets/icon.png">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta charset="utf-8">
+    <title>Editor</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8rem
+        }
+
+        .loader-child {
+            margin: auto
+        }
+
+        .loader img {
+            animation: zoomInOut 1s ease infinite
+        }
+    </style>
+    <!--<link rel="icon" type="image/x-icon" href="favicon.ico">-->
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body class="mat-typography">
-<app-layout></app-layout>
+<app-layout>
+    <!--<div class="loader"></div>-->
+    <div class="loader">
+        <div class="loader-child">
+            <!--<img src="/assets/icon.png" alt="Angular Logo" width="200px">-->
+            <img src="data:image/png;base64, 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"/>
+        </div>
+    </div>
+</app-layout>
 </body>
 </html>

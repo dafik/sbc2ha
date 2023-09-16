@@ -11,7 +11,8 @@ public enum PlatformType {
     OLED,
     MQTT,
     PCA9685,
-    GPIO,
+    SWITCH,
+    DIGITAL,
     RESISTANCE,
     NTC
 }

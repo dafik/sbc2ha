@@ -4,3 +4,28 @@
 mat-list{
   background-color: #333333;
 }
+
+.content {
+  display: flex;
+  margin: 82px auto 32px;
+  padding: 0 16px;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+
+
+
+.stateCard {
+  width: 25rem ;
+  margin-left: 1rem;
+}

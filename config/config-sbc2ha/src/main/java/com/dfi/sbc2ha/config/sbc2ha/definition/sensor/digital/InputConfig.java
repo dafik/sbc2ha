@@ -1,7 +1,6 @@
 package com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital;
 
 import com.dfi.sbc2ha.config.sbc2ha.definition.action.ActionConfig;
-import com.dfi.sbc2ha.config.sbc2ha.definition.enums.InputKindType;
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.PlatformType;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.SensorConfig;
 import com.dfi.sbc2ha.helper.deserializer.DurationDeserializer;
@@ -34,7 +33,6 @@ import java.util.Map;
 @Setter
 public abstract class InputConfig<E extends InputAction> extends SensorConfig {
 
-    protected InputKindType kind;
     int input;
 
 
@@ -46,9 +44,9 @@ public abstract class InputConfig<E extends InputAction> extends SensorConfig {
     boolean inverted = false;
     Map<E, List<ActionConfig>> actions = new HashMap<>();
 
-    public InputConfig() {
+    public InputConfig(PlatformType platformType) {
         super();
-        platform = PlatformType.GPIO;
+        platform = platformType;
     }
 
     public List<ActionConfig> getEventActions(E action) {

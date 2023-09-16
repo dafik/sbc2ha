@@ -17,6 +17,7 @@
         <module>converter</module>
         <module>config-boneio</module>
         <module>config-sbc2ha</module>
+        <module>editor</module>
     </modules>
 
 

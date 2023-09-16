@@ -13,7 +13,9 @@ function logProvider() { //(2)
 const PROXY_CONF = {
   "/api": {
     target: "http://localhost:8080",
-    secure: false
+    secure: false,
+    logLevel: 'debug',
+    logProvider: logProvider,
   },
   "/ws": {
     target: "ws://localhost:8080",

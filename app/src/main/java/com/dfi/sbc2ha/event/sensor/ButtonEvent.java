@@ -1,7 +1,7 @@
 package com.dfi.sbc2ha.event.sensor;
 
 import com.dfi.sbc2ha.event.StateEvent;
-import com.dfi.sbc2ha.state.sensor.ButtonState;
+import com.dfi.sbc2ha.services.state.sensor.ButtonState;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("button")

@@ -62,7 +62,29 @@
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
+            },
+            "webonly": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.webonly.ts"
+                }
+              ]
+            },
+            "site": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.site.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -75,6 +97,9 @@
             },
             "development": {
               "browserTarget": "editor:build:development"
+            },
+            "webonly": {
+              "browserTarget": "editor:build:webonly"
             }
           },
           "defaultConfiguration": "development"

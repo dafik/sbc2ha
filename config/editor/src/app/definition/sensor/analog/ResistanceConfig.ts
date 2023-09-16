@@ -10,7 +10,6 @@ export class ResistanceConfig extends SingleSourceConfig {
     @Expose({name: "reference_voltage"})
     referenceVoltage: string;
 
-
     constructor(name: string, sensor: string, direction: ResistanceDirectionType, resistor: string, referenceVoltage: string) {
         super(PlatformType.RESISTANCE, name, sensor);
         this.direction = direction;

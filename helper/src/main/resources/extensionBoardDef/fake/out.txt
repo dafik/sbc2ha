@@ -1,0 +1,6 @@
+# OUT, MCP NR, PIN kind: mcp
+1,,11,gpio
+2,,12,gpio
+3,,13,gpio
+4,,14,gpio
+5,,15,gpio

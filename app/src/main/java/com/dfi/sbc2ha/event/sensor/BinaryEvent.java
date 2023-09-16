@@ -1,7 +1,7 @@
 package com.dfi.sbc2ha.event.sensor;
 
 import com.dfi.sbc2ha.event.StateEvent;
-import com.dfi.sbc2ha.state.sensor.BinaryState;
+import com.dfi.sbc2ha.services.state.sensor.BinaryState;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("binary")

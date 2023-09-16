@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatAccordion} from "@angular/material/expansion";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AppConfig} from "../../../../definition/AppConfig";
@@ -8,7 +8,8 @@ import {YamlPipe} from "../../yaml.pipe";
 import {JsonDPipe} from "../../json-d.pipe";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {LogLevel} from "../../../../definition/enums/LogLevel";
-import {saveAs} from "file-saver";
+import {saveAs} from "file-saver-es";
+import {environment} from "../../../../../environments/environment";
 
 
 @Component({
@@ -16,7 +17,7 @@ import {saveAs} from "file-saver";
     templateUrl: './edit.component.html',
     styleUrls: ['./edit.component.scss']
 })
-export class EditComponent {
+export class EditComponent implements OnInit{
     @ViewChild(MatAccordion) accordion: MatAccordion = {} as MatAccordion
 
     public appConfig: AppConfig;
@@ -61,11 +62,18 @@ export class EditComponent {
                 } else if (isSaved(params)) {
                     this.es.loadConfig(params.uuid)
                 }
-                this.appConfig = this.es.getConfig()
+                let config = this.es.getConfig();
+                if(config) {
+                    this.appConfig = config
+                }
             });
     }
 
     uploadToCache() {
+        if(environment.webOnly!){
+            this.webOnly();
+            return
+        }
 
         const jsonConfig = this.jsonPipe.transform(this.es.getConfig())
 
@@ -91,7 +99,12 @@ export class EditComponent {
     }
 
     uploadToArgument() {
+        if(environment.webOnly!){
+            this.webOnly();
+            return
+        }else {
 
+        }
     }
 
     addLog($event: boolean) {
@@ -105,6 +118,10 @@ export class EditComponent {
         const data = this.yamlPipe.transform(this.getConfig());
         const theFile = new Blob([data], { type: "text/yaml" });
         saveAs(theFile,"config.yaml")
+    }
+
+    webOnly() {
+        this.snackBar.open("Log viewer unavailable in webOnly preview", "Ok, i understand", {panelClass: 'error'})
     }
 }
 

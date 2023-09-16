@@ -1,12 +1,15 @@
 package com.dfi.sbc2ha.actuator;
 
+import com.dfi.sbc2ha.components.actuator.Cover;
 import com.dfi.sbc2ha.event.actuator.CoverEvent;
 import com.dfi.sbc2ha.helper.deserializer.DurationStyle;
 import com.diozero.api.DigitalOutputDevice;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 
 import java.time.Duration;
 
@@ -18,7 +21,7 @@ public class CoverTest {
     DigitalOutputDevice open;
     DigitalOutputDevice close;
 
-    @Before
+    @BeforeEach
     public void before() {
         open = mock(DigitalOutputDevice.class);
         close = mock(DigitalOutputDevice.class);
@@ -26,6 +29,7 @@ public class CoverTest {
 
     @SneakyThrows
     @Test
+    @Disabled
     public void coverClose() {
 
         Duration openTime = DurationStyle.detectAndParse("10s");

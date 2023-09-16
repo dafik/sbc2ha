@@ -1,23 +1,44 @@
 <div class="content" role="main">
-  <h2>Config editor</h2>
-  <div class="card-container">
-    <a class="card" [routerLink]="'../'+links['creator'].path">
-      <mat-icon fontIcon="add"></mat-icon>
-      <span>New config</span>
-    </a>
-    <a class="card" (click)="downloadConfig()">
-      <mat-icon fontIcon="edit"></mat-icon>
-      <span>Edit current config</span>
-    </a>
-    <a class="card"  (click)="fileUpload.click()" >
-      <mat-icon fontIcon="upload_file"></mat-icon>
-      <span>Upload config file</span>
-      <input #fileUpload type="file" hidden="hidden" (change)="uploadFile($event.target)" accept=".json, .yaml">
-    </a>
-    <a class="card" (click)="fileConvert.click()" >
-      <mat-icon fontIcon="transform"></mat-icon>
-      <span>Convert boneIo config</span>
-      <input #fileConvert type="file" hidden="hidden" (change)="readFile($event.target)" accept=".yaml">
-    </a>
-  </div>
+    <h2>Config editor</h2>
+    <div class="card-container">
+        <a class="card" [routerLink]="'../'+links['creator'].path">
+            <mat-icon fontIcon="add"></mat-icon>
+            <span>New config</span>
+        </a>
+        <a class="card" (click)="downloadConfig()"  matTooltip="config which is currently in use by device">
+            <mat-icon fontIcon="edit"></mat-icon>
+            <span>Edit current config</span>
+        </a>
+    </div>
+    <h3>Upload sbc2ha config files </h3>
+    <div class="card-container">
+        <a class="card" (click)="fileUploadYaml.click()">
+            <mat-icon fontIcon="upload_file"></mat-icon>
+            <span>yaml file</span>
+            <input #fileUploadYaml type="file" hidden="hidden" (change)="uploadYamlFile($event)" accept=".yaml">
+        </a>
+        <a class="card" (click)="fileUploadJson.click()">
+            <mat-icon fontIcon="upload_file"></mat-icon>
+            <span>json file</span>
+            <input #fileUploadJson type="file" hidden="hidden" (change)="uploadJsonFile($event)" accept=".json">
+        </a>
+    </div>
+    <h3>Convert BoneIo config files </h3>
+    <div class="card-container">
+        <a class="card" (click)="environment.webOnly! ? webOnly() : fileConvertSingle.click()">
+            <mat-icon fontIcon="transform"></mat-icon>
+            <span>Single yaml</span>
+            <input #fileConvertSingle type="file" hidden="hidden"   (change)="readFile($event)" accept=".yaml">
+        </a>
+        <a class="card" (click)="environment.webOnly! ? webOnly() : fileConvertMultiple.click()">
+            <mat-icon fontIcon="transform"></mat-icon>
+            <span>Multiple yamls</span>
+            <input #fileConvertMultiple type="file" hidden="hidden" multiple  (change)="readFile($event)" accept=".yaml">
+        </a>
+        <a class="card" (click)="environment.webOnly! ? webOnly() : fileConvertZip.click()">
+            <mat-icon fontIcon="transform"></mat-icon>
+            <span>Zipped multiple yamls</span>
+            <input #fileConvertZip type="file" hidden="hidden"   (change)="readFile($event)" accept=".zip">
+        </a>
+    </div>
 </div>

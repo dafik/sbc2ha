@@ -38,6 +38,16 @@ public class ExtensionInputBoard {
         }
         return extensionInputBoard;
     }
+    public static ExtensionInputBoard of(List<String[]> entries) {
+        ExtensionInputBoard extensionInputBoard = new ExtensionInputBoard();
+
+        for (var entry : entries) {
+            int pin = Integer.parseInt(entry[3]);
+            InputDefinition inputDefinition = new InputDefinition(ExtensionInputType.valueOfChar(entry[0]), entry[2], pin);
+            extensionInputBoard.add(entry[0], Integer.parseInt(entry[1]), inputDefinition);
+        }
+        return extensionInputBoard;
+    }
 
     private void add(String type, int inputNumber, InputDefinition inputDefinition) {
         switch (type) {
