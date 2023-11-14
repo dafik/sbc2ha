@@ -24,14 +24,14 @@
         <dependency>
             <groupId>com.diozero</groupId>
             <artifactId>diozero-core</artifactId>
-            <version>1.4.0</version>
+            <version>${diozero.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.solarnetwork.common</groupId>
             <artifactId>nifty-modbus-core</artifactId>
-            <version>0.4.0</version>
+            <version>${nifty-modbus.version}</version>
             <scope>compile</scope>
         </dependency>
 

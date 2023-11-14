@@ -20,15 +20,14 @@
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <revision>0.0.4</revision>
+        <revision>0.0.5</revision>
+        <diozero.version>1.4.0-dafik</diozero.version>
+        <nifty-modbus.version>0.5.0</nifty-modbus.version>
     </properties>
-
-
 
     <dependencies>
 
-
-        <dependency>
+       <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>2.15.0</version>

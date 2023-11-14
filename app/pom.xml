@@ -43,13 +43,8 @@
         </dependency>
         <dependency>
             <groupId>com.diozero</groupId>
-            <artifactId>diozero-core</artifactId>
-            <version>1.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.diozero</groupId>
             <artifactId>diozero-provider-pigpio</artifactId>
-            <version>1.4.0</version>
+            <version>${diozero.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -65,12 +60,12 @@
         <dependency>
             <groupId>net.solarnetwork.common</groupId>
             <artifactId>nifty-modbus-core</artifactId>
-            <version>0.5.0</version>
+            <version>${nifty-modbus.version}</version>
         </dependency>
         <dependency>
             <groupId>net.solarnetwork.common</groupId>
             <artifactId>nifty-modbus-rtu</artifactId>
-            <version>0.5.0</version>
+            <version>${nifty-modbus.version}</version>
         </dependency>
 <!--        <dependency>
             <groupId>net.solarnetwork.common</groupId>
@@ -95,11 +90,6 @@
             <version>2.9.4</version>
         </dependency>
 
-        <dependency>
-            <groupId>net.sf.jmimemagic</groupId>
-            <artifactId>jmimemagic</artifactId>
-            <version>0.1.5</version>
-        </dependency>
     </dependencies>
 
     <build>
