@@ -24,6 +24,16 @@
         <diozero.version>1.4.0-dafik</diozero.version>
         <nifty-modbus.version>0.5.0</nifty-modbus.version>
     </properties>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/dafik/diozero</url>
+        </repository>
+    </repositories>
 
     <dependencies>
 
