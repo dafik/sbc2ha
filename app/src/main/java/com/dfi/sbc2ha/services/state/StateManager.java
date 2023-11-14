@@ -3,7 +3,7 @@ package com.dfi.sbc2ha.services.state;
 import com.dfi.sbc2ha.components.actuator.Actuator;
 import com.dfi.sbc2ha.config.sbc2ha.definition.enums.ActuatorType;
 import com.dfi.sbc2ha.event.StateEvent;
-import com.dfi.sbc2ha.util.Jar;
+import com.dfi.sbc2ha.helper.Jar;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

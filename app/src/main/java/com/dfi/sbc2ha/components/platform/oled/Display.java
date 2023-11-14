@@ -267,9 +267,9 @@ public class Display implements DeviceInterface {
 
         g2d.setFont(danube);
 
-        g2d.drawString("bone", 3, 15);
-        g2d.drawString("iO", 53, 15);
-        g2d.drawString("java", 73, 15);
+        g2d.drawString("sbc2ha", 3, 15);
+        //g2d.drawString("iO", 53, 15);
+        //g2d.drawString("java", 73, 15);
 
         g2d.setFont(fontSmall);
         g2d.drawString("version: " + Version.VERSION, 3, 30);
@@ -302,9 +302,9 @@ public class Display implements DeviceInterface {
         g2d.setFont(danube);
 
         int offset = 15;
-        g2d.drawString("bone", 3, offset);
-        g2d.drawString("iO", 53, offset);
-        g2d.drawString("java", 73, offset);
+        g2d.drawString("sbc2ha", 3, 15);
+        //g2d.drawString("iO", 53, offset);
+        //g2d.drawString("java", 73, offset);
         offset += 2;
         g2d.setFont(fontExtraSmall);
         try {

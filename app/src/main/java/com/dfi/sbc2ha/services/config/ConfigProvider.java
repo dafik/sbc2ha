@@ -3,7 +3,7 @@ package com.dfi.sbc2ha.services.config;
 import com.dfi.sbc2ha.Sbc2ha;
 import com.dfi.sbc2ha.config.sbc2ha.definition.AppConfig;
 import com.dfi.sbc2ha.services.config.loader.ConfigLoaderJackson;
-import com.dfi.sbc2ha.util.Jar;
+import com.dfi.sbc2ha.helper.Jar;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
