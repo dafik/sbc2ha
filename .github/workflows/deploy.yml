@@ -17,6 +17,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Publish package
-        run: mvn --batch-mode -Dgpg.skip -DskipTests deploy
+        run: mvn --batch-mode  -DskipTests deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
