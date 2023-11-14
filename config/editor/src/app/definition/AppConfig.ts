@@ -79,6 +79,7 @@ export class AppConfig {
         }
     })
     actuator: ActuatorConfig[] = [];
+    @Type(() => LoggerConfig)
     logger?: LoggerConfig;
 }
 

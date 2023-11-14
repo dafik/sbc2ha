@@ -51,10 +51,10 @@ export class StatesComponent implements OnInit, OnDestroy {
                 takeUntil(this.destroyed$)
             )
             .subscribe(values => {
-            values.forEach(config => {
-                this.fakeEvent.set(config.name, "");
+                values.forEach(config => {
+                    this.fakeEvent.set(config.name, "");
+                })
             })
-        })
 
         if (environment.webOnly!) {
             this.snackBar.open("States unavailable in webOnly preview", "Ok, i understand", {panelClass: 'error'})
@@ -187,6 +187,53 @@ export class StatesComponent implements OnInit, OnDestroy {
     }
 
     protected readonly InputSensorAction = InputSensorAction;
+
+    hasAnyAction(sensor: InputSwitchConfig): boolean {
+        if (sensor.actions && Object.keys(sensor.actions).length) {
+            if (sensor.actions.single?.length) {
+                return true
+            } else if (sensor.actions.double?.length) {
+                return true
+            } else if (sensor.actions.long?.length) {
+                return true
+            }
+        }
+        return false;
+    }
+
+    hasMultipleAction(sensor: InputSwitchConfig): boolean {
+        return this.getActions(sensor).length > 1
+    }
+
+    hasSingleAction(sensor: InputSwitchConfig): boolean {
+        return this.getActions(sensor).length == 1
+    }
+
+    getSingleAction(sensor: InputSwitchConfig): string {
+        let action = this.getActions(sensor)[0];
+        this.fakeEvent.set(sensor.name, action);
+        return action;
+    }
+
+    getActions(sensor: InputSwitchConfig): string[] {
+        let found = [];
+        if (sensor.actions && Object.keys(sensor.actions).length) {
+            if (sensor.actions.single?.length) {
+                found.push("single");
+            }
+            if (sensor.actions.double?.length) {
+                found.push("double");
+            }
+            if (sensor.actions.long?.length) {
+                found.push("long");
+            }
+        }
+        return found
+    }
+
+    asSwitch(sensor: SensorConfig) {
+        return sensor as InputSwitchConfig
+    }
 }
 
 interface InitialState {

@@ -25,8 +25,8 @@ export class LogListComponent {
 
     deleteWriter() {
         if (this.log) {
-            this.log.writer = [];
-            delete this.log?.writer
+            this.log.writer = new Map();
+            //delete this.log?.writer
         }
     }
 
@@ -45,7 +45,7 @@ export class LogListComponent {
             dialogRefItem.afterClosed().subscribe(result => {
                 if (result && this.log) {
                     // @ts-ignore
-                    this.log.logs[result.package] = result.level
+                    this.log.logs.set(result.package, result.level)
                 }
             });
         }
@@ -54,7 +54,7 @@ export class LogListComponent {
     deletePackage(key: string) {
         if (this.log) {
             // @ts-ignore
-            delete this.log.logs[key]
+            this.log.logs.delete(key)
         }
     }
 
@@ -62,9 +62,9 @@ export class LogListComponent {
         if (this.log?.writer) {
             let writer = this.log?.writer;
             // @ts-ignore
-            if (writer['format']) {
+            if (writer?.get('format')) {
                 // @ts-ignore
-                return writer['format'] as string
+                return writer?.get('format');
             }
         }
         return null
@@ -84,7 +84,7 @@ export class LogListComponent {
         dialogRefItem.afterClosed().subscribe(result => {
             if (result && this.log) {
                 // @ts-ignore
-                this.log.logs[result.package] = result.level
+                this.log.logs.set(result.package,result.level);
             }
         });
 
@@ -95,7 +95,8 @@ export class LogListComponent {
         dialogRefItem.afterClosed().subscribe(result => {
             if (result) {
                 if (result && this.log) {
-                    this.log.writer = [{format: result}]
+
+                    this.log.writer = new Map<string, string>([["format", result]]);
                 }
             }
         });
@@ -103,10 +104,10 @@ export class LogListComponent {
 
     editWriter() {
         if (this.log) {
-            const dialogRefItem = this.dialog.open<LogAddWriterComponent, any, string>(LogAddWriterComponent, {data: (this.log.writer as any)['format']});
+            const dialogRefItem = this.dialog.open<LogAddWriterComponent, any, string>(LogAddWriterComponent, {data: this.log.writer?.get('format')});
             dialogRefItem.afterClosed().subscribe(result => {
                 if (result && this.log) {
-                    (this.log.writer as any)['format'] = result;
+                    this.log.writer?.set('format', result);
                 }
             });
         }

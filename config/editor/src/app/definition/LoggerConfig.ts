@@ -1,7 +1,12 @@
 import {LogLevel} from "./enums/LogLevel";
+import {Type} from "class-transformer";
 
-export interface LoggerConfig {
+export class LoggerConfig {
     default?: LogLevel;
-    logs: Record<string, string>[];
-    writer?: Record<string, string>[];
+
+    @Type(() => Map<string,string>)
+    logs?: Map<string, string>
+
+    @Type(() => Map<string,string>)
+    writer?: Map<string, string>
 }

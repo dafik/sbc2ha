@@ -73,7 +73,8 @@ export class ConfigComponent {
             )
             .subscribe({
                     next: value => {
-                        const ac: AppConfig = this.as.fromYaml(value);
+                        const ac: AppConfig = plainToInstance(AppConfig, value);
+                        //const ac: AppConfig = this.as.fromYaml(value);
                         let uuid = this.es.saveConfig(ac);
                         this.es.setConfig(ac)
                         this.router.navigate(["/editor"], {queryParams: {uuid}});

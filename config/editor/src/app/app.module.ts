@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {ModuleWithProviders, NgModule, Type} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {AppRoutingModule} from './app-routing.module';
@@ -38,7 +38,17 @@ import {MatInputModule} from "@angular/material/input";
 import {MatOptionModule} from "@angular/material/core";
 import {MatSelectModule} from "@angular/material/select";
 import {MatTooltipModule} from "@angular/material/tooltip";
+import {NgxGoogleAnalyticsModule, NgxGoogleAnalyticsRouterModule} from "ngx-google-analytics";
+import {environment} from "../environments/environment";
 
+let siteModules:Array<Type<any> | ModuleWithProviders<{}> | any[]> =[];
+
+if (environment.site && environment.ga) {
+    siteModules = [
+        NgxGoogleAnalyticsModule.forRoot(environment.ga),
+        NgxGoogleAnalyticsRouterModule
+    ];
+}
 
 @NgModule({
     declarations: [
@@ -80,7 +90,8 @@ import {MatTooltipModule} from "@angular/material/tooltip";
         MatInputModule,
         MatOptionModule,
         MatSelectModule,
-        MatTooltipModule
+        MatTooltipModule,
+        ...siteModules
     ],
     providers: [
         DatePipe,

@@ -109,7 +109,7 @@ export class EditComponent implements OnInit{
 
     addLog($event: boolean) {
         this.appConfig.logger = {
-            logs: [],
+            logs: new Map(),
             default: LogLevel.INFO,
         }
     }

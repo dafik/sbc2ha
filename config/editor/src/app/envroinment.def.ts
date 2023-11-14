@@ -1,5 +1,6 @@
-export interface EnvroinmentDef{
-  webOnly?: true,
-  site?: true,
-  useHash: boolean
+export interface EnvroinmentDef {
+    webOnly?: true;
+    site?: true;
+    useHash: boolean;
+    ga?: string;
 }

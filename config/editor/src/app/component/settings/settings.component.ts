@@ -18,6 +18,8 @@ export class SettingsComponent {
     reload() {
         if (environment.webOnly!) {
             this.webOnly();
+        } else if (environment.site!) {
+            this.site();
         } else {
             this.http.get("/api/reload").subscribe(value => {
                 this.router.navigate(['/logs']);
@@ -51,7 +53,9 @@ export class SettingsComponent {
     clearStateCache() {
         if (environment.webOnly!) {
             this.webOnly();
-        } else {
+        } else if (environment.site!) {
+            this.site();
+        }else {
             this.http.get("/api/clear/states").subscribe()
         }
     }
@@ -59,6 +63,8 @@ export class SettingsComponent {
     clearConfigCache() {
         if (environment.webOnly!) {
             this.webOnly();
+        }else if (environment.site!) {
+            this.site();
         } else {
             this.http.get("/api/clear/config").subscribe()
         }

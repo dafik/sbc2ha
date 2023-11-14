@@ -24,22 +24,28 @@
             </span>
             <span matListItemLine>Default log level</span>
         </mat-list-item>
-        <mat-list-item *ngFor="let v of log.logs | keyvalue">
-            <span matListItemTitle>{{v.value}}</span>
-            <span matListItemMeta>
+        <ng-template [ngIf]="log.logs">
+            <mat-divider *ngIf="log.default"></mat-divider>
+            <mat-list-item *ngFor="let v of log.logs | keyvalue">
+                <span matListItemTitle>{{v.value}}</span>
+                <span matListItemMeta>
                 <button mat-button (click)="editPackage(v.key)"><mat-icon>edit</mat-icon></button>
                 <button mat-button (click)="deletePackage(v.key)"><mat-icon>delete</mat-icon></button>
-            </span>
-            <span matListItemLine>{{v.key}}</span>
-        </mat-list-item>
-        <mat-list-item *ngIf="getWriterFormat() != null">
-            <span matListItemTitle>{{getWriterFormat()}}</span>
-            <span matListItemMeta>
+                </span>
+                <span matListItemLine>{{v.key}}</span>
+            </mat-list-item>
+        </ng-template>
+        <ng-template [ngIf]="log.writer">
+            <mat-divider *ngIf="log.default || (log.logs && log.logs.size)"></mat-divider>
+            <mat-list-item *ngIf="getWriterFormat() != null">
+                <span matListItemTitle>{{getWriterFormat()}}</span>
+                <span matListItemMeta>
                 <button mat-button (click)="editWriter()"><mat-icon>edit</mat-icon></button>
                 <button mat-button (click)="deleteWriter()"><mat-icon>delete</mat-icon></button>
             </span>
-            <span matListItemLine>writer format</span>
-        </mat-list-item>
+                <span matListItemLine>writer format</span>
+            </mat-list-item>
+        </ng-template>
 
     </ng-template>
 </mat-list>

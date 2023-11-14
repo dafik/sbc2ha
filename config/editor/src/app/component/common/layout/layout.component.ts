@@ -3,6 +3,7 @@ import {environment} from "../../../../environments/environment";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatDialog} from "@angular/material/dialog";
 import {WebOnlyComponent} from "../web-only/web-only.component";
+import {VERSION} from "../../../version";
 
 @Component({
     selector: 'app-layout',
@@ -23,4 +24,6 @@ export class LayoutComponent implements OnInit {
             this.dialog.open(WebOnlyComponent)
         }
     }
+
+    protected readonly VERSION = VERSION;
 }
