@@ -1,6 +1,6 @@
 package com.dfi.sbc2ha.config.converter.config.loader;
 
-import com.dfi.sbc2ha.helper.JarHelper;
+import com.dfi.sbc2ha.helper.Jar;
 import com.dfi.sbc2ha.helper.ProcessRunner;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,7 +49,9 @@ public class Optimize {
 
         String pytonDir = getPytonDir();
         String tool = getPytonDir() + "/yaml_util.py";
-        if (JarHelper.isRunInJar() && !Files.exists(Path.of(tool))) {
+
+
+        if (Jar.isRunInJar() && !Files.exists(Path.of(tool))) {
 
             InputStream src = ClassLoader.getSystemResourceAsStream("tools/yaml_util.py");
             File target = new File(tool);
@@ -64,9 +66,10 @@ public class Optimize {
             }
         }
 
-        String script = JarHelper.isRunInJar() ?
+        String script = Jar.isRunInJar() ?
                 tool :
-                pwd + "/src/main/resources/tools/yaml_util.py";
+                pwd + "/config/converter/src/main/resources/tools/yaml_util.py";
+
 
 
         List<String> lines = List.of(
@@ -125,7 +128,7 @@ public class Optimize {
     }
 
     private static String getPytonDir() {
-        return JarHelper.getTempDir() + "/python";
+        return Jar.getTempDir() + "/python";
     }
 
     private static boolean checkPythonYaml() {

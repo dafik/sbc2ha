@@ -12,7 +12,7 @@ public class StreamGobbler implements Runnable {
     private final Consumer<String> consumer;
 
     public StreamGobbler(Process process, Consumer<String> consumer) {
-        this.inputStream = process.getInputStream();
+        inputStream = process.getInputStream();
         errorStream = process.getErrorStream();
         this.consumer = consumer;
     }

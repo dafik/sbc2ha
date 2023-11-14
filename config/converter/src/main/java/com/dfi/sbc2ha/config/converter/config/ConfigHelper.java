@@ -3,7 +3,7 @@ package com.dfi.sbc2ha.config.converter.config;
 
 import com.dfi.sbc2ha.config.boneio.definition.BoneIoConfig;
 import com.dfi.sbc2ha.config.converter.config.loader.ConfigLoaderJackson;
-import com.dfi.sbc2ha.helper.JarHelper;
+import com.dfi.sbc2ha.helper.Jar;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -126,7 +126,7 @@ public class ConfigHelper {
         if (statMap != null) {
             return statMap;
         }
-        String statsFileLocation = JarHelper.getTempDir() + "/cacheStats.json";
+        String statsFileLocation = Jar.getTempDir() + "/cacheStats.json";
         File statsFile = new File(statsFileLocation).getAbsoluteFile();
         if (!statsFile.exists()) {
             return new HashMap<>();
@@ -143,7 +143,7 @@ public class ConfigHelper {
     }
 
     private static void saveStats(Map<String, FileStat> stats) {
-        String statsFileLocation = JarHelper.getTempDir() + "/cacheStats.json";
+        String statsFileLocation = Jar.getTempDir() + "/cacheStats.json";
         File statsFile = new File(statsFileLocation).getAbsoluteFile();
         try {
             // Serialize Java object info JSON file.
@@ -158,7 +158,7 @@ public class ConfigHelper {
     private static String getCacheFileName(File originalFile) {
 
         File absoluteFile = originalFile.getAbsoluteFile();
-        String directory = JarHelper.getTempDir();
+        String directory = Jar.getTempDir();
         String fileName = absoluteFile.getName();
 
         String file = fileName;

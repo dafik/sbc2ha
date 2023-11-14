@@ -69,7 +69,7 @@ public class BoneIoConverter {
         return convert(boneIoConfig,
                 "boneio",
                 inputBoard == null ? detectInputBoard(boneIoConfig.getInput()) : inputBoard,
-                outputBoard == null ? detectOutputBoard(boneIoConfig.getOutput()) : outputBoard
+                outputBoard == null ? detectOutputBoard(boneIoConfig) : outputBoard
         );
     }
 
@@ -98,6 +98,8 @@ public class BoneIoConverter {
         appConfig.addPlatform(getDallas(boneIoConfig.getDallas()));
         appConfig.addPlatform(getModbus(boneIoConfig.getModbus()));
 
+        //boolean mcpInverted = isMcpInverted(getBusConfig(boneIoConfig.getMcp23017(), PlatformType.MCP23017));
+
         appConfig.setActuator(getOutput(boneIoConfig.getOutput()));
         appConfig.addActuator(getCover(boneIoConfig.getCover()));
 
@@ -110,6 +112,20 @@ public class BoneIoConverter {
         appConfig.setLogger(getLogger(boneIoConfig.getLogger()));
 
         return appConfig;
+    }
+
+    private static boolean isMcpInverted(List<BoneIoBusConfig> busConfig) {
+        List<String> ids = busConfig.stream().map(BoneIoBusConfig::getId).toList();
+        if (ids.size() > 1) {
+            int first = Integer.parseInt(ids.get(0).replaceAll("[^0-9]", ""));
+            int second = Integer.parseInt(ids.get(1).replaceAll("[^0-9]", ""));
+            int val1 = busConfig.get(0).getAddress();
+            int val2 = busConfig.get(1).getAddress();
+
+            return first > second ? val1 > val2 : val2 > val1;
+        } else {
+            return false;
+        }
     }
 
 
@@ -143,10 +159,52 @@ public class BoneIoConverter {
         return inputBoard;
     }
 
-    private static String detectOutputBoard(List<BoneIoOutputConfig> outputList) {
+    private static String detectOutputBoard(BoneIoConfig boneIoConfig) {
+        List<BoneIoOutputConfig> outputList = boneIoConfig.getOutput();
+        getBusConfig(boneIoConfig.getMcp23017(), PlatformType.MCP23017);
+
         String outputBoard = "output-24x16A-v0.4";
         if (outputList.size() > 24) {
             outputBoard = "output-32x5A-v0.4";
+        } else {
+            var v3_1 = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+            var v3_2 = List.of(0, 1, 8, 9, 11, 10, 12, 13, 14, 15);
+
+            var v4_1 = List.of(8, 9, 10, 11, 12, 13, 14, 15);
+            var v4_2 = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+
+            var b1 = outputList.stream()
+                    .filter(c -> c instanceof BoneIoMcpOutputConfig)
+                    .filter(c -> {
+                        var mcpId = ((BoneIoMcpOutputConfig) c).getMcpId().replaceAll("[^0-9]", "");
+                        if (mcpInverted) {
+                            mcpId = mcpId.equals("1") ? "2" : "1";
+                        }
+                        return mcpId.equals("1");
+                    })
+                    .map(boneIoOutputConfig -> Integer.parseInt(boneIoOutputConfig.getPin()))
+                    .toList();
+
+
+            var b2 = outputList.stream()
+                    .filter(c -> c instanceof BoneIoMcpOutputConfig)
+                    .filter(c -> {
+                        var mcpId = ((BoneIoMcpOutputConfig) c).getMcpId().replaceAll("[^0-9]", "");
+                        if (mcpInverted) {
+                            mcpId = mcpId.equals("1") ? "2" : "1";
+                        }
+                        return mcpId.equals("2");
+                    })
+                    .map(boneIoOutputConfig -> Integer.parseInt(boneIoOutputConfig.getPin()))
+                    .toList();
+
+            List<Integer> b1_4 = b1.stream().filter(o -> !v4_1.contains(o)).toList();
+            List<Integer> b1_3 = b1.stream().filter(o -> !v3_1.contains(o)).toList();
+
+            List<Integer> b2_4 = b2.stream().filter(o -> !v4_2.contains(o)).toList();
+            List<Integer> b2_3 = b2.stream().filter(o -> !v3_2.contains(o)).toList();
+
+            outputBoard = b1_3.size() + b2_3.size() == 0 ? "output-24x16A-v0.3" : "output-24x16A-v0.4";
         }
 
         log.warn("guessing outputBoard: {}", outputBoard);
@@ -164,7 +222,7 @@ public class BoneIoConverter {
             return d;
         }).collect(Collectors.toList());
 
-        if (configList.size() == 2 && ((I2cBusConfig) configList.get(0)).getAddress() > ((I2cBusConfig) configList.get(1)).getAddress()) {
+        if (pt == PlatformType.MCP23017 && configList.size() == 2 && ((I2cBusConfig) configList.get(0)).getAddress() > ((I2cBusConfig) configList.get(1)).getAddress()) {
             I2cBusConfig first = (I2cBusConfig) configList.get(0);
             I2cBusConfig second = (I2cBusConfig) configList.get(1);
             var tmp = first.getAddress();
@@ -178,12 +236,12 @@ public class BoneIoConverter {
 
     static LoggerConfig getLogger(BoneIoLoggerConfig s) {
         LoggerConfig d = new LoggerConfig();
-        d.setDefaultLevel(LogLevelType.valueOf(s.getDefaultLevel().level));
+        d.setDefaultLevel(LogLevelType.valueOf(s.getDefaultLevel().level.toUpperCase()));
         Map<String, com.dfi.sbc2ha.config.boneio.definition.enums.LogLevelType> logs1 = s.getLogs();
 
         Map<String, LogLevelType> logs = new LinkedHashMap<>();
         s.getLogs().forEach((s1, logLevelType) -> {
-            logs.put(s1,LogLevelType.valueOf(s.getDefaultLevel().level));
+            logs.put(s1, LogLevelType.valueOf(s.getDefaultLevel().level.toUpperCase()));
         });
         d.setLogs(logs);
         return d;
@@ -275,21 +333,25 @@ public class BoneIoConverter {
     static List<ActionConfig> getActions(List<BoneIoActionConfig> sla, List<ActuatorConfig> actuator) {
         List<ActionConfig> dla = new ArrayList<>();
         for (var sa : sla) {
-            ActionConfig da;
-            switch (sa.getAction()) {
-                case MQTT:
-                    da = getMqttAction((BoneIoMqttActionConfig) sa);
-                    break;
-                default:
-                case OUTPUT:
-                    da = getOutputAction((BoneIoOutputActionConfig) sa, actuator);
-                    break;
-                case COVER:
-                    da = getCoverAction((BoneIoCoverActionConfig) sa, actuator);
-                    break;
+            try {
+                ActionConfig da;
+                switch (sa.getAction()) {
+                    case MQTT:
+                        da = getMqttAction((BoneIoMqttActionConfig) sa);
+                        break;
+                    default:
+                    case OUTPUT:
+                        da = getOutputAction((BoneIoOutputActionConfig) sa, actuator);
+                        break;
+                    case COVER:
+                        da = getCoverAction((BoneIoCoverActionConfig) sa, actuator);
+                        break;
+                }
+                da.setAction(convertEnum(ActionType.class, sa.getAction()));
+                dla.add(da);
+            }catch (NoSuchElementException ignored){
+
             }
-            da.setAction(convertEnum(ActionType.class, sa.getAction()));
-            dla.add(da);
         }
         return dla;
     }
@@ -364,7 +426,7 @@ public class BoneIoConverter {
         ExtensionBoardInfo instance = ExtensionBoardInfo.getInstance();
 
         if (s instanceof BoneIoMcpOutputConfig) {
-            int mcpId = Integer.parseInt(((BoneIoMcpOutputConfig) s).getMcpId().replace("mcp", ""));
+            int mcpId = Integer.parseInt(((BoneIoMcpOutputConfig) s).getMcpId().replaceAll("[^0-9]", ""));
             if (mcpInverted) {
                 mcpId = mcpId == 1 ? 2 : 1;
             }

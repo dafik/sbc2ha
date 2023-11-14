@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class JarHelper {
+public class Jar {
     private static boolean isRunInJar = false;
     private static boolean isChecked = false;
 
@@ -18,7 +18,7 @@ public class JarHelper {
     }
 
     private static void checkIsRunningInJar() {
-        URL resource = JarHelper.class.getResource(JarHelper.class.getSimpleName() + ".class");
+        URL resource = Jar.class.getResource(Jar.class.getSimpleName() + ".class");
         assert resource != null;
         String protocol = resource.getProtocol();
         if (Objects.equals(protocol, "jar")) {
