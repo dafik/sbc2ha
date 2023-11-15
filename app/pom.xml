@@ -157,7 +157,8 @@
                         </goals>
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedArtifactId>app-with-dep</shadedArtifactId>
+                            <!--<shadedArtifactId>with-dep</shadedArtifactId>-->
+                            <shadedClassifierName>with-dep</shadedClassifierName>
                             <finalName>${project.artifactId}-${project.version}-dep</finalName>
                             <transformers>
                                 <transformer
