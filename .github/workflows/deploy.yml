@@ -17,7 +17,20 @@ jobs:
           cache-name: cache-node-modules
         with:
           # caching node_modules
-          path: node_modules
+          path: config/editor/node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Cache angular
+        id: cache-angular
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-angular
+        with:
+          # caching node_modules
+          path: config/editor/.angular
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
