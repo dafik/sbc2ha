@@ -67,11 +67,11 @@
             <artifactId>nifty-modbus-rtu</artifactId>
             <version>${nifty-modbus.version}</version>
         </dependency>
-<!--        <dependency>
-            <groupId>net.solarnetwork.common</groupId>
-            <artifactId>nifty-modbus-rtu-jsc</artifactId>
-            <version>0.5.0</version>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>net.solarnetwork.common</groupId>
+                    <artifactId>nifty-modbus-rtu-jsc</artifactId>
+                    <version>0.5.0</version>
+                </dependency>-->
         <dependency>
             <groupId>org.tinylog</groupId>
             <artifactId>tinylog-impl</artifactId>
@@ -228,8 +228,6 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
-
 </project>

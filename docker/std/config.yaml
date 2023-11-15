@@ -1,0 +1,65 @@
+platform: [ ]
+sensor:
+  - platform: analog
+    name: analog 1
+    filters: [ ]
+    analog: 1
+  - platform: analog
+    name: Analog 2
+    filters: [ ]
+    analog: 2
+  - platform: resistance
+    name: resistance 1
+    filters: [ ]
+    sensor: analog 1
+    direction: DOWNSTREAM
+    resistor: "10000"
+    reference_voltage: "1.8"
+  - platform: digital
+    name: digital 1
+    input: 1
+    device_class: DOOR
+  - platform: digital
+    name: Digital 2
+    input: 2
+    device_class: MOTION
+  - platform: switch
+    name: switch 1
+    input: 3
+    click_detection: double
+    actions:
+      single:
+        - action: output
+          output: 1
+          action_output: toggle
+      double:
+        - action: output
+          output: 1
+          action_output: toggle
+        - action: output
+          output: 2
+          action_output: toggle
+  - platform: switch
+    name: switch 2
+    input: 4
+    actions:
+      single:
+        - action: output
+          output: 2
+          action_output: toggle
+
+actuator:
+  - restore_state: true
+    kind: gpio
+    name: out 1
+    output_type: switch
+    output: 1
+  - restore_state: true
+    kind: gpio
+    name: out 2
+    output_type: switch
+    output: 2
+extension_boards:
+  vendor: fake
+  input_board: in
+  output_board: out

@@ -1,0 +1,15 @@
+name: "sbc2ha"
+description: "Single board computer 2 home assistant"
+version: "0.0.3"
+slug: "sbc2ha"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+ports:
+  5005/tcp: 5005
+schema:
+  config: "str?"

@@ -63,7 +63,7 @@ public class Display implements DeviceInterface {
         String dejavu = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
         String dejavuMono = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf";
 
-        InputStream systemResource = ClassLoader.getSystemResourceAsStream("danube__.ttf");
+        InputStream systemResource = ClassLoader.getSystemResourceAsStream("font/danube__.ttf");
 
 
         try {
