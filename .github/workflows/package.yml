@@ -92,13 +92,13 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm/v7,linux/arm64 \
             --output "type=image,push=false" \
-            --file ./docker/std/Dockerfile 
+            --file ./docker/std/Dockerfile \
             --tag sbc2ha/sbc2ha:${{ github.ref_name }} --tag sbc2ha/sbc2ha:latest \
             --push \
             ./docker/std
 
 
-  docker-ha:
+  docker-ha-addon:
     needs: [publish]
     runs-on: ubuntu-latest
     permissions:
@@ -125,11 +125,11 @@ jobs:
 
       - name: Run Buildx
         run: |
-          cp app-${{ github.ref_name }}-dep.jar ./docker/std/sbc2ha.jar
+          cp app-${{ github.ref_name }}-dep.jar ./docker/ha/sbc2ha.jar
           docker buildx build \
             --platform linux/amd64,linux/arm/v7,linux/arm64 \
             --output "type=image,push=false" \
-            --file ./docker/ha/Dockerfile 
+            --file ./docker/ha/Dockerfile \
             --tag sbc2ha/sbc2ha-ha-addon:${{ github.ref_name }} --tag sbc2ha/sbc2ha-ha-addon:latest \
             --push \
             ./docker/ha
