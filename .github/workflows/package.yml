@@ -10,6 +10,7 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v3
+
       - name: Cache node modules
         id: cache-nodemodules
         uses: actions/cache@v2
@@ -23,6 +24,7 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
       - name: Cache angular
         id: cache-angular
         uses: actions/cache@v2
@@ -31,21 +33,47 @@ jobs:
         with:
           # caching node_modules
           path: config/editor/.angular
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
+      - name: Cache app target
+        id: cache-app
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-app
+        with:
+          # caching node_modules
+          path: app/target/*-dep.jar
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+
       - name: Publish package
         run: mvn --batch-mode  -DskipTests deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  docker:
+    needs: [publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -61,10 +89,10 @@ jobs:
 
       - name: Run Buildx
         run: |
-            cp ./app/target/app-0.0.5-dep.jar ./docker/std/sbc2ha.jar
-            docker buildx build \
-              --platform linux/amd64,linux/arm/v7,linux/arm64 \
-              --output "type=image,push=false" \
-              --file ./docker/std/Dockerfile ./docker/std \
-              --tag sbc2ha/sbc2ha:${{ github.ref_name }} --tag sbc2ha/sbc2ha:latest \
-              --push
+          cp ./app/target/app-${{ github.ref_name }}-dep.jar ./docker/std/sbc2ha.jar
+          docker buildx build \
+            --platform linux/amd64,linux/arm/v7,linux/arm64 \
+            --output "type=image,push=false" \
+            --file ./docker/std/Dockerfile ./docker/std \
+            --tag sbc2ha/sbc2ha:${{ github.ref_name }} --tag sbc2ha/sbc2ha:latest \
+            --push
