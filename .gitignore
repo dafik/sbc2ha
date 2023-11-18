@@ -45,14 +45,5 @@ build/
 /app/src/main/resources/tiny.prop.json
 /config/config-sbc2ha-new/.gitignore
 /config/config-typescript/*
-/config/editor/node/node_modules/*
-/config/editor/node/node_modules/npm/.npmrc
-/config/editor/node/node_modules/npm/index.js
-/config/editor/node/node_modules/npm/LICENSE
-/config/editor/node/node_modules/npm/package.json
-/config/editor/node/node_modules/npm/README.md
-/config/editor/node/node
-/config/editor/node/npm
-/config/editor/node/npm.cmd
-/config/editor/node/npx
-/config/editor/node/npx.cmd
+/config/editor/*
+/docs/*

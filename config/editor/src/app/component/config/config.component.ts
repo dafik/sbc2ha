@@ -12,6 +12,7 @@ import {EnvroinmentDef} from 'src/app/envroinment.def';
 import {from, map, switchMap, zipAll} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import * as JSZip from "jszip";
+import {UrlHelper} from "../../shared/url-helper";
 
 @Component({
     selector: 'app-config',
@@ -200,7 +201,7 @@ export class ConfigComponent {
 
     private uploadFileToConvert(fileToUpload: File) {
 
-        const endpoint = '/api/convert';
+        const endpoint = UrlHelper.getApiUrl()+'convert';
         const formData: FormData = new FormData();
         formData.append('config', fileToUpload, fileToUpload.name);
         return this.httpClient

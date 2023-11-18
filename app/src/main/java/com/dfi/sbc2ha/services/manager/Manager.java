@@ -299,10 +299,24 @@ public class Manager implements AutoCloseable {
             String name = ((ActuatorCommand) cmd).getActuator();
             Actuator actuator = actuatorMap.get(name);
             if (actuator != null) {
-                if (cmd instanceof GpioCommand && actuator instanceof Relay) {
-                    switch (((GpioCommand) cmd).getState()) {
-                        case ON -> ((Relay) actuator).turnOn();
-                        case OFF -> ((Relay) actuator).turnOff();
+                if (cmd instanceof GpioCommand) {
+                    if (actuator instanceof Relay) {
+                        switch (((GpioCommand) cmd).getState()) {
+                            case ON -> ((Relay) actuator).turnOn();
+                            case OFF -> ((Relay) actuator).turnOff();
+                        }
+                    } else if (actuator instanceof Led) {
+                        switch (((GpioCommand) cmd).getState()) {
+                            case ON -> ((Led) actuator).turnOn(new LightCommand());
+                            case OFF -> ((Led) actuator).turnOff(new LightCommand());
+                        }
+                    } else if (actuator instanceof LedFading) {
+                        switch (((GpioCommand) cmd).getState()) {
+                            case ON -> ((LedFading) actuator).turnOn(new LightCommand());
+                            case OFF -> ((LedFading) actuator).turnOff(new LightCommand());
+                        }
+                    } else {
+                        log.error("not found suitable method");
                     }
                 }
             }

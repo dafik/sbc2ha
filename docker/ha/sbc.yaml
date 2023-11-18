@@ -1,60 +1,8 @@
----
-platform:
-  - platform: mqtt
-    host: 192.168.1.10
-    username: boneio
-    password: boneio
-    port: 1883
-    topic_prefix: pi-1
-    ha_discovery:
-      enabled: true
-      topic_prefix: homeassistant
-actuator:
-  - name: Salon klima led
-    kind: gpiopwm
-    output: 12
-    output_type: led
-    restore_state: true
-  - name: Salon okno led
-    kind: gpiopwm
-    output: 13
-    output_type: led
-    restore_state: true
-  - name: Salon obraz led
-    kind: gpiopwm
-    output: 29
-    output_type: led
-    restore_state: true
-  - name: Salon kanapa led
-    kind: gpiopwm
-    output: 15
-    output_type: led
-    restore_state: true
-  - name: Hall led
-    kind: gpiopwm
-    output: 37
-    output_type: led
-    restore_state: true
-  - name: Wc led
-    kind: gpiopwm
-    output: 35
-    output_type: led
-    restore_state: true
-  - name: Kuchnia led
-    kind: gpiopwm
-    output: 33
-    output_type: led
-    restore_state: true
-  - name: Łazienka led
-    kind: gpiopwm
-    output: 31
-    output_type: led
-    restore_state: true
 logger:
   default: info
   logs:
     com.dfi: trace
-    com.dfi.sbc2ha.platform.mqtt: debug
+    com.dfi.sbc2ha.components.platform.mqtt: warn
     com.diozero.sbc.LocalSystemInfo: error
     com.dfi.sbc2ha.actuator.Led: trace
     com.diozero.devices.PwmLed: trace

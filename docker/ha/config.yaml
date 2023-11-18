@@ -13,3 +13,6 @@ ports:
   5005/tcp: 5005
 schema:
   config: "str?"
+ingress: true
+ingress_port: 8080
+image: "myhub/image-{arch}-addon-name"

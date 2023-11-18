@@ -2,6 +2,7 @@ import {Injectable, OnDestroy} from '@angular/core';
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {filter, map, Observable, of, retry, switchMap, timer} from "rxjs";
 import {webSocket} from "rxjs/webSocket";
+import {UrlHelper} from "../../shared/url-helper";
 
 @Injectable({
     providedIn: 'root'
@@ -12,14 +13,10 @@ export class StateService implements OnDestroy {
 
     connect(): Observable<any> {
 
-        const protocol = window.location.protocol.replace('http', 'ws');
-        const host = window.location.host;
-
-
-        return of(`${protocol}//${host}`).pipe(
-            filter(apiUrl => !!apiUrl),
+        return of(UrlHelper.getWsUrl()).pipe(
+            filter(wsUrl => !!wsUrl),
             // https becomes wws, http becomes ws
-            map(apiUrl => apiUrl.replace(/^http/, 'ws') + '/ws/states'),
+            map(wsUrl => wsUrl + 'states'),
             switchMap(wsUrl => {
                 if (this.connection$) {
                     return this.connection$;

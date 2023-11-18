@@ -10,6 +10,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {LogLevel} from "../../../../definition/enums/LogLevel";
 import {saveAs} from "file-saver-es";
 import {environment} from "../../../../../environments/environment";
+import {UrlHelper} from "../../../../shared/url-helper";
 
 
 @Component({
@@ -82,7 +83,7 @@ export class EditComponent implements OnInit{
 
         const fileToUpload = new File(fileBits, fileName);
 
-        const endpoint = '/api/write/cache';
+        const endpoint = UrlHelper.getApiUrl()+'write/cache';
         const formData: FormData = new FormData();
         formData.append('cache', fileToUpload, fileToUpload.name);
         return this.httpClient

@@ -2,6 +2,7 @@ import {Injectable, OnDestroy} from '@angular/core';
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {filter, map, Observable, of, retry, switchMap, timer} from "rxjs";
 import {webSocket} from "rxjs/webSocket";
+import {UrlHelper} from "../../shared/url-helper";
 
 @Injectable({
   providedIn: 'root'
@@ -13,14 +14,9 @@ export class RemoteLogService implements OnDestroy {
 
   connect(): Observable<any> {
 
-    const protocol = window.location.protocol.replace('http', 'ws');
-    const host = window.location.host;
-
-
-    return of(`${protocol}//${host}`).pipe(
-      filter(apiUrl => !!apiUrl),
-      // https becomes wws, http becomes ws
-      map(apiUrl => apiUrl.replace(/^http/, 'ws')  + '/ws/logs'),
+    return of(UrlHelper.getWsUrl()).pipe(
+      filter(wsUrl => !!wsUrl),
+      map(wsUrl => wsUrl + 'logs'),
       switchMap(wsUrl => {
         if (this.connection$) {
           return this.connection$;

@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {environment} from "../../../environments/environment";
+import {UrlHelper} from "../../shared/url-helper";
 
 @Component({
     selector: 'app-settings',
@@ -21,7 +22,7 @@ export class SettingsComponent {
         } else if (environment.site!) {
             this.site();
         } else {
-            this.http.get("/api/reload").subscribe(value => {
+            this.http.get(UrlHelper.getApiUrl()+"reload").subscribe(value => {
                 this.router.navigate(['/logs']);
             })
         }
@@ -34,7 +35,7 @@ export class SettingsComponent {
         } else if (environment.site!) {
             this.site();
         } else {
-            this.http.get("/api/restart").subscribe(value => {
+            this.http.get(UrlHelper.getApiUrl()+"restart").subscribe(value => {
                 this.router.navigate(['/logs']);
             })
         }
@@ -46,7 +47,7 @@ export class SettingsComponent {
         } else if (environment.site!) {
             this.site();
         } else {
-            this.http.get("/api/stop").subscribe()
+            this.http.get(UrlHelper.getApiUrl()+"stop").subscribe()
         }
     }
 
@@ -56,7 +57,7 @@ export class SettingsComponent {
         } else if (environment.site!) {
             this.site();
         }else {
-            this.http.get("/api/clear/states").subscribe()
+            this.http.get(UrlHelper.getApiUrl()+"clear/states").subscribe()
         }
     }
 
@@ -66,7 +67,7 @@ export class SettingsComponent {
         }else if (environment.site!) {
             this.site();
         } else {
-            this.http.get("/api/clear/config").subscribe()
+            this.http.get(UrlHelper.getApiUrl()+"clear/config").subscribe()
         }
     }
 
