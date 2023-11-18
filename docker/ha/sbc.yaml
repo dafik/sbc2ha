@@ -12,5 +12,5 @@ logger:
     format: "{ date:HH:mm:ss } {level|size=5} {class-name} {message}"
 extension_boards:
   vendor: rpi
-  inputBoard: nohat
-  outputBoard: nohat
+  input_board: nohat
+  output_board: nohat
