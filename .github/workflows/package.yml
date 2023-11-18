@@ -13,7 +13,7 @@ jobs:
 
       - name: Cache node modules
         id: cache-nodemodules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
         with:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Cache angular
         id: cache-angular
-        uses: actions/cache@v2
+        uses: actions/cache@3
         env:
           cache-name: cache-angular
         with:
