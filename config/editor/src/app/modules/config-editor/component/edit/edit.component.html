@@ -2,8 +2,9 @@
   <mat-card-content>
     <button mat-raised-button (click)="accordion.openAll()">Expand All</button>
     <button mat-raised-button (click)="accordion.closeAll()">Collapse All</button>
-    <button mat-raised-button color="accent" (click)="uploadToCache()">Save in device cache</button>
-    <button mat-raised-button color="warn" (click)="uploadToArgument()">Save as argument file</button>
+<!--    <button mat-raised-button color="accent" (click)="uploadToCache()">Save in device cache</button>
+    <button mat-raised-button color="warn" (click)="uploadToArgument()">Save as argument file</button>-->
+    <button mat-raised-button color="warn" (click)="save()">Save</button>
     <button mat-raised-button color="accent" (click)="downloadYaml()">Download yaml</button>
   </mat-card-content>
 </mat-card>

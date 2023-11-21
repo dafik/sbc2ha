@@ -62,6 +62,8 @@ import { LogListComponent } from './component/log/log-list/log-list.component';
 import { LogAddDefaultComponent } from './component/log/log-add-default/log-add-default.component';
 import { LogAddWriterComponent } from './component/log/log-add-writer/log-add-writer.component';
 import { LogAddPackageComponent } from './component/log/log-add-package/log-add-package.component';
+import { SaveDialogComponent } from './component/save-dialog/save-dialog.component';
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 
 @NgModule({
@@ -109,7 +111,8 @@ import { LogAddPackageComponent } from './component/log/log-add-package/log-add-
         LogListComponent,
         LogAddDefaultComponent,
         LogAddWriterComponent,
-        LogAddPackageComponent
+        LogAddPackageComponent,
+        SaveDialogComponent
     ],
     imports: [
         CommonModule,
@@ -127,7 +130,8 @@ import { LogAddPackageComponent } from './component/log/log-add-package/log-add-
         MatDialogModule,
         MatCheckboxModule,
         MatRadioModule,
-        MatCardModule
+        MatCardModule,
+        MatSlideToggleModule
     ],
     providers: [YamlPipe, JsonDPipe]
 })
