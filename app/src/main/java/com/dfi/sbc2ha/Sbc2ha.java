@@ -65,7 +65,7 @@ public class Sbc2ha implements AutoCloseable {
     public static void main(String[] args) {
         try {
             long startTime = System.currentTimeMillis();
-            log.info("App starting {}", Version.VERSION);
+            log.info("App starting {}", Version.getVersion());
 
             configFile = getConfigFile(args);
             sbc2ha = new Sbc2ha(startTime);

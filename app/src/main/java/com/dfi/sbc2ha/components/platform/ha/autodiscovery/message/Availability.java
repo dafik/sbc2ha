@@ -1,6 +1,9 @@
 package com.dfi.sbc2ha.components.platform.ha.autodiscovery.message;
 
 import com.dfi.sbc2ha.Version;
+import com.dfi.sbc2ha.components.platform.bus.ModbusFactory;
+import com.dfi.sbc2ha.components.platform.ha.autodiscovery.HaDeviceType;
+import com.dfi.sbc2ha.components.platform.ha.autodiscovery.SbcDeviceType;
 import com.dfi.sbc2ha.components.sensor.modbus.ModbusSensor;
 import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.ActuatorConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.actuator.CoverConfig;
@@ -16,16 +19,16 @@ import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.digital.InputSwitchConfig;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.ModbusSensorDefinition;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.modbus.Register;
 import com.dfi.sbc2ha.config.sbc2ha.definition.sensor.oneWire.therm.DS18B20;
-import com.dfi.sbc2ha.components.platform.bus.ModbusFactory;
-import com.dfi.sbc2ha.components.platform.ha.autodiscovery.HaDeviceType;
-import com.dfi.sbc2ha.components.platform.ha.autodiscovery.SbcDeviceType;
 import com.dfi.sbc2ha.services.state.sensor.ButtonState;
+import com.dfi.sbc2ha.web.Server;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -330,7 +333,15 @@ public abstract class Availability {
             identifiers.add(topic);
             this.model = model;
             name = topic;
-            swVersion = Version.VERSION;
+            swVersion = Version.getVersion();
+
+            try {
+                InetAddress localHost = InetAddress.getLocalHost();
+                configurationUrl = "http://" + localHost.getHostAddress() + ":" + Server.getPort();
+            } catch (UnknownHostException ignored) {
+
+            }
+
         }
     }
 

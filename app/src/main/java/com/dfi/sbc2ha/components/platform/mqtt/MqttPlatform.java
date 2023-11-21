@@ -66,7 +66,7 @@ public class MqttPlatform {
             manager.addDisplayLine("prepare autodiscovery");
             Availability.setTopicPrefix(mqttConfig.getTopicPrefix());
             Availability.setModel("boneIO Relay Board");
-            Availability.setVersion(Version.VERSION);
+            Availability.setVersion(Version.getVersion());
         }
     }
 

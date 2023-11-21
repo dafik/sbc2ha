@@ -272,7 +272,7 @@ public class Display implements DeviceInterface {
         //g2d.drawString("java", 73, 15);
 
         g2d.setFont(fontSmall);
-        g2d.drawString("version: " + Version.VERSION, 3, 30);
+        g2d.drawString("version: " + Version.getVersion(), 3, 30);
 
         try {
             g2d.drawString((String) lines.get(0), 3, 42);

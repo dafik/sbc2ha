@@ -47,3 +47,4 @@ build/
 /config/config-typescript/*
 /config/editor/*
 /docs/*
+/docker/ha/sbc2ha.jar

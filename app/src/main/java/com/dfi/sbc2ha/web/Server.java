@@ -35,12 +35,14 @@ import static spark.Spark.*;
 
 
 public class Server {
+    public static final int PORT = 8080;
     private final String configFile;
     private final EventBus eventBus = EventBus.getDefault();
 
     public Server(String configFile) {
         this.configFile = configFile;
-        port(8080);
+        int port = getPort();
+        port(port);
         staticFiles.location("/editor");
         webSocket("/ws/device", DeviceWebsocket.class);
         webSocket("/ws/logs", LogWebsocket.class);
@@ -64,7 +66,11 @@ public class Server {
         });
     }
 
-    private  Route getConfigJson() {
+    public static int getPort() {
+        return PORT;
+    }
+
+    private Route getConfigJson() {
         return (request, res) -> {
             String filePath = ConfigProvider.getCachedFileName(configFile);
             byte[] bytes = Files.readAllBytes(Paths.get(filePath));
@@ -90,17 +96,10 @@ public class Server {
     private Route convert() {
         return (request, response) -> {
             try {
-
-
-
-
-
                 List<Path> uploadFiles = getUploadFiles(request);
                 if (uploadFiles.size() == 1) {
                     return ConverterService.convert(uploadFiles.get(0));
                 }
-
-
             } catch (RuntimeException e) {
                 response.status(HttpStatus.BAD_REQUEST_400);
                 return e.getMessage();
@@ -115,8 +114,6 @@ public class Server {
                 String inputFileName = "cache";
                 Path config = getUploadFile(request, inputFileName);
                 ConfigService.writeCache(config);
-
-
             } catch (Exception e) {
                 response.status(HttpStatus.BAD_REQUEST_400);
                 return e.getMessage();
@@ -218,9 +215,7 @@ public class Server {
         File uploadDir = new File("/tmp/upload");
         uploadDir.mkdir();
 
-
         req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
-
 
         HttpServletRequest raw = req.raw();
         Collection<Part> parts = raw.getParts();
