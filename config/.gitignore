@@ -36,15 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
-/.idea/
-/app/utils/relayboard/config.yaml
-/app/utils/relayboard/output24x16A.yaml
-/app/utils/relayboard/x-output24x16A.yaml
-/app/utils/rPi/config.yaml
-/app/src/main/resources/mock-board-info.properties
-/app/src/main/resources/tiny.prop.json
-/config/config-sbc2ha-new/.gitignore
-/config/config-typescript/*
-/docs/*
-/docker/ha/sbc2ha.jar
-/config/editor/node/*
+
+/example-configs/*
+
+/converter/src/main/resources/tools/*

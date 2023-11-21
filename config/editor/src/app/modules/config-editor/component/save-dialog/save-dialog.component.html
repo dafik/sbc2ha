@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Save editor content</h1>
+<div mat-dialog-content>
+  <form [formGroup]="platform" class="form1">
+
+    <mat-label>Reload</mat-label>
+    <mat-checkbox [formControl]="reloadCtrl"></mat-checkbox>
+
+    <mat-label>Show logs</mat-label>
+    <mat-checkbox [formControl]="showLogsCtrl"></mat-checkbox>
+
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button color="warn" (click)="uploadCache()">in cache</button>
+  <button mat-raised-button color="primary" (click)="uploadConfig()">in config</button>
+</div>
