@@ -401,11 +401,8 @@ inne godne uwagi cechy.
 ### Jako dodatek do HomeAssistant (RaspberyPI 4)
 
 1. Edytor konfiguracji
-
-![sbc2ha-ha-rpi-config-editor](https://github.com/dafik/sbc2ha/assets/3379462/f6297167-dec0-4db2-8a5a-4917b0a7dc1f | width=600)
-
-2. Podgląd na żywo logów
-   
+![sbc2ha-ha-rpi-config-editor](https://github.com/dafik/sbc2ha/assets/3379462/f6297167-dec0-4db2-8a5a-4917b0a7dc1f)
+2. Podgląd na żywo logów  
 ![sbc2ha-ha-rpi-logs](https://github.com/dafik/sbc2ha/assets/3379462/a910f731-a4e7-48f2-83d2-f9e1464d08c1)
 
 ### Natwna instalacja (BeagleBone@BoneIo)
