@@ -13,7 +13,7 @@
 - [Wkład](#wkład-w-projekt)
 - [FAQ](#faq)
 - [Zrzuty ekranu](#zrzuty-ekranu)
-- [Wideo](#zrzuty-ekranu)
+- [Wideo](#wideo)
 - [Demo panelu Wideo](https://sbc2ha.mieszkadlo.eu/app/)
 
 ## Wstęp
