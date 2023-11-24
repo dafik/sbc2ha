@@ -12,7 +12,9 @@
 - [Instalacja](#instalacja)
 - [Wkład](#wkład-w-projekt)
 - [FAQ](#faq)
-- [Licencja](#licencja-)
+- [Zrzuty ekranu](#zrzuty-ekranu)
+- [Wideo](#zrzuty-ekranu)
+- [Demo panelu Wideo](https://sbc2ha.mieszkadlo.eu/app/)
 
 ## Wstęp
 Sbc2ha to wszechstronne i kompleksowe rozwiązanie zaprojektowane z myślą o szerokiej gamie użytkowników i aplikacji,
@@ -332,7 +334,7 @@ Interfejs WWW udostępnia kilka narzędzi do zarządzania systemem:
 - **Zatrzymanie aplikacji**: Ta opcja umożliwia zatrzymanie systemu. Może to być przydatne, jeśli chcesz zamknąć
   system do konserwacji lub rozwiązywania problemów. 
 
-- **Kasowanie zapamiętanych stanów siłownika**: Jeśli używasz elementów wykonawczych, które pamiętają swój stan (takich jak przekaźniki), 
+- **Kasowanie zapamiętanych stanów**: Jeśli używasz elementów wykonawczych, które pamiętają swój stan (takich jak przekaźniki), 
   możesz użyj tej opcji, aby wyczyścić zapamiętane stany.
   Może to być przydatne, jeśli chcesz zresetować siłowniki do znanego stanu.
 
@@ -347,7 +349,7 @@ Interfejs WWW udostępnia kilka narzędzi do zarządzania systemem:
   można użyć tej opcji, aby zapisać bieżącą konfigurację z powrotem do oryginalnego pliku konfiguracyjnego. Spowoduje to zastąpienie
   istniejącego pliku konfiguracyjny z bieżącą konfiguracją.
 
-### [DEMO](https://sbc2ha.mieszkadlo.eu/app/) tylko panel
+### [DEMO ](https://sbc2ha.mieszkadlo.eu/app/) tylko panel
 
  
 ## Wkład w projekt
@@ -389,61 +391,50 @@ Pamiętaj, im więcej szczegółów na temat swojego problemu podasz, tym łatwi
 
 ## Licencja
 
-Ten projekt jest objęty licencją MIT — szczegółowe informacje można znaleźć w pliku LICENSE.md.
-<!---
+Ten projekt jest projektem open source i jest dostępny na licencji [BSD-3-Clause license](https://github.com/dafik/sbc2ha/blob/master/LICENSE)
+
 ## Zrzuty ekranu
 
 Ta sekcja zawiera wizualną reprezentację projektu, prezentującą interfejs użytkownika, integrację sprzętu i
 inne godne uwagi cechy.
 
+### Jako dodatek do HomeAssistant (RaspberyPI 4)
 
-### Interfejs sieciowy
+1. Edytor konfiguracji
 
-|                                                                                   |                                                                                                       |                                                                                          |                                                                                                           |       |
-|:---------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------:|:-----:|
-| ![Panel Asystenta Home](https://loremflickr.com/1920/1080/dashboard?random=1) | ![Strona konfiguracji urządzenia Home Assistant](https://loremflickr.com/1920/1080/configuration?random=2) | ![Strona przeglądania dziennika na żywo Asystenta Home](https://loremflickr.com/1920/1080/logs?random=3) | ![Strona monitorowania statusu Home Assistant w czasie rzeczywistym](https://loremflickr.com/1920/1080/monitoring?random=4) |
+![sbc2ha-ha-rpi-config-editor](https://github.com/dafik/sbc2ha/assets/3379462/f6297167-dec0-4db2-8a5a-4917b0a7dc1f | width=600)
 
-### Integracje sprzętu
+2. Podgląd na żywo logów
+   
+![sbc2ha-ha-rpi-logs](https://github.com/dafik/sbc2ha/assets/3379462/a910f731-a4e7-48f2-83d2-f9e1464d08c1)
 
-|                                                                                                   |                                                                                              |                                                                                                     |       |       |
-|:-------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------:|:-----:|:-----:|
-| ![BeagleBone Black działający asystent domowy](https://loremflickr.com/1920/1080/beaglebone?random=5) | ![Raspberry Pi z uruchomionym Asystentem Domowym](https://loremflickr.com/1920/1080/raspberry?random=6) | ![Kolejna obsługiwana płyta z systemem Home Assistant](https://loremflickr.com/1920/1080/board?random=7) |
+### Natwna instalacja (BeagleBone@BoneIo)
+1. Dashbord
+![sbc2ha-native-bbb-dashbord](https://github.com/dafik/sbc2ha/assets/3379462/d3db114b-d579-4066-be56-9a64a2fd6030)
+2. Ustawienia
+![sbc2ha-native-bbb-settings](https://github.com/dafik/sbc2ha/assets/3379462/cab2295e-04a4-40bc-9c7e-ae924b1f6fa5)
+4. Stany
+![sbc2ha-native-bbb-states](https://github.com/dafik/sbc2ha/assets/3379462/ea933614-baaf-47f4-a392-dbf7477e288a)
+5. Edytor
+![sbc2ha-native-bbb-editor-main](https://github.com/dafik/sbc2ha/assets/3379462/fff85507-c129-471d-9110-1921b3b4d447)
+6. Kreator konfiguracji
+![sbc2ha-native-bbb-config-creator](https://github.com/dafik/sbc2ha/assets/3379462/e54db910-20a6-4348-ba6d-900127916e25)
+7. Edycja sensora
+![sbc2ha-native-bbb-edit-actuator-sensor](https://github.com/dafik/sbc2ha/assets/3379462/cbc37c23-b9d2-43a8-b026-401fbd4fd84e)
+8. Edycja aktuatora (wlementu wykonawczego)
+![sbc2ha-native-bbb-edit-actuator](https://github.com/dafik/sbc2ha/assets/3379462/005dd1d7-f871-42ed-b586-1e4e8b07ee53)
+9. Edycja komponentów platformy
+![sbc2ha-native-bbb-edit-platform](https://github.com/dafik/sbc2ha/assets/3379462/c68850c6-7756-4b71-80ac-e6c509780a12)
+10. Wynikowa konfiguracja YAML
+![sbc2ha-native-bbb-config-yaml](https://github.com/dafik/sbc2ha/assets/3379462/530aa218-19bb-4012-9190-a7081123ea37)
+10. Wynikowa konfiguracja JSON
+![sbc2ha-native-bbb-config-json](https://github.com/dafik/sbc2ha/assets/3379462/88f12f85-b158-4cf9-b72b-ef705393e6ac)
 
-### Komunikacja MQTT
+### Wideo
 
-|                                                                           |                                                                                                         |       |       |       |
-|:-------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|:-----:|:-----:|:-----:|
-| ![Panel brokera MQTT](https://loremflickr.com/1920/1080/mqtt?random=8) | ![Panel brokera MQTT pokazujący tematy i komunikaty](https://loremflickr.com/1920/1080/topics?random=9) |
+[sbc2ha-demo.webm](https://github.com/dafik/sbc2ha/assets/3379462/c564bb1f-e857-4909-8a8d-697567c64443)
 
-### Integracja z Asystentem Domowym
 
-|                                                                                                       |                                                                                                            |       |       |       |
-|:-----------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------:|:-----:|:-----:|:-----:|
-| ![Panel Home Assistant z urządzeniami projektowymi](https://loremflickr.com/1920/1080/devices?random=10) | ![Automatyzacja Home Assistant za pomocą urządzeń projektowych](https://loremflickr.com/1920/1080/automation?random=11) |
 
-### Zarządzanie czujnikami i elementami wykonawczymi
-
-|                                                                                              |                                                                                                  |       |       |       |
-|:--------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|:-----:|:-----:|:-----:|
-| ![Strona zarządzania czujnikami Home Assistant](https://loremflickr.com/1920/1080/sensor?random=12) | ![Strona zarządzania siłownikami Home Assistant](https://loremflickr.com/1920/1080/actuator?random=13) |
-
-### Dzienniki na żywo i konfiguracja
-
-|                                                                                         |                                                                                                 |       |       |       |
-|:---------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|:-----:|:-----:|:-----:|
-| ![Strona dzienników na żywo Asystenta Home](https://loremflickr.com/1920/1080/live-logs?random=14) | ![Strona konfiguracji Home Assistant](https://loremflickr.com/1920/1080/configuration?random=15) |
-
--->
-
-## Informacje dodatkowe
-
-- System jest open source i jest dostępny na licencji [BSD-3-Clause license](https://github.com/dafik/sbc2ha/blob/master/LICENSE)
-- System jest aktywnie rozwijany i regularnie dodawane są nowe funkcje. 
-
-<!---
-## Wytyczne dotyczące wkładu 
-Jeżeli chcesz przyczynić się do rozwoju systemu, zapoznaj się z treścią wpisu
-wytyczne: [CONTRIBUTING.md](link do-contributing-guidelines). 
--->
 ## Informacje kontaktowe 
 * Jeśli masz jakieś pytania lub uwagi, skontaktuj się z programistami pod adresem zbyszek.wieczorek AT gmail.com
