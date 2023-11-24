@@ -14,7 +14,7 @@
 - [FAQ](#faq)
 - [Zrzuty ekranu](#zrzuty-ekranu)
 - [Wideo](#wideo)
-- [Demo panelu Wideo](https://sbc2ha.mieszkadlo.eu/app/)
+- [Demo panelu](https://sbc2ha.mieszkadlo.eu/app/)
 
 ## Wstęp
 Sbc2ha to wszechstronne i kompleksowe rozwiązanie zaprojektowane z myślą o szerokiej gamie użytkowników i aplikacji,
