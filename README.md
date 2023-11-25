@@ -44,7 +44,7 @@ które zostało napisane w języku Python i było dostępne wyłącznie dla plat
 Obecny system jest jednak napisany w mocno typowanym języku programowania JAVA — dzięki temu może być przenoszony pomiędzy różnymi platformami (SBC).  
 Oprogramowanie opiera się na świetnej bibliotece [diozero](https://www.diozero.com/), zawiera również małe wstawki w języku C (JNI) do komunikacji z systemem Linux.  
 Z biegiem czasu oprogramowanie znacznie ewoluowało, rozwiązując i korygując mniej udane wybory dokonane przez twórców oryginalnego oprogramowania.  
-Obecnie oferuje ono wsparcie dla większej liczby czujników i siłowników, dzięki
+Obecnie oferuje ono wsparcie dla większej liczby czujników i elementów wykonawczych, dzięki
 wykorzystaniu biblioteki diozero i standaryzacji obsługi urządzeń.
 
 System może pochwalić się szeroką gamą funkcjonalności, w tym:
@@ -84,7 +84,7 @@ Sbc2ha może działać w trzech różnych trybach:
 Tryb autonomiczny jest najbardziej podstawowym trybem działania sbc2ha.   
 Pozwala on na bezpośrednie sterowanie podłączonymi urządzeniami w oparciu o różne zdarzenia i odczyty.   
 W tym trybie nie są wymagane żadnie inne komponenty do jego działania.  
-W lokalnej logice obsługiwane są obecnie następujące sensory: binary i button (switch) oraz actuator relay. 
+W lokalnej logice obsługiwany obecnie jest sensor button (switch) oraz actuator relay. 
 
 
 #### Kontrola oparta na zdarzeniach
