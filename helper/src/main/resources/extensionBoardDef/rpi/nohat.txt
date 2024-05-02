@@ -18,6 +18,8 @@
 23,,11,gpio
 24,,8,gpio
 26,,7,gpio
+27,,0,gpio
+28,,1,gpio
 29,,5,gpio
 31,,6,gpio
 32,,12,gpio
