@@ -33,14 +33,56 @@ public abstract class DeviceConfig {
 
     /**
      * Human-readable display name (mutable, never a persistence key).
+     * Alias: {@code name} maps to the same value.
      */
     @JsonProperty("display_name")
     protected String displayName;
 
+    /**
+     * Human-readable display name — alias for {@code display_name}.
+     * Jackson merges both into the same {@link #displayName} field.
+     */
+    @JsonProperty("name")
+    protected String nameAlias;
+
+    /**
+     * Reference to a hardware channel (e.g. {@code input_board.input1}).
+     */
+    @JsonProperty("input")
+    protected String input;
+
+    /**
+     * Reference to a hardware channel (e.g. {@code output_board.output1}).
+     */
+    @JsonProperty("output")
+    protected String output;
+
+    /**
+     * Logical location path (e.g. {@code floor1.stairs}).
+     */
+    @JsonProperty("location")
+    protected String location;
+
+    /**
+     * Home Assistant exposure configuration.
+     */
+    @JsonProperty("expose")
+    protected ExposeConfig expose;
+
     protected DeviceConfig() {}
 
     public String id() { return id; }
-    public String displayName() { return displayName; }
+    public String displayName() {
+        if (displayName != null) return displayName;
+        if (nameAlias != null) return nameAlias;
+        return null;
+    }
+    public String name() { return displayName(); }
+
+    public String input() { return input; }
+    public String output() { return output; }
+    public String location() { return location; }
+    public ExposeConfig expose() { return expose; }
 
     public abstract DeviceType type();
 

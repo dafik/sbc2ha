@@ -1,0 +1,41 @@
+sbc2ha:
+  id: bone1
+  name: bone1
+  schema: 1
+runtime:
+  offline_first: true
+hardware:
+  board: { id: main, type: beaglebone-black }
+  buses:
+    i2c2: { type: i2c, path: /dev/i2c-2 }
+  profiles:
+    input_board: { type: boneio.input-v0.4, board: main }
+    output_board:
+      type: boneio.output-24x16a-v0.4
+      bus: i2c2
+      addresses: { mcp1: 0x20, mcp2: 0x21 }
+locations:
+  floor1: { name: Piętro 1 }
+  floor1.stairs: { name: Klatka, parent: floor1 }
+devices:
+  - id: klatka_button
+    name: Klatka 1
+    type: button
+    input: input_board.input1
+    location: floor1.stairs
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: klatka_light }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+  - id: klatka_light
+    name: Klatka
+    type: light
+    output: output_board.output1
+    location: floor1.stairs
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+mqtt: { enabled: false }
+home_assistant: { enabled: false }
