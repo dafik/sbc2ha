@@ -1,0 +1,12 @@
+node_id: test_node
+schema: "1"
+
+devices:
+  - type: output
+    id: out_relay1
+    display_name: "Test Relay"
+
+  - type: button
+    id: btn_entrance
+    display_name: "Entrance Button"
+    click_action: out_relay1

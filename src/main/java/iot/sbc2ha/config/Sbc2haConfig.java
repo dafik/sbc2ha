@@ -39,6 +39,11 @@ public final class Sbc2haConfig {
     @JsonProperty("devices")
     private List<iot.sbc2ha.device.DeviceConfig> devices = new ArrayList<>();
 
+    /**
+     * Validated device registry — populated after {@link #validate()}.
+     */
+    private transient DeviceRegistry registry;
+
     public Sbc2haConfig() {
     }
 
@@ -72,7 +77,17 @@ public final class Sbc2haConfig {
     }
 
     /**
+     * @return the validated device registry, or {@code null} if {@link #validate()} has not been called
+     */
+    public DeviceRegistry registry() {
+        return registry;
+    }
+
+    /**
      * Validate this configuration instance.
+     *
+     * <p>Also builds and caches the {@link DeviceRegistry} for later
+     * runtime use.</p>
      *
      * @throws ValidationException if node_id is missing/invalid, schema is unknown, or device validation fails
      */
@@ -91,12 +106,13 @@ public final class Sbc2haConfig {
             throw new ValidationException(
                     "Unsupported schema version: " + schema + ". Supported: " + SUPPORTED_SCHEMA);
         }
-        // Validate device registry: unique IDs, click_action targets exist
-        DeviceRegistry registry = new DeviceRegistry();
+        // Build and cache the validated device registry
+        DeviceRegistry reg = new DeviceRegistry();
         for (iot.sbc2ha.device.DeviceConfig dev : devices) {
-            registry.add(dev);
+            reg.add(dev);
         }
-        registry.validate();
+        reg.validate();
+        this.registry = reg;
     }
 
     @Override
