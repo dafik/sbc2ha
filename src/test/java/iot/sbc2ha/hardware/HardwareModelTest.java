@@ -183,4 +183,30 @@ class HardwareModelTest {
         HardwareModel b = new HardwareModel("bone2", List.of(ch), List.of());
         assertNotEquals(a, b);
     }
+
+    @Test
+    void profileFieldSetAndAccessed() {
+        GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
+        HardwareModel model = new HardwareModel("bone1", "boneio.input-v0.3", List.of(ch), List.of());
+        assertEquals("boneio.input-v0.3", model.profile());
+        assertEquals("bone1", model.board());
+    }
+
+    @Test
+    void profileNullWhenNotSet() {
+        GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
+        HardwareModel model = new HardwareModel("bone1", List.of(ch), List.of());
+        assertNull(model.profile());
+    }
+
+    @Test
+    void profileIncludedInEqualsAndHashCode() {
+        GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
+        var mappings = List.<HardwareMapping>of();
+        HardwareModel a = new HardwareModel("bone1", "profile-a", List.of(ch), mappings);
+        HardwareModel b = new HardwareModel("bone1", "profile-a", List.of(ch), mappings);
+        HardwareModel c = new HardwareModel("bone1", "profile-b", List.of(ch), mappings);
+        assertEquals(a, b);
+        assertNotEquals(a, c);
+    }
 }

@@ -42,6 +42,7 @@ import java.util.*;
 public final class HardwareModel {
 
     private String board;
+    private String profile;
     private List<PhysicalChannel> channels = new ArrayList<>();
     private List<HardwareMapping> mappings = new ArrayList<>();
     private final Map<String, HardwareMapping> byLogicalId = new LinkedHashMap<>();
@@ -67,10 +68,37 @@ public final class HardwareModel {
     }
 
     /**
+     * Create a HardwareModel with an optional profile reference.
+     */
+    public HardwareModel(String board, String profile,
+                         List<PhysicalChannel> channels,
+                         List<HardwareMapping> mappings) {
+        this.board = board;
+        this.profile = profile;
+        this.channels = channels != null ? List.copyOf(channels) : List.of();
+        if (mappings != null) {
+            this.mappings = new ArrayList<>(mappings);
+            for (HardwareMapping m : this.mappings) {
+                byLogicalId.put(m.logicalId(), m);
+            }
+        } else {
+            this.mappings = List.of();
+        }
+    }
+
+    /**
      * Board profile name (e.g. "bone1").
      */
     public String board() {
         return board;
+    }
+
+    /**
+     * Reference to the hardware profile this model was expanded from,
+     * or {@code null} if created manually.
+     */
+    public String profile() {
+        return profile;
     }
 
     /**
@@ -164,13 +192,14 @@ public final class HardwareModel {
         if (o == null || getClass() != o.getClass()) return false;
         HardwareModel that = (HardwareModel) o;
         return Objects.equals(board, that.board)
+                && Objects.equals(profile, that.profile)
                 && Objects.equals(channels, that.channels)
                 && Objects.equals(mappings, that.mappings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, channels, mappings);
+        return Objects.hash(board, profile, channels, mappings);
     }
 
     @Override

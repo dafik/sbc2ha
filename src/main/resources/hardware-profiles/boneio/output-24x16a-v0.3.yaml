@@ -1,0 +1,30 @@
+# Placeholder profile for boneio output board 24x16A v0.3.
+# INCOMPLETE — verify against .plan/oldApp/helper/src/main/resources/extensionBoardDef/boneio/output-24x16A-v0.3.txt
+# before production use.
+
+id: boneio.output-24x16a-v0.3
+incomplete: true
+channels:
+  - type: mcp23017
+    location: "i2c-1:0x20:A:0"
+    port: A
+    pin: 0
+  - type: mcp23017
+    location: "i2c-1:0x20:A:1"
+    port: A
+    pin: 1
+mappings:
+  - logical_id: output_1
+    description: "Output 1"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x20:A:0"
+      port: A
+      pin: 0
+  - logical_id: output_2
+    description: "Output 2"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x20:A:1"
+      port: A
+      pin: 1

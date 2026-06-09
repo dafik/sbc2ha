@@ -1,0 +1,26 @@
+# Placeholder profile for boneio input board v0.3.
+# INCOMPLETE — verify against .plan/oldApp/helper/src/main/resources/extensionBoardDef/boneio/input-v0.3.txt
+# before production use.
+
+id: boneio.input-v0.3
+incomplete: true
+channels:
+  - type: gpio
+    location: "P8_07"
+    direction: input
+  - type: gpio
+    location: "P8_08"
+    direction: input
+mappings:
+  - logical_id: input_1
+    description: "Input 1"
+    physical:
+      type: gpio
+      location: "P8_07"
+      direction: input
+  - logical_id: input_2
+    description: "Input 2"
+    physical:
+      type: gpio
+      location: "P8_08"
+      direction: input
