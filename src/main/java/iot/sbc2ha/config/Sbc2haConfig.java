@@ -1,7 +1,10 @@
 package iot.sbc2ha.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import iot.sbc2ha.device.DeviceRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -30,6 +33,12 @@ public final class Sbc2haConfig {
     @JsonProperty("schema")
     private String schema;
 
+    /**
+     * List of devices (polymorphic: {@code type} field determines actual subtype).
+     */
+    @JsonProperty("devices")
+    private List<iot.sbc2ha.device.DeviceConfig> devices = new ArrayList<>();
+
     public Sbc2haConfig() {
     }
 
@@ -54,10 +63,18 @@ public final class Sbc2haConfig {
         this.schema = schema;
     }
 
+    public List<iot.sbc2ha.device.DeviceConfig> devices() {
+        return devices;
+    }
+
+    public void setDevices(List<iot.sbc2ha.device.DeviceConfig> devices) {
+        this.devices = devices;
+    }
+
     /**
      * Validate this configuration instance.
      *
-     * @throws ValidationException if node_id is missing/invalid or schema is unknown
+     * @throws ValidationException if node_id is missing/invalid, schema is unknown, or device validation fails
      */
     public void validate() {
         if (nodeId == null) {
@@ -74,6 +91,12 @@ public final class Sbc2haConfig {
             throw new ValidationException(
                     "Unsupported schema version: " + schema + ". Supported: " + SUPPORTED_SCHEMA);
         }
+        // Validate device registry: unique IDs, click_action targets exist
+        DeviceRegistry registry = new DeviceRegistry();
+        for (iot.sbc2ha.device.DeviceConfig dev : devices) {
+            registry.add(dev);
+        }
+        registry.validate();
     }
 
     @Override
@@ -82,16 +105,17 @@ public final class Sbc2haConfig {
         if (o == null || getClass() != o.getClass()) return false;
         Sbc2haConfig that = (Sbc2haConfig) o;
         return Objects.equals(nodeId, that.nodeId)
-                && Objects.equals(schema, that.schema);
+                && Objects.equals(schema, that.schema)
+                && Objects.equals(devices, that.devices);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nodeId, schema);
+        return Objects.hash(nodeId, schema, devices);
     }
 
     @Override
     public String toString() {
-        return "Sbc2haConfig{nodeId='" + nodeId + "', schema='" + schema + "'}";
+        return "Sbc2haConfig{nodeId='" + nodeId + "', schema='" + schema + "', devices=" + devices + "}";
     }
 }
