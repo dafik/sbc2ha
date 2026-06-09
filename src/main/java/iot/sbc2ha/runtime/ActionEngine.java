@@ -30,20 +30,51 @@ public final class ActionEngine {
 
     private final Map<String, ButtonRuntime> buttonMap = new LinkedHashMap<>();
     private final Map<String, DeviceRuntime> targetMap = new LinkedHashMap<>();
+    private final StateService stateService;
 
     /**
      * Creates an action engine from a device registry, building all button
-     * runtimes and resolving target references.
+     * runtimes and resolving target references. No state restoration is performed.
      *
      * @param registry the validated device registry
      */
     public ActionEngine(DeviceRegistry registry) {
+        this(registry, null);
+    }
+
+    /**
+     * Creates an action engine from a device registry, building all button
+     * runtimes and resolving target references. If a {@code stateService} is
+     * provided, persisted states are loaded and applied to all target runtimes.
+     *
+     * @param registry     the validated device registry
+     * @param stateService persistent state store, or {@code null} for no restore
+     */
+    public ActionEngine(DeviceRegistry registry, StateService stateService) {
+        this.stateService = stateService;
+
         // Index all togglable targets first (outputs + lights)
         for (DeviceConfig dev : registry.all()) {
             if (dev instanceof iot.sbc2ha.device.OutputDevice) {
                 targetMap.put(dev.id(), new OutputRuntime((iot.sbc2ha.device.OutputDevice) dev));
             } else if (dev instanceof iot.sbc2ha.device.LightDevice) {
                 targetMap.put(dev.id(), new LightRuntime((iot.sbc2ha.device.LightDevice) dev));
+            }
+        }
+
+        // Restore persisted states
+        if (stateService != null) {
+            Map<String, DeviceState> restored = stateService.load();
+            for (var entry : restored.entrySet()) {
+                DeviceRuntime target = targetMap.get(entry.getKey());
+                if (target != null) {
+                    if (target instanceof OutputRuntime out) {
+                        out.setState(entry.getValue());
+                    } else if (target instanceof LightRuntime light) {
+                        light.setState(entry.getValue());
+                    }
+                    log.info("Restored state for {}: {}", entry.getKey(), entry.getValue());
+                }
             }
         }
 
@@ -104,10 +135,12 @@ public final class ActionEngine {
             case OUTPUT_TOGGLE -> {
                 if (target instanceof OutputRuntime out) {
                     out.toggle();
+                    persist(out.id(), out.state());
                     log.info("Button '{}' toggled output '{}' → {}",
                             buttonRuntime.id(), targetId, out.state());
                 } else if (target instanceof LightRuntime light) {
                     light.toggle();
+                    persist(light.id(), light.state());
                     log.info("Button '{}' toggled light '{}' → {}",
                             buttonRuntime.id(), targetId, light.state());
                 }
@@ -115,18 +148,22 @@ public final class ActionEngine {
             case OUTPUT_ON -> {
                 if (target instanceof OutputRuntime out) {
                     out.setState(DeviceState.ON);
+                    persist(out.id(), out.state());
                     log.info("Button '{}' set output '{}' ON", buttonRuntime.id(), targetId);
                 } else if (target instanceof LightRuntime light) {
                     light.setState(DeviceState.ON);
+                    persist(light.id(), light.state());
                     log.info("Button '{}' set light '{}' ON", buttonRuntime.id(), targetId);
                 }
             }
             case OUTPUT_OFF -> {
                 if (target instanceof OutputRuntime out) {
                     out.setState(DeviceState.OFF);
+                    persist(out.id(), out.state());
                     log.info("Button '{}' set output '{}' OFF", buttonRuntime.id(), targetId);
                 } else if (target instanceof LightRuntime light) {
                     light.setState(DeviceState.OFF);
+                    persist(light.id(), light.state());
                     log.info("Button '{}' set light '{}' OFF", buttonRuntime.id(), targetId);
                 }
             }
@@ -154,5 +191,21 @@ public final class ActionEngine {
      */
     public DeviceRuntime getTarget(String deviceId) {
         return targetMap.get(deviceId);
+    }
+
+    /**
+     * Persist a state change through the StateService if available.
+     */
+    private void persist(String deviceId, DeviceState state) {
+        if (stateService != null) {
+            stateService.setState(deviceId, state);
+        }
+    }
+
+    /**
+     * @return the StateService used for state restoration, or {@code null} if none
+     */
+    public StateService stateService() {
+        return stateService;
     }
 }

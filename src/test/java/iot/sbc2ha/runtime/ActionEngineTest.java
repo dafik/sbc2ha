@@ -5,6 +5,10 @@ import iot.sbc2ha.device.DeviceRegistry;
 import iot.sbc2ha.device.LightDevice;
 import iot.sbc2ha.device.OutputDevice;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -180,5 +184,101 @@ class ActionEngineTest {
         output.setState(DeviceState.ON);
         engine.dispatchClick(btn);
         assertEquals(DeviceState.OFF, output.state());
+    }
+
+    @Test
+    void withStateService_restoresInitialStates(@TempDir Path tempDir) {
+        Path stateFile = tempDir.resolve("state.json");
+
+        // Pre-populate state file with ON state for out_1
+        StateService stateService = new StateService(stateFile);
+        stateService.setState("out_1", DeviceState.ON);
+        stateService.persist();
+
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry, stateService);
+
+        OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
+        assertEquals(DeviceState.ON, output.state());
+    }
+
+    @Test
+    void withStateService_noRestoreForUnknownDevices(@TempDir Path tempDir) {
+        Path stateFile = tempDir.resolve("state.json");
+
+        StateService stateService = new StateService(stateFile);
+        stateService.setState("out_1", DeviceState.ON);
+        stateService.setState("unknown_dev", DeviceState.ON);
+        stateService.persist();
+
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry, stateService);
+
+        // out_1 should be restored
+        OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
+        assertEquals(DeviceState.ON, output.state());
+
+        // unknown_dev should not appear
+        assertNull(engine.getTarget("unknown_dev"));
+    }
+
+    @Test
+    void withStateService_dispatchPersistStates(@TempDir Path tempDir) {
+        Path stateFile = tempDir.resolve("state.json");
+
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.add(new ButtonDevice("btn_1", "Button 1", "out_1"));
+        registry.validate();
+
+        StateService stateService = new StateService(stateFile);
+        ActionEngine engine = new ActionEngine(registry, stateService);
+
+        // Dispatch a click
+        engine.dispatchClick(engine.getButton("btn_1"));
+
+        // Verify state was persisted to disk
+        StateService fresh = new StateService(stateFile);
+        Map<String, DeviceState> restored = fresh.load();
+        assertEquals(1, restored.size());
+        assertEquals(DeviceState.ON, restored.get("out_1"));
+    }
+
+    @Test
+    void withStateService_null_service_noPersist() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.add(new ButtonDevice("btn_1", "Button 1", "out_1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry, null);
+
+        engine.dispatchClick(engine.getButton("btn_1"));
+        assertEquals(DeviceState.ON, ((OutputRuntime) engine.getTarget("out_1")).state());
+        assertNull(engine.stateService());
+    }
+
+    @Test
+    void withStateService_restoresLight(@TempDir Path tempDir) {
+        Path stateFile = tempDir.resolve("state.json");
+
+        StateService stateService = new StateService(stateFile);
+        stateService.setState("light_1", DeviceState.ON);
+        stateService.persist();
+
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new LightDevice("light_1", "Kitchen Light"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry, stateService);
+
+        LightRuntime light = (LightRuntime) engine.getTarget("light_1");
+        assertEquals(DeviceState.ON, light.state());
     }
 }
