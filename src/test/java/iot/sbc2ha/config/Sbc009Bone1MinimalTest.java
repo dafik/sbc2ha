@@ -3,7 +3,7 @@ package iot.sbc2ha.config;
 import iot.sbc2ha.device.*;
 import iot.sbc2ha.runtime.ActionEngine;
 import iot.sbc2ha.runtime.ActionType;
-import iot.sbc2ha.runtime.ButtonRuntime;
+import iot.sbc2ha.runtime.SwitchRuntime;
 import iot.sbc2ha.runtime.LightRuntime;
 import org.junit.jupiter.api.Test;
 
@@ -42,9 +42,9 @@ class Sbc009Bone1MinimalTest {
               floor1: { name: Piętro 1 }
               floor1.stairs: { name: Klatka, parent: floor1 }
             devices:
-              - id: klatka_button
+              - id: klatka_switch
                 name: Klatka 1
-                type: button
+                type: switch
                 input: input_board.input1
                 location: floor1.stairs
                 clicks: { click: true, double: true, long: false, release: false }
@@ -110,34 +110,34 @@ class Sbc009Bone1MinimalTest {
             // Verify devices
             assertEquals(2, config.devices().size());
 
-            // Button device
-            ButtonDevice button = (ButtonDevice) config.devices().getFirst();
-            assertEquals("klatka_button", button.id());
-            assertEquals("Klatka 1", button.name());
-            assertEquals("input_board.input1", button.input());
-            assertEquals("floor1.stairs", button.location());
+            // Switch device
+            SwitchDevice switchDevice = (SwitchDevice) config.devices().getFirst();
+            assertEquals("klatka_switch", switchDevice.id());
+            assertEquals("Klatka 1", switchDevice.name());
+            assertEquals("input_board.input1", switchDevice.input());
+            assertEquals("floor1.stairs", switchDevice.location());
 
             // Verify clicks config
-            assertNotNull(button.clicks());
-            assertTrue(button.clicks().click());
-            assertTrue(button.clicks().dbl());
-            assertFalse(button.clicks().longPress());
-            assertFalse(button.clicks().release());
+            assertNotNull(switchDevice.clicks());
+            assertTrue(switchDevice.clicks().click());
+            assertTrue(switchDevice.clicks().dbl());
+            assertFalse(switchDevice.clicks().longPress());
+            assertFalse(switchDevice.clicks().release());
 
             // Verify actions
-            assertNotNull(button.actions());
-            assertTrue(button.actions().containsKey("click"));
-            List<ActionMapping> clickActions = button.actions().get("click");
+            assertNotNull(switchDevice.actions());
+            assertTrue(switchDevice.actions().containsKey("click"));
+            List<ActionMapping> clickActions = switchDevice.actions().get("click");
             assertEquals(1, clickActions.size());
             ActionMapping clickAction = clickActions.getFirst();
             assertEquals(ActionMapping.ActionType.OUTPUT_TOGGLE, clickAction.type());
             assertEquals("klatka_light", clickAction.target());
 
             // Verify HA expose
-            assertNotNull(button.expose());
-            assertNotNull(button.expose().ha());
-            assertTrue(button.expose().ha().enabled());
-            assertEquals(List.of("click", "double"), button.expose().ha().events());
+            assertNotNull(switchDevice.expose());
+            assertNotNull(switchDevice.expose().ha());
+            assertTrue(switchDevice.expose().ha().enabled());
+            assertEquals(List.of("click", "double"), switchDevice.expose().ha().events());
 
             // Light device
             LightDevice light = (LightDevice) config.devices().get(1);
@@ -162,11 +162,11 @@ class Sbc009Bone1MinimalTest {
             ActionEngine engine = new ActionEngine(registry);
             assertNotNull(engine);
 
-            // Button is wired (new actions.format → OUTPUT_TOGGLE)
-            ButtonRuntime btnRuntime = engine.getButton("klatka_button");
-            assertNotNull(btnRuntime);
-            assertEquals(ActionType.OUTPUT_TOGGLE, btnRuntime.action());
-            assertEquals("klatka_light", btnRuntime.targetId());
+            // Switch is wired (new actions.format → OUTPUT_TOGGLE)
+            SwitchRuntime switchRuntime = engine.getSwitch("klatka_switch");
+            assertNotNull(switchRuntime);
+            assertEquals(ActionType.OUTPUT_TOGGLE, switchRuntime.action());
+            assertEquals("klatka_light", switchRuntime.targetId());
 
             // Light is a togglable target
             LightRuntime lightRuntime = (LightRuntime) engine.getTarget("klatka_light");
@@ -258,9 +258,9 @@ class Sbc009Bone1MinimalTest {
                   - type: light
                     id: light_1
                     display_name: Legacy Light
-                  - type: button
-                    id: btn_1
-                    display_name: Legacy Button
+                  - type: switch
+                    id: switch_1
+                    display_name: Legacy Switch
                     click_action: light_1
                 """;
         Path tempFile = null;

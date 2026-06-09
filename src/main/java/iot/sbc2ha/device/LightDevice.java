@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 /**
- * Light device — a togglable output that can be referenced by button click actions.
+ * Light device — a togglable output that can be referenced by switch click actions.
  *
  * <pre>
  * # Legacy format

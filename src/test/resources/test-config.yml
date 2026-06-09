@@ -6,7 +6,7 @@ devices:
     id: out_relay1
     display_name: "Test Relay"
 
-  - type: button
+  - type: switch
     id: btn_entrance
     display_name: "Entrance Button"
     click_action: out_relay1

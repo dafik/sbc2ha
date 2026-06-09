@@ -37,7 +37,7 @@ class HardwareProfileTest {
     @Test
     void createsWithAllFields() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_1", "Btn 1", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
         HardwareProfile profile = new HardwareProfile("test-id", true, List.of(ch), List.of(mapping));
         assertEquals("test-id", profile.id());
         assertTrue(profile.incomplete());
@@ -114,7 +114,7 @@ class HardwareProfileTest {
     @Test
     void toStringIncludesAllFields() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_1", "Btn 1", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
         HardwareProfile profile = new HardwareProfile("test-id", true, List.of(ch), List.of(mapping));
         String s = profile.toString();
         assertTrue(s.contains("test-id"));
@@ -135,8 +135,8 @@ class HardwareProfileTest {
                     location: "P9_11"
                     direction: input
                 mappings:
-                  - logical_id: btn_x
-                    description: "X button"
+                  - logical_id: switch_x
+                    description: "X switch"
                     physical:
                       type: gpio
                       location: "P9_11"
@@ -159,7 +159,7 @@ class HardwareProfileTest {
     @Test
     void expansionEqualsManualModel() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_x", "X button", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_x", "X switch", ch);
 
         HardwareModel fromProfile = new HardwareModel("test", "test", List.of(ch), List.of(mapping));
         HardwareModel fromManual = new HardwareModel("test", null, List.of(ch), List.of(mapping));
@@ -167,6 +167,6 @@ class HardwareProfileTest {
         // Channels and mappings are equivalent even though profile differs
         assertEquals(fromProfile.channels(), fromManual.channels());
         assertEquals(fromProfile.mappings(), fromManual.mappings());
-        assertSame(ch, fromProfile.getPhysicalChannel("btn_x"));
+        assertSame(ch, fromProfile.getPhysicalChannel("switch_x"));
     }
 }

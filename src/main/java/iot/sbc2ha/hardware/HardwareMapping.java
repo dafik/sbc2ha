@@ -12,8 +12,8 @@ import java.util.Objects;
  * ({@link iot.sbc2ha.device.DeviceConfig}) and the physical hardware layer.
  *
  * <pre>
- * logical_id: btn_entrance
- * description: "Entrance door button on P9_11"
+ * logical_id: switch_entrance
+ * description: "Entrance door switch on P9_11"
  * physical:
  *   type: gpio
  *   location: "P9_11"

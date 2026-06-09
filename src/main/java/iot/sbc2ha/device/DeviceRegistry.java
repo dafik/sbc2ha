@@ -33,7 +33,7 @@ public final class DeviceRegistry {
      * Validate the registry:
      * <ul>
      *   <li>No duplicate IDs (shouldn't happen after add, but safe to check).</li>
-     *   <li>Every button click_action target exists as a device.</li>
+     *   <li>Every switch click_action target exists as a device.</li>
      * </ul>
      *
      * @throws ValidationException if validation fails
@@ -46,12 +46,12 @@ public final class DeviceRegistry {
             }
         }
         for (DeviceConfig dev : devices) {
-            if (dev instanceof ButtonDevice btn) {
-                String target = btn.clickAction();
+            if (dev instanceof SwitchDevice switch1) {
+                String target = switch1.clickAction();
                 if (target != null && !target.isBlank()) {
                     if (!byId.containsKey(target)) {
                         throw new ValidationException(
-                                "Button '" + dev.id() + "' click_action targets unknown device: " + target);
+                                "Switch '" + dev.id() + "' click_action targets unknown device: " + target);
                     }
                 }
             }
@@ -75,12 +75,12 @@ public final class DeviceRegistry {
     }
 
     /**
-     * All button devices.
+     * All switch devices.
      */
-    public List<ButtonDevice> buttons() {
+    public List<SwitchDevice> switchs() {
         return devices.stream()
-                .filter(d -> d instanceof ButtonDevice)
-                .map(d -> (ButtonDevice) d)
+                .filter(d -> d instanceof SwitchDevice)
+                .map(d -> (SwitchDevice) d)
                 .collect(Collectors.toList());
     }
 

@@ -1,7 +1,7 @@
 package iot.sbc2ha.runtime;
 
 import iot.sbc2ha.device.ActionMapping;
-import iot.sbc2ha.device.ButtonDevice;
+import iot.sbc2ha.device.SwitchDevice;
 import iot.sbc2ha.device.DeviceConfig;
 import iot.sbc2ha.device.DeviceRegistry;
 import org.slf4j.Logger;
@@ -11,17 +11,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Engine that dispatches button events to target devices.
+ * Engine that dispatches switch events to target devices.
  *
- * <p>Construction wires every {@link ButtonDevice} in the registry to a
- * {@link ButtonRuntime} using the button's {@code click_action} mapping.
+ * <p>Construction wires every {@link SwitchDevice} in the registry to a
+ * {@link SwitchRuntime} using the switch's {@code click_action} mapping.
  * Toggle actions are resolved against a map of {@link DeviceRuntime} targets
  * (outputs and lights).</p>
  *
  * <h3>Dispatch flow</h3>
  * <pre>
- * button.click() → engine.dispatchClick(buttonRuntime)
- *                 → target = runtimes.get(buttonRuntime.targetId())
+ * switch.click() → engine.dispatchClick(switchRuntime)
+ *                 → target = runtimes.get(switchRuntime.targetId())
  *                 → target.toggle()
  * </pre>
  */
@@ -29,12 +29,12 @@ public final class ActionEngine {
 
     private static final Logger log = LoggerFactory.getLogger(ActionEngine.class);
 
-    private final Map<String, ButtonRuntime> buttonMap = new LinkedHashMap<>();
+    private final Map<String, SwitchRuntime> switchMap = new LinkedHashMap<>();
     private final Map<String, DeviceRuntime> targetMap = new LinkedHashMap<>();
     private final StateService stateService;
 
     /**
-     * Creates an action engine from a device registry, building all button
+     * Creates an action engine from a device registry, building all switch
      * runtimes and resolving target references. No state restoration is performed.
      *
      * @param registry the validated device registry
@@ -44,7 +44,7 @@ public final class ActionEngine {
     }
 
     /**
-     * Creates an action engine from a device registry, building all button
+     * Creates an action engine from a device registry, building all switch
      * runtimes and resolving target references. If a {@code stateService} is
      * provided, persisted states are loaded and applied to all target runtimes.
      *
@@ -79,30 +79,30 @@ public final class ActionEngine {
             }
         }
 
-        // Wire button runtimes (legacy clickAction + new actions format)
+        // Wire switch runtimes (legacy clickAction + new actions format)
         for (DeviceConfig dev : registry.all()) {
-            if (dev instanceof ButtonDevice btn) {
+            if (dev instanceof SwitchDevice switch1) {
                 ActionType action = ActionType.NOOP;
-                String targetId = btn.clickAction();
+                String targetId = switch1.clickAction();
                 if (targetId != null && !targetId.isBlank()) {
                     action = ActionType.OUTPUT_TOGGLE;
-                } else if (btn.actions() != null && btn.actions().containsKey("click")) {
-                    var clickActions = btn.actions().get("click");
+                } else if (switch1.actions() != null && switch1.actions().containsKey("click")) {
+                    var clickActions = switch1.actions().get("click");
                     if (clickActions != null && !clickActions.isEmpty()) {
                         var mapping = clickActions.getFirst();
                         action = mapActionType(mapping.type());
                         targetId = mapping.target();
                     }
                 }
-                ButtonRuntime runtime = new ButtonRuntime(btn, action, targetId);
-                buttonMap.put(dev.id(), runtime);
-                log.info("Wired button '{}' → action={} target={}",
+                SwitchRuntime runtime = new SwitchRuntime(switch1, action, targetId);
+                switchMap.put(dev.id(), runtime);
+                log.info("Wired switch '{}' → action={} target={}",
                         dev.id(), action, targetId);
             }
         }
 
-        log.info("ActionEngine initialized: {} buttons, {} togglable targets",
-                buttonMap.size(), targetMap.size());
+        log.info("ActionEngine initialized: {} switchs, {} togglable targets",
+                switchMap.size(), targetMap.size());
     }
 
     /**
@@ -127,10 +127,10 @@ public final class ActionEngine {
     }
 
     /**
-     * @return all button runtimes keyed by device ID
+     * @return all switch runtimes keyed by device ID
      */
-    public Map<String, ButtonRuntime> buttons() {
-        return buttonMap;
+    public Map<String, SwitchRuntime> switchs() {
+        return switchMap;
     }
 
     /**
@@ -141,59 +141,59 @@ public final class ActionEngine {
     }
 
     /**
-     * Dispatch a click event from the given button runtime to its target.
+     * Dispatch a click event from the given switch runtime to its target.
      *
-     * @param buttonRuntime the button runtime that received the click
+     * @param switchRuntime the switch runtime that received the click
      */
-    public void dispatchClick(ButtonRuntime buttonRuntime) {
-        String targetId = buttonRuntime.targetId();
+    public void dispatchClick(SwitchRuntime switchRuntime) {
+        String targetId = switchRuntime.targetId();
         if (targetId == null || targetId.isBlank()) {
-            log.debug("Button '{}' has no click target — skipping", buttonRuntime.id());
+            log.debug("Switch '{}' has no click target — skipping", switchRuntime.id());
             return;
         }
 
         DeviceRuntime target = targetMap.get(targetId);
         if (target == null) {
-            log.error("Button '{}' click targets unknown device '{}'",
-                    buttonRuntime.id(), targetId);
+            log.error("Switch '{}' click targets unknown device '{}'",
+                    switchRuntime.id(), targetId);
             return;
         }
 
-        ActionType action = buttonRuntime.action();
+        ActionType action = switchRuntime.action();
         switch (action) {
             case OUTPUT_TOGGLE -> {
                 if (target instanceof OutputRuntime out) {
                     out.toggle();
                     persist(out.id(), out.state());
-                    log.info("Button '{}' toggled output '{}' → {}",
-                            buttonRuntime.id(), targetId, out.state());
+                    log.info("Switch '{}' toggled output '{}' → {}",
+                            switchRuntime.id(), targetId, out.state());
                 } else if (target instanceof LightRuntime light) {
                     light.toggle();
                     persist(light.id(), light.state());
-                    log.info("Button '{}' toggled light '{}' → {}",
-                            buttonRuntime.id(), targetId, light.state());
+                    log.info("Switch '{}' toggled light '{}' → {}",
+                            switchRuntime.id(), targetId, light.state());
                 }
             }
             case OUTPUT_ON -> {
                 if (target instanceof OutputRuntime out) {
                     out.setState(DeviceState.ON);
                     persist(out.id(), out.state());
-                    log.info("Button '{}' set output '{}' ON", buttonRuntime.id(), targetId);
+                    log.info("Switch '{}' set output '{}' ON", switchRuntime.id(), targetId);
                 } else if (target instanceof LightRuntime light) {
                     light.setState(DeviceState.ON);
                     persist(light.id(), light.state());
-                    log.info("Button '{}' set light '{}' ON", buttonRuntime.id(), targetId);
+                    log.info("Switch '{}' set light '{}' ON", switchRuntime.id(), targetId);
                 }
             }
             case OUTPUT_OFF -> {
                 if (target instanceof OutputRuntime out) {
                     out.setState(DeviceState.OFF);
                     persist(out.id(), out.state());
-                    log.info("Button '{}' set output '{}' OFF", buttonRuntime.id(), targetId);
+                    log.info("Switch '{}' set output '{}' OFF", switchRuntime.id(), targetId);
                 } else if (target instanceof LightRuntime light) {
                     light.setState(DeviceState.OFF);
                     persist(light.id(), light.state());
-                    log.info("Button '{}' set light '{}' OFF", buttonRuntime.id(), targetId);
+                    log.info("Switch '{}' set light '{}' OFF", switchRuntime.id(), targetId);
                 }
             }
             case NOOP -> {
@@ -203,13 +203,13 @@ public final class ActionEngine {
     }
 
     /**
-     * Get a button runtime by device ID.
+     * Get a switch runtime by device ID.
      *
      * @param deviceId the stable device ID
-     * @return the button runtime, or {@code null} if not found
+     * @return the switch runtime, or {@code null} if not found
      */
-    public ButtonRuntime getButton(String deviceId) {
-        return buttonMap.get(deviceId);
+    public SwitchRuntime getSwitch(String deviceId) {
+        return switchMap.get(deviceId);
     }
 
     /**

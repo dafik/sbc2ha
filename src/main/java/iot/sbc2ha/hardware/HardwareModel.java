@@ -24,8 +24,8 @@ import java.util.*;
  *     port: A
  *     pin: 0
  * mappings:
- *   - logical_id: btn_entrance
- *     description: "Entrance door button"
+ *   - logical_id: switch_entrance
+ *     description: "Entrance door switch"
  *     physical:
  *       type: gpio
  *       location: "P9_11"

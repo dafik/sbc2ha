@@ -8,7 +8,7 @@ import iot.sbc2ha.config.Sbc2haConfig;
 import iot.sbc2ha.device.DeviceRegistry;
 import iot.sbc2ha.runtime.ActionEngine;
 import iot.sbc2ha.runtime.ActionType;
-import iot.sbc2ha.runtime.ButtonRuntime;
+import iot.sbc2ha.runtime.SwitchRuntime;
 import iot.sbc2ha.runtime.DeviceRuntime;
 import iot.sbc2ha.runtime.DeviceState;
 import iot.sbc2ha.runtime.LightRuntime;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * SBC-010: Fake offline-ready integration test.
  *
  * <p>End-to-end fake pipeline: load config → restore state → build fake runtime →
- * reach OFFLINE_READY → toggle output via button click → verify state persists.</p>
+ * reach OFFLINE_READY → toggle output via switch click → verify state persists.</p>
  */
 class FakeOfflineReadyIntegrationTest {
 
@@ -55,9 +55,9 @@ class FakeOfflineReadyIntegrationTest {
               floor1: { name: Piętro 1 }
               floor1.stairs: { name: Klatka, parent: floor1 }
             devices:
-              - id: klatka_button
+              - id: klatka_switch
                 name: Klatka 1
-                type: button
+                type: switch
                 input: input_board.input1
                 location: floor1.stairs
                 clicks: { click: true, double: true, long: false, release: false }
@@ -112,14 +112,14 @@ class FakeOfflineReadyIntegrationTest {
         Map<String, DeviceState> restored = stateService.load();
         assertTrue(restored.isEmpty());
 
-        // --- ActionEngine: wire buttons and targets ---
+        // --- ActionEngine: wire switchs and targets ---
         ActionEngine engine = new ActionEngine(registry, stateService);
 
-        // Button wired with OUTPUT_TOGGLE (new actions format, not legacy clickAction)
-        ButtonRuntime btnRuntime = engine.getButton("klatka_button");
-        assertNotNull(btnRuntime);
-        assertEquals(ActionType.OUTPUT_TOGGLE, btnRuntime.action());
-        assertEquals("klatka_light", btnRuntime.targetId());
+        // Switch wired with OUTPUT_TOGGLE (new actions format, not legacy clickAction)
+        SwitchRuntime switchRuntime = engine.getSwitch("klatka_switch");
+        assertNotNull(switchRuntime);
+        assertEquals(ActionType.OUTPUT_TOGGLE, switchRuntime.action());
+        assertEquals("klatka_light", switchRuntime.targetId());
 
         // Light is a togglable target
         DeviceRuntime lightTarget = engine.getTarget("klatka_light");
@@ -135,8 +135,8 @@ class FakeOfflineReadyIntegrationTest {
         lifecycle.transition(LifecycleState.OFFLINE_READY);
         assertEquals(LifecycleState.OFFLINE_READY, lifecycle.state());
 
-        // --- Toggle: simulate button click ---
-        engine.dispatchClick(btnRuntime);
+        // --- Toggle: simulate switch click ---
+        engine.dispatchClick(switchRuntime);
         assertEquals(DeviceState.ON, lightRuntime.state());
 
         // Verify state persisted
@@ -145,7 +145,7 @@ class FakeOfflineReadyIntegrationTest {
         assertEquals(DeviceState.ON, persisted.get("klatka_light"));
 
         // Toggle again
-        engine.dispatchClick(btnRuntime);
+        engine.dispatchClick(switchRuntime);
         assertEquals(DeviceState.OFF, lightRuntime.state());
         assertEquals(DeviceState.OFF, stateService.getState("klatka_light"));
 
@@ -197,9 +197,9 @@ class FakeOfflineReadyIntegrationTest {
                 node_id: legacy-node
                 schema: "1"
                 devices:
-                  - id: btn_1
-                    type: button
-                    display_name: Button 1
+                  - id: switch_1
+                    type: switch
+                    display_name: Switch 1
                     click_action: light_1
                   - id: light_1
                     type: output
@@ -213,10 +213,10 @@ class FakeOfflineReadyIntegrationTest {
         StateService stateService = new StateService(tempDir.resolve("legacy-state.json"));
         ActionEngine engine = new ActionEngine(registry, stateService);
 
-        ButtonRuntime btn = engine.getButton("btn_1");
-        assertNotNull(btn);
-        assertEquals(ActionType.OUTPUT_TOGGLE, btn.action());
-        assertEquals("light_1", btn.targetId());
+        SwitchRuntime switch1 = engine.getSwitch("switch_1");
+        assertNotNull(switch1);
+        assertEquals(ActionType.OUTPUT_TOGGLE, switch1.action());
+        assertEquals("light_1", switch1.targetId());
 
         DeviceRuntime target = engine.getTarget("light_1");
         assertNotNull(target);
@@ -224,7 +224,7 @@ class FakeOfflineReadyIntegrationTest {
         OutputRuntime out = (OutputRuntime) target;
         assertEquals(DeviceState.OFF, out.state());
 
-        engine.dispatchClick(btn);
+        engine.dispatchClick(switch1);
         assertEquals(DeviceState.ON, out.state());
 
         lifecycleShutdown();

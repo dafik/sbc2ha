@@ -20,7 +20,7 @@ locations:
 devices:
   - id: klatka_button
     name: Klatka 1
-    type: button
+    type: switch
     input: input_board.input1
     location: floor1.stairs
     clicks: { click: true, double: true, long: false, release: false }

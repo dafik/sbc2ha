@@ -25,7 +25,7 @@ import java.util.Objects;
  *     location: "P9_11"
  *     direction: input
  * mappings:
- *   - logical_id: btn_1
+ *   - logical_id: switch_1
  *     description: "Input 1"
  *     physical:
  *       type: gpio

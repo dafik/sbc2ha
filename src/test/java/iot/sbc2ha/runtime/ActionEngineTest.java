@@ -1,6 +1,6 @@
 package iot.sbc2ha.runtime;
 
-import iot.sbc2ha.device.ButtonDevice;
+import iot.sbc2ha.device.SwitchDevice;
 import iot.sbc2ha.device.DeviceRegistry;
 import iot.sbc2ha.device.LightDevice;
 import iot.sbc2ha.device.OutputDevice;
@@ -18,21 +18,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class ActionEngineTest {
 
     @Test
-    void engineWiresButtonToOutput() {
+    void engineWiresSwitchToOutput() {
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new OutputDevice("out_1", "Relay 1"));
-        registry.add(new ButtonDevice("btn_1", "Button 1", "out_1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
         registry.validate();
 
         ActionEngine engine = new ActionEngine(registry);
 
-        assertEquals(1, engine.buttons().size());
+        assertEquals(1, engine.switchs().size());
         assertEquals(1, engine.targets().size());
 
-        ButtonRuntime btn = engine.getButton("btn_1");
-        assertNotNull(btn);
-        assertEquals(ActionType.OUTPUT_TOGGLE, btn.action());
-        assertEquals("out_1", btn.targetId());
+        SwitchRuntime switch1 = engine.getSwitch("switch_1");
+        assertNotNull(switch1);
+        assertEquals(ActionType.OUTPUT_TOGGLE, switch1.action());
+        assertEquals("out_1", switch1.targetId());
 
         DeviceRuntime target = engine.getTarget("out_1");
         assertNotNull(target);
@@ -41,17 +41,17 @@ class ActionEngineTest {
     }
 
     @Test
-    void engineWiresButtonToLight() {
+    void engineWiresSwitchToLight() {
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new LightDevice("light_1", "Kitchen Light"));
-        registry.add(new ButtonDevice("btn_1", "Button 1", "light_1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "light_1"));
         registry.validate();
 
         ActionEngine engine = new ActionEngine(registry);
 
-        ButtonRuntime btn = engine.getButton("btn_1");
-        assertNotNull(btn);
-        assertEquals(ActionType.OUTPUT_TOGGLE, btn.action());
+        SwitchRuntime switch1 = engine.getSwitch("switch_1");
+        assertNotNull(switch1);
+        assertEquals(ActionType.OUTPUT_TOGGLE, switch1.action());
 
         DeviceRuntime target = engine.getTarget("light_1");
         assertNotNull(target);
@@ -59,33 +59,33 @@ class ActionEngineTest {
     }
 
     @Test
-    void engineWiresButtonWithoutClickAction() {
+    void engineWiresSwitchWithoutClickAction() {
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new OutputDevice("out_1", "Relay 1"));
-        registry.add(new ButtonDevice("btn_noop", "No-Op Button", null));
+        registry.add(new SwitchDevice("switch_noop", "No-Op Switch", null));
         registry.validate();
 
         ActionEngine engine = new ActionEngine(registry);
 
-        ButtonRuntime btn = engine.getButton("btn_noop");
-        assertNotNull(btn);
-        assertEquals(ActionType.NOOP, btn.action());
-        assertNull(btn.targetId());
+        SwitchRuntime switch1 = engine.getSwitch("switch_noop");
+        assertNotNull(switch1);
+        assertEquals(ActionType.NOOP, switch1.action());
+        assertNull(switch1.targetId());
     }
 
     @Test
     void dispatchClick_togglesOutput() {
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new OutputDevice("out_1", "Relay 1"));
-        registry.add(new ButtonDevice("btn_1", "Button 1", "out_1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
         registry.validate();
 
         ActionEngine engine = new ActionEngine(registry);
 
-        engine.dispatchClick(engine.getButton("btn_1"));
+        engine.dispatchClick(engine.getSwitch("switch_1"));
         assertEquals(DeviceState.ON, ((OutputRuntime) engine.getTarget("out_1")).state());
 
-        engine.dispatchClick(engine.getButton("btn_1"));
+        engine.dispatchClick(engine.getSwitch("switch_1"));
         assertEquals(DeviceState.OFF, ((OutputRuntime) engine.getTarget("out_1")).state());
     }
 
@@ -93,13 +93,13 @@ class ActionEngineTest {
     void dispatchClick_noop_doesNothing() {
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new OutputDevice("out_1", "Relay 1"));
-        registry.add(new ButtonDevice("btn_noop", "No-Op Button", null));
+        registry.add(new SwitchDevice("switch_noop", "No-Op Switch", null));
         registry.validate();
 
         ActionEngine engine = new ActionEngine(registry);
 
         OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
-        engine.dispatchClick(engine.getButton("btn_noop"));
+        engine.dispatchClick(engine.getSwitch("switch_noop"));
         assertEquals(DeviceState.OFF, output.state());
     }
 
@@ -107,37 +107,37 @@ class ActionEngineTest {
     void dispatchClick_unknownTarget_logsError() {
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new OutputDevice("out_1", "Relay 1"));
-        // Create a button with an unknown target (skip validation for this test)
-        ButtonRuntime btn = new ButtonRuntime(
-                new ButtonDevice("btn_bad", "Bad Button", "nonexistent"),
+        // Create a switch with an unknown target (skip validation for this test)
+        SwitchRuntime switch1 = new SwitchRuntime(
+                new SwitchDevice("switch_bad", "Bad Switch", "nonexistent"),
                 ActionType.OUTPUT_TOGGLE, "nonexistent");
 
         ActionEngine engine = new ActionEngine(registry);
-        // Manually inject the bad button (since registry validation would reject it)
-        engine.buttons().put("btn_bad", btn);
+        // Manually inject the bad switch (since registry validation would reject it)
+        engine.switchs().put("switch_bad", switch1);
 
         // Should not throw, just log error
-        assertDoesNotThrow(() -> engine.dispatchClick(btn));
+        assertDoesNotThrow(() -> engine.dispatchClick(switch1));
     }
 
     @Test
-    void multipleButtonsSameTarget() {
+    void multipleSwitchsSameTarget() {
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new OutputDevice("out_1", "Relay 1"));
-        registry.add(new ButtonDevice("btn_1", "Button 1", "out_1"));
-        registry.add(new ButtonDevice("btn_2", "Button 2", "out_1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
+        registry.add(new SwitchDevice("switch_2", "Switch 2", "out_1"));
         registry.validate();
 
         ActionEngine engine = new ActionEngine(registry);
 
-        assertEquals(2, engine.buttons().size());
+        assertEquals(2, engine.switchs().size());
         assertEquals(1, engine.targets().size());
 
-        // Both buttons should toggle the same output
-        engine.dispatchClick(engine.getButton("btn_1"));
+        // Both switchs should toggle the same output
+        engine.dispatchClick(engine.getSwitch("switch_1"));
         assertEquals(DeviceState.ON, ((OutputRuntime) engine.getTarget("out_1")).state());
 
-        engine.dispatchClick(engine.getButton("btn_2"));
+        engine.dispatchClick(engine.getSwitch("switch_2"));
         assertEquals(DeviceState.OFF, ((OutputRuntime) engine.getTarget("out_1")).state());
     }
 
@@ -150,16 +150,16 @@ class ActionEngineTest {
         ActionEngine engine = new ActionEngine(registry);
         OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
 
-        // Manually create an OUTPUT_ON button
-        ButtonRuntime btn = new ButtonRuntime(
-                new ButtonDevice("btn_on", "On Button", "out_1"),
+        // Manually create an OUTPUT_ON switch
+        SwitchRuntime switch1 = new SwitchRuntime(
+                new SwitchDevice("switch_on", "On Switch", "out_1"),
                 ActionType.OUTPUT_ON, "out_1");
-        engine.buttons().put("btn_on", btn);
+        engine.switchs().put("switch_on", switch1);
 
-        engine.dispatchClick(btn);
+        engine.dispatchClick(switch1);
         assertEquals(DeviceState.ON, output.state());
 
-        engine.dispatchClick(btn);
+        engine.dispatchClick(switch1);
         assertEquals(DeviceState.ON, output.state());
     }
 
@@ -172,17 +172,17 @@ class ActionEngineTest {
         ActionEngine engine = new ActionEngine(registry);
         OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
 
-        ButtonRuntime btn = new ButtonRuntime(
-                new ButtonDevice("btn_off", "Off Button", "out_1"),
+        SwitchRuntime switch1 = new SwitchRuntime(
+                new SwitchDevice("switch_off", "Off Switch", "out_1"),
                 ActionType.OUTPUT_OFF, "out_1");
-        engine.buttons().put("btn_off", btn);
+        engine.switchs().put("switch_off", switch1);
 
-        engine.dispatchClick(btn);
+        engine.dispatchClick(switch1);
         assertEquals(DeviceState.OFF, output.state());
 
         // Ensure ON state can be set first
         output.setState(DeviceState.ON);
-        engine.dispatchClick(btn);
+        engine.dispatchClick(switch1);
         assertEquals(DeviceState.OFF, output.state());
     }
 
@@ -234,14 +234,14 @@ class ActionEngineTest {
 
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new OutputDevice("out_1", "Relay 1"));
-        registry.add(new ButtonDevice("btn_1", "Button 1", "out_1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
         registry.validate();
 
         StateService stateService = new StateService(stateFile);
         ActionEngine engine = new ActionEngine(registry, stateService);
 
         // Dispatch a click
-        engine.dispatchClick(engine.getButton("btn_1"));
+        engine.dispatchClick(engine.getSwitch("switch_1"));
 
         // Verify state was persisted to disk
         StateService fresh = new StateService(stateFile);
@@ -254,12 +254,12 @@ class ActionEngineTest {
     void withStateService_null_service_noPersist() {
         DeviceRegistry registry = new DeviceRegistry();
         registry.add(new OutputDevice("out_1", "Relay 1"));
-        registry.add(new ButtonDevice("btn_1", "Button 1", "out_1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
         registry.validate();
 
         ActionEngine engine = new ActionEngine(registry, null);
 
-        engine.dispatchClick(engine.getButton("btn_1"));
+        engine.dispatchClick(engine.getSwitch("switch_1"));
         assertEquals(DeviceState.ON, ((OutputRuntime) engine.getTarget("out_1")).state());
         assertNull(engine.stateService());
     }

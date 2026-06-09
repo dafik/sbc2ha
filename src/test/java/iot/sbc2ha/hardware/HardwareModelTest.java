@@ -3,7 +3,7 @@ package iot.sbc2ha.hardware;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.databind.MapperFeature;
-import iot.sbc2ha.device.ButtonDevice;
+import iot.sbc2ha.device.SwitchDevice;
 import iot.sbc2ha.device.DeviceConfig;
 import iot.sbc2ha.device.DeviceRegistry;
 import iot.sbc2ha.device.OutputDevice;
@@ -45,10 +45,10 @@ class HardwareModelTest {
     @Test
     void resolvesKnownLogicalId() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_entrance", "Entrance", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_entrance", "Entrance", ch);
         HardwareModel model = new HardwareModel("bone1", List.of(ch), List.of(mapping));
-        assertSame(ch, model.getPhysicalChannel("btn_entrance"));
-        assertSame(mapping, model.getMapping("btn_entrance"));
+        assertSame(ch, model.getPhysicalChannel("switch_entrance"));
+        assertSame(mapping, model.getMapping("switch_entrance"));
     }
 
     @Test
@@ -61,34 +61,34 @@ class HardwareModelTest {
     @Test
     void resolveThrowsForUnknownLogicalId() {
         HardwareModel model = new HardwareModel("bone1", List.of(), List.of());
-        HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.resolve("btn_x"));
+        HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.resolve("switch_x"));
         assertTrue(ex.getMessage().contains("No hardware mapping"));
     }
 
     @Test
     void validatePassesWhenAllDevicesMapped() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_1", "Btn 1", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
         HardwareModel model = new HardwareModel("bone1", List.of(ch), List.of(mapping));
-        assertDoesNotThrow(() -> model.validate(Set.of("btn_1")));
+        assertDoesNotThrow(() -> model.validate(Set.of("switch_1")));
     }
 
     @Test
     void validateFailsWhenDevicesMissing() {
         HardwareModel model = new HardwareModel("bone1", List.of(), List.of());
-        HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.validate(Set.of("btn_1", "btn_2")));
+        HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.validate(Set.of("switch_1", "switch_2")));
         assertTrue(ex.getMessage().contains("Missing hardware mappings"));
-        assertTrue(ex.getMessage().contains("btn_1"));
-        assertTrue(ex.getMessage().contains("btn_2"));
+        assertTrue(ex.getMessage().contains("switch_1"));
+        assertTrue(ex.getMessage().contains("switch_2"));
     }
 
     @Test
     void validatePartialMissing() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_1", "Btn 1", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
         HardwareModel model = new HardwareModel("bone1", List.of(ch), List.of(mapping));
-        HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.validate(Set.of("btn_1", "btn_missing")));
-        assertTrue(ex.getMessage().contains("btn_missing"));
+        HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.validate(Set.of("switch_1", "switch_missing")));
+        assertTrue(ex.getMessage().contains("switch_missing"));
     }
 
     @Test
@@ -110,14 +110,14 @@ class HardwareModelTest {
 
     @Test
     void integrationWithDeviceRegistry_mapsOutputs() {
-        GpioChannel btnCh = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
+        GpioChannel switchCh = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         Mcp23017Channel outCh = new Mcp23017Channel("i2c-1:0x20:A:0", Mcp23017Channel.Port.A, 0);
-        HardwareMapping btnMapping = new HardwareMapping("btn_entrance", "Entrance", btnCh);
+        HardwareMapping switchMapping = new HardwareMapping("switch_entrance", "Entrance", switchCh);
         HardwareMapping outMapping = new HardwareMapping("out_relay1", "Relay 1", outCh);
-        HardwareModel model = new HardwareModel("bone1", List.of(btnCh, outCh), List.of(btnMapping, outMapping));
+        HardwareModel model = new HardwareModel("bone1", List.of(switchCh, outCh), List.of(switchMapping, outMapping));
 
         DeviceRegistry reg = new DeviceRegistry();
-        reg.add(new ButtonDevice("btn_entrance", "Entrance", "out_relay1"));
+        reg.add(new SwitchDevice("switch_entrance", "Entrance", "out_relay1"));
         reg.add(new OutputDevice("out_relay1", "Relay 1"));
         reg.validate();
 
@@ -126,7 +126,7 @@ class HardwareModelTest {
                 reg.all().stream().map(DeviceConfig::id).collect(java.util.stream.Collectors.toSet())));
 
         // Verify resolution works
-        assertSame(btnCh, model.resolve("btn_entrance"));
+        assertSame(switchCh, model.resolve("switch_entrance"));
         assertSame(outCh, model.resolve("out_relay1"));
     }
 
@@ -139,8 +139,8 @@ class HardwareModelTest {
                     location: "P9_11"
                     direction: input
                 mappings:
-                  - logical_id: btn_entrance
-                    description: "Entrance door button"
+                  - logical_id: switch_entrance
+                    description: "Entrance door switch"
                     physical:
                       type: gpio
                       location: "P9_11"
@@ -162,14 +162,14 @@ class HardwareModelTest {
         assertEquals(GpioChannel.Direction.INPUT, gpio.direction());
 
         HardwareMapping mapping = model.mappings().getFirst();
-        assertEquals("btn_entrance", mapping.logicalId());
+        assertEquals("switch_entrance", mapping.logicalId());
         assertEquals(ch, mapping.physical());
     }
 
     @Test
     void equalsAndHashCode() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_1", "Btn 1", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
         HardwareModel a = new HardwareModel("bone1", List.of(ch), List.of(mapping));
         HardwareModel b = new HardwareModel("bone1", List.of(ch), List.of(mapping));
         assertEquals(a, b);

@@ -7,18 +7,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class DeviceConfigTest {
 
     @Test
-    void buttonDevice_createsWithAllFields() {
-        ButtonDevice btn = new ButtonDevice("btn_1", "Btn 1", "light_1");
-        assertEquals("btn_1", btn.id());
-        assertEquals("Btn 1", btn.displayName());
-        assertEquals("light_1", btn.clickAction());
-        assertEquals(DeviceConfig.DeviceType.BUTTON, btn.type());
+    void switchDevice_createsWithAllFields() {
+        SwitchDevice switch1 = new SwitchDevice("switch_1", "switch 1", "light_1");
+        assertEquals("switch_1", switch1.id());
+        assertEquals("switch 1", switch1.displayName());
+        assertEquals("light_1", switch1.clickAction());
+        assertEquals(DeviceConfig.DeviceType.SWITCH, switch1.type());
     }
 
     @Test
-    void buttonDevice_clickActionNullByDefault() {
-        ButtonDevice btn = new ButtonDevice("btn_1", "Btn 1", null);
-        assertNull(btn.clickAction());
+    void switchDevice_clickActionNullByDefault() {
+        SwitchDevice switch1 = new SwitchDevice("switch_1", "switch 1", null);
+        assertNull(switch1.clickAction());
     }
 
     @Test
@@ -38,17 +38,17 @@ class DeviceConfigTest {
     }
 
     @Test
-    void buttonDevice_equalsAndHashCode() {
-        ButtonDevice a = new ButtonDevice("btn_1", "B1", "light_1");
-        ButtonDevice b = new ButtonDevice("btn_1", "B1", "light_1");
+    void switchDevice_equalsAndHashCode() {
+        SwitchDevice a = new SwitchDevice("switch_1", "B1", "light_1");
+        SwitchDevice b = new SwitchDevice("switch_1", "B1", "light_1");
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test
-    void buttonDevice_notEqual_differentClickAction() {
-        ButtonDevice a = new ButtonDevice("btn_1", "B1", "light_1");
-        ButtonDevice b = new ButtonDevice("btn_1", "B1", "light_2");
+    void switchDevice_notEqual_differentClickAction() {
+        SwitchDevice a = new SwitchDevice("switch_1", "B1", "light_1");
+        SwitchDevice b = new SwitchDevice("switch_1", "B1", "light_2");
         assertNotEquals(a, b);
     }
 

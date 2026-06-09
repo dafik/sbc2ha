@@ -6,16 +6,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 /**
- * Button device — generates click events that can trigger actions on other devices.
+ * Switch device — generates click events that can trigger actions on other devices.
  *
  * <pre>
  * # Legacy format
- * - id: btn_entrance
- *   display_name: "Entrance button"
+ * - id: switch_entrance
+ *   display_name: "Entrance switch"
  *   click_action: light_kitchen
  *
  * # Profile-based format (SBC-009)
- * - id: klatka_button
+ * - id: klatka_switch
  *   name: Klatka 1
  *   input: input_board.input1
  *   location: floor1.stairs
@@ -27,10 +27,10 @@ import java.util.Objects;
  *     ha: { enabled: true, events: [click, double] }
  * </pre>
  */
-public final class ButtonDevice extends DeviceConfig {
+public final class SwitchDevice extends DeviceConfig {
 
     /**
-     * Legacy: optional ID of a device to toggle when the button is clicked.
+     * Legacy: optional ID of a device to toggle when the switch is clicked.
      */
     @JsonProperty("click_action")
     private String clickAction;
@@ -47,10 +47,10 @@ public final class ButtonDevice extends DeviceConfig {
     @JsonProperty("actions")
     private java.util.Map<String, java.util.List<ActionMapping>> actions;
 
-    public ButtonDevice() {}
+    public SwitchDevice() {}
 
     @JsonCreator
-    public ButtonDevice(
+    public SwitchDevice(
             @JsonProperty("id") String id,
             @JsonProperty("display_name") String displayName,
             @JsonProperty("click_action") String clickAction) {
@@ -59,7 +59,7 @@ public final class ButtonDevice extends DeviceConfig {
         this.clickAction = clickAction;
     }
 
-    public ButtonDevice(
+    public SwitchDevice(
             String id,
             String displayName,
             String clickAction,
@@ -74,7 +74,7 @@ public final class ButtonDevice extends DeviceConfig {
 
     @Override
     public DeviceType type() {
-        return DeviceType.BUTTON;
+        return DeviceType.SWITCH;
     }
 
     public String clickAction() {
@@ -94,7 +94,7 @@ public final class ButtonDevice extends DeviceConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        ButtonDevice that = (ButtonDevice) o;
+        SwitchDevice that = (SwitchDevice) o;
         return Objects.equals(clickAction, that.clickAction)
                 && Objects.equals(clicks, that.clicks)
                 && Objects.equals(actions, that.actions);
@@ -107,7 +107,7 @@ public final class ButtonDevice extends DeviceConfig {
 
     @Override
     public String toString() {
-        return "ButtonDevice{id='" + id + "', displayName='" + displayName
+        return "SwitchDevice{id='" + id + "', displayName='" + displayName
                 + "', clickAction='" + clickAction + "', clicks=" + clicks + ", actions=" + actions + "}";
     }
 }

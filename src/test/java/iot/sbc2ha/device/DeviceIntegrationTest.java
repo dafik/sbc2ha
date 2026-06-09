@@ -36,8 +36,8 @@ class DeviceIntegrationTest {
                   - type: light
                     id: light_kitchen
                     display_name: Kitchen light
-                  - type: button
-                    id: btn_entrance
+                  - type: switch
+                    id: switch_entrance
                     display_name: Entrance
                     click_action: light_kitchen
                 """;
@@ -53,8 +53,8 @@ class DeviceIntegrationTest {
                 node_id: bbb-core-1
                 schema: "1"
                 devices:
-                  - type: button
-                    id: btn_entrance
+                  - type: switch
+                    id: switch_entrance
                     click_action: light_missing
                 """;
         assertThrows(ValidationException.class, () -> iot.sbc2ha.config.ConfigLoader.load(writeYaml(yaml)));
@@ -68,7 +68,7 @@ class DeviceIntegrationTest {
                 devices:
                   - type: light
                     id: light_1
-                  - type: button
+                  - type: switch
                     id: light_1
                     click_action: light_1
                 """;
@@ -84,8 +84,8 @@ class DeviceIntegrationTest {
                   - type: output
                     id: out_relay1
                     display_name: Relay 1
-                  - type: button
-                    id: btn_entrance
+                  - type: switch
+                    id: switch_entrance
                     click_action: out_relay1
                 """;
         Sbc2haConfig config = iot.sbc2ha.config.ConfigLoader.load(writeYaml(yaml));

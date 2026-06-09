@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 /**
- * Configures which button click events to detect.
+ * Configures which switch click events to detect.
  *
  * <pre>
  * clicks: { click: true, double: true, long: false, release: false }

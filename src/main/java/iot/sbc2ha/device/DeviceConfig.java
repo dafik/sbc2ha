@@ -13,11 +13,11 @@ import java.util.Objects;
  * Base device configuration with stable ID — all devices share this contract.
  * <p>
  * Jackson polymorphic deserialization uses the {@code type} property to determine
- * the actual subtype (ButtonDevice, LightDevice, OutputDevice).
+ * the actual subtype (SwitchDevice, LightDevice, OutputDevice).
  */
 @JsonTypeInfo(use = Id.NAME, property = "type", include = As.EXISTING_PROPERTY)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = ButtonDevice.class, name = "button"),
+        @JsonSubTypes.Type(value = SwitchDevice.class, name = "switch"),
         @JsonSubTypes.Type(value = LightDevice.class, name = "light"),
         @JsonSubTypes.Type(value = OutputDevice.class, name = "output")
 })
@@ -107,7 +107,7 @@ public abstract class DeviceConfig {
     }
 
     public enum DeviceType {
-        BUTTON,
+        SWITCH,
         LIGHT,
         OUTPUT
     }

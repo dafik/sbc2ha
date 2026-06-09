@@ -46,7 +46,7 @@ class ProfileRegistryTest {
     @Test
     void registerAndHasProfile() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_1", "Btn 1", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
         HardwareProfile profile = new HardwareProfile("test", false, List.of(ch), List.of(mapping));
         registry.register(profile);
         assertTrue(registry.hasProfile("test"));
@@ -73,7 +73,7 @@ class ProfileRegistryTest {
     @Test
     void expandPreservesChannels() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_1", "Btn 1", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
         HardwareProfile profile = new HardwareProfile("test", false, List.of(ch), List.of(mapping));
         registry.register(profile);
 
@@ -99,11 +99,11 @@ class ProfileRegistryTest {
     @Test
     void expandWithExtraMappingsAppends() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping m1 = new HardwareMapping("btn_1", "Btn 1", ch);
+        HardwareMapping m1 = new HardwareMapping("switch_1", "switch 1", ch);
         HardwareProfile profile = new HardwareProfile("test", false, List.of(ch), List.of(m1));
         registry.register(profile);
 
-        HardwareMapping m2 = new HardwareMapping("btn_2", "Btn 2", ch);
+        HardwareMapping m2 = new HardwareMapping("switch_2", "switch 2", ch);
         HardwareModel model = registry.expand("test", null, List.of(m2));
         assertEquals(2, model.mappingCount());
     }
@@ -133,13 +133,13 @@ class ProfileRegistryTest {
     void expandWithOverridesReplacesMappings() {
         GpioChannel profileCh = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         GpioChannel overrideCh = new GpioChannel("P9_12", GpioChannel.Direction.OUTPUT);
-        HardwareMapping profileMapping = new HardwareMapping("btn_1", "Btn 1", profileCh);
-        HardwareMapping overrideMapping = new HardwareMapping("btn_1", "Btn 1 OVER", overrideCh);
+        HardwareMapping profileMapping = new HardwareMapping("switch_1", "switch 1", profileCh);
+        HardwareMapping overrideMapping = new HardwareMapping("switch_1", "switch 1 OVER", overrideCh);
         HardwareProfile profile = new HardwareProfile("test", false, List.of(profileCh), List.of(profileMapping));
         registry.register(profile);
 
         HardwareModel model = registry.expandWithOverrides("test", null, List.of(overrideMapping));
-        HardwareMapping resolved = model.getMapping("btn_1");
+        HardwareMapping resolved = model.getMapping("switch_1");
         assertSame(overrideMapping, resolved);
     }
 
@@ -209,7 +209,7 @@ class ProfileRegistryTest {
     @Test
     void profileExpansionEquivalentToManual() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareMapping mapping = new HardwareMapping("btn_entrance", "Entrance door", ch);
+        HardwareMapping mapping = new HardwareMapping("switch_entrance", "Entrance door", ch);
 
         // Register profile
         HardwareProfile profile = new HardwareProfile("equiv-test", false, List.of(ch), List.of(mapping));
@@ -228,8 +228,8 @@ class ProfileRegistryTest {
         assertEquals(fromManual.board(), fromProfile.board());
         assertEquals(fromManual.channels(), fromProfile.channels());
         assertEquals(fromManual.mappings(), fromProfile.mappings());
-        assertSame(ch, fromProfile.getPhysicalChannel("btn_entrance"));
-        assertSame(mapping, fromProfile.getMapping("btn_entrance"));
+        assertSame(ch, fromProfile.getPhysicalChannel("switch_entrance"));
+        assertSame(mapping, fromProfile.getMapping("switch_entrance"));
     }
 
     // --- YAML roundtrip ---
