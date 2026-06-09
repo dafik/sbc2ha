@@ -162,10 +162,11 @@ class Sbc009Bone1MinimalTest {
             ActionEngine engine = new ActionEngine(registry);
             assertNotNull(engine);
 
-            // Button is wired (legacy clickAction is null → NOOP)
+            // Button is wired (new actions.format → OUTPUT_TOGGLE)
             ButtonRuntime btnRuntime = engine.getButton("klatka_button");
             assertNotNull(btnRuntime);
-            assertEquals(ActionType.NOOP, btnRuntime.action());
+            assertEquals(ActionType.OUTPUT_TOGGLE, btnRuntime.action());
+            assertEquals("klatka_light", btnRuntime.targetId());
 
             // Light is a togglable target
             LightRuntime lightRuntime = (LightRuntime) engine.getTarget("klatka_light");

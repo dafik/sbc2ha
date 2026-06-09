@@ -1,5 +1,6 @@
 package iot.sbc2ha.runtime;
 
+import iot.sbc2ha.device.ActionMapping;
 import iot.sbc2ha.device.ButtonDevice;
 import iot.sbc2ha.device.DeviceConfig;
 import iot.sbc2ha.device.DeviceRegistry;
@@ -78,13 +79,20 @@ public final class ActionEngine {
             }
         }
 
-        // Wire button runtimes
+        // Wire button runtimes (legacy clickAction + new actions format)
         for (DeviceConfig dev : registry.all()) {
             if (dev instanceof ButtonDevice btn) {
                 ActionType action = ActionType.NOOP;
                 String targetId = btn.clickAction();
                 if (targetId != null && !targetId.isBlank()) {
                     action = ActionType.OUTPUT_TOGGLE;
+                } else if (btn.actions() != null && btn.actions().containsKey("click")) {
+                    var clickActions = btn.actions().get("click");
+                    if (clickActions != null && !clickActions.isEmpty()) {
+                        var mapping = clickActions.getFirst();
+                        action = mapActionType(mapping.type());
+                        targetId = mapping.target();
+                    }
                 }
                 ButtonRuntime runtime = new ButtonRuntime(btn, action, targetId);
                 buttonMap.put(dev.id(), runtime);
@@ -95,6 +103,27 @@ public final class ActionEngine {
 
         log.info("ActionEngine initialized: {} buttons, {} togglable targets",
                 buttonMap.size(), targetMap.size());
+    }
+
+    /**
+     * Convert an {@link ActionMapping.ActionType} to a runtime {@link ActionType}.
+     */
+    private static ActionType mapActionType(ActionMapping.ActionType mappingType) {
+        if (mappingType == null) return ActionType.NOOP;
+        switch (mappingType) {
+            case OUTPUT_TOGGLE -> {
+                return ActionType.OUTPUT_TOGGLE;
+            }
+            case OUTPUT_ON -> {
+                return ActionType.OUTPUT_ON;
+            }
+            case OUTPUT_OFF -> {
+                return ActionType.OUTPUT_OFF;
+            }
+            default -> {
+                return ActionType.NOOP;
+            }
+        }
     }
 
     /**
