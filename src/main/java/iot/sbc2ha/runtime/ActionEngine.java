@@ -7,6 +7,7 @@ import iot.sbc2ha.device.SwitchDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -91,22 +92,52 @@ public final class ActionEngine {
             }
         }
 
-        // Wire switch runtimes (legacy clickAction + new actions format)
+        // Wire switch runtimes (legacy clickAction + new multi-event actions)
         for (DeviceConfig dev : registry.all()) {
             if (dev instanceof SwitchDevice switch1) {
+                var eventActions = new EnumMap<EventType, ActionType>(EventType.class);
+                var eventTargets = new EnumMap<EventType, String>(EventType.class);
+
+                // Default: no-op for all events
+                for (EventType et : EventType.values()) {
+                    eventActions.put(et, ActionType.NOOP);
+                    eventTargets.put(et, null);
+                }
+
+                // Legacy clickAction (wire as CLICK event)
                 ActionType action = ActionType.NOOP;
                 String targetId = switch1.clickAction();
                 if (targetId != null && !targetId.isBlank()) {
                     action = ActionType.OUTPUT_TOGGLE;
-                } else if (switch1.actions() != null && switch1.actions().containsKey("click")) {
-                    var clickActions = switch1.actions().get("click");
-                    if (clickActions != null && !clickActions.isEmpty()) {
-                        var mapping = clickActions.getFirst();
-                        action = mapActionType(mapping.type());
-                        targetId = mapping.target();
+                    eventActions.put(EventType.CLICK, ActionType.OUTPUT_TOGGLE);
+                    eventTargets.put(EventType.CLICK, targetId);
+                } else if (switch1.actions() != null) {
+                    // Wire all configured event keys
+                    for (var entry : switch1.actions().entrySet()) {
+                        EventType eventType = eventTypeFromName(entry.getKey());
+                        if (eventType == null) {
+                            log.debug("Unknown event name '{}' for switch '{}', skipping",
+                                    entry.getKey(), dev.id());
+                            continue;
+                        }
+                        var mappings = entry.getValue();
+                        if (mappings != null && !mappings.isEmpty()) {
+                            var mapping = mappings.getFirst();
+                            ActionType mappedAction = mapActionType(mapping.type());
+                            String mappedTarget = mapping.target();
+                            eventActions.put(eventType, mappedAction);
+                            eventTargets.put(eventType, mappedTarget);
+                            log.debug("Wired switch '{}' event '{}': action={} target={}",
+                                    dev.id(), eventType, mappedAction, mappedTarget);
+                        }
+                        if (eventType == EventType.CLICK) {
+                            action = eventActions.get(EventType.CLICK);
+                            targetId = eventTargets.get(EventType.CLICK);
+                        }
                     }
                 }
-                SwitchRuntime runtime = new SwitchRuntime(switch1, action, targetId);
+
+                SwitchRuntime runtime = new SwitchRuntime(switch1, eventActions, eventTargets);
                 switchMap.put(dev.id(), runtime);
                 log.info("Wired switch '{}' → action={} target={}",
                         dev.id(), action, targetId);
@@ -139,6 +170,23 @@ public final class ActionEngine {
     }
 
     /**
+     * Convert a YAML event name string to an {@link EventType}.
+     *
+     * @param name the YAML key (e.g. "click", "double", "long", "release")
+     * @return the corresponding EventType, or {@code null} if unrecognized
+     */
+    private static EventType eventTypeFromName(String name) {
+        if (name == null) return null;
+        return switch (name.toLowerCase()) {
+            case "click" -> EventType.CLICK;
+            case "double" -> EventType.DOUBLE;
+            case "long" -> EventType.LONG;
+            case "release" -> EventType.RELEASE;
+            default -> null;
+        };
+    }
+
+    /**
      * @return all switch runtimes keyed by device ID
      */
     public Map<String, SwitchRuntime> switchs() {
@@ -155,57 +203,74 @@ public final class ActionEngine {
     /**
      * Dispatch a click event from the given switch runtime to its target.
      *
+     * <p>Convenience method that delegates to {@link #dispatchEvent(SwitchRuntime, EventType)}
+     * with {@link EventType#CLICK}.</p>
+     *
      * @param switchRuntime the switch runtime that received the click
      */
     public void dispatchClick(SwitchRuntime switchRuntime) {
-        String targetId = switchRuntime.targetId();
+        dispatchEvent(switchRuntime, EventType.CLICK);
+    }
+
+    /**
+     * Dispatch an event from the given switch runtime to its target device.
+     *
+     * <p>Looks up the action and target for the specific event type,
+     * then performs the corresponding state change on the target.</p>
+     *
+     * @param switchRuntime the switch runtime that received the event
+     * @param eventType     the event type that was detected
+     */
+    public void dispatchEvent(SwitchRuntime switchRuntime, EventType eventType) {
+        ActionType action = switchRuntime.action(eventType);
+        String targetId = switchRuntime.targetId(eventType);
+
         if (targetId == null || targetId.isBlank()) {
-            log.debug("Switch '{}' has no click target — skipping", switchRuntime.id());
+            log.debug("Switch '{}' has no {} target — skipping", switchRuntime.id(), eventType);
             return;
         }
 
         DeviceRuntime target = targetMap.get(targetId);
         if (target == null) {
-            log.error("Switch '{}' click targets unknown device '{}'",
-                    switchRuntime.id(), targetId);
+            log.error("Switch '{}' {} targets unknown device '{}'",
+                    switchRuntime.id(), eventType, targetId);
             return;
         }
 
-        ActionType action = switchRuntime.action();
         switch (action) {
             case OUTPUT_TOGGLE -> {
                 if (target instanceof OutputRuntime out) {
                     out.toggle();
                     persist(out.id(), out.state());
-                    log.info("Switch '{}' toggled output '{}' → {}",
-                            switchRuntime.id(), targetId, out.state());
+                    log.info("Switch '{}' {} toggled output '{}' → {}",
+                            switchRuntime.id(), eventType, targetId, out.state());
                 } else if (target instanceof LightRuntime light) {
                     light.toggle();
                     persist(light.id(), light.state());
-                    log.info("Switch '{}' toggled light '{}' → {}",
-                            switchRuntime.id(), targetId, light.state());
+                    log.info("Switch '{}' {} toggled light '{}' → {}",
+                            switchRuntime.id(), eventType, targetId, light.state());
                 }
             }
             case OUTPUT_ON -> {
                 if (target instanceof OutputRuntime out) {
                     out.setState(DeviceState.ON);
                     persist(out.id(), out.state());
-                    log.info("Switch '{}' set output '{}' ON", switchRuntime.id(), targetId);
+                    log.info("Switch '{}' {} set output '{}' ON", switchRuntime.id(), eventType, targetId);
                 } else if (target instanceof LightRuntime light) {
                     light.setState(DeviceState.ON);
                     persist(light.id(), light.state());
-                    log.info("Switch '{}' set light '{}' ON", switchRuntime.id(), targetId);
+                    log.info("Switch '{}' {} set light '{}' ON", switchRuntime.id(), eventType, targetId);
                 }
             }
             case OUTPUT_OFF -> {
                 if (target instanceof OutputRuntime out) {
                     out.setState(DeviceState.OFF);
                     persist(out.id(), out.state());
-                    log.info("Switch '{}' set output '{}' OFF", switchRuntime.id(), targetId);
+                    log.info("Switch '{}' {} set output '{}' OFF", switchRuntime.id(), eventType, targetId);
                 } else if (target instanceof LightRuntime light) {
                     light.setState(DeviceState.OFF);
                     persist(light.id(), light.state());
-                    log.info("Switch '{}' set light '{}' OFF", switchRuntime.id(), targetId);
+                    log.info("Switch '{}' {} set light '{}' OFF", switchRuntime.id(), eventType, targetId);
                 }
             }
             case NOOP -> {

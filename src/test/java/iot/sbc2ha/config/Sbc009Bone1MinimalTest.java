@@ -3,6 +3,7 @@ package iot.sbc2ha.config;
 import iot.sbc2ha.device.*;
 import iot.sbc2ha.runtime.ActionEngine;
 import iot.sbc2ha.runtime.ActionType;
+import iot.sbc2ha.runtime.EventType;
 import iot.sbc2ha.runtime.SwitchRuntime;
 import iot.sbc2ha.runtime.LightRuntime;
 import org.junit.jupiter.api.Test;
@@ -165,8 +166,8 @@ class Sbc009Bone1MinimalTest {
             // Switch is wired (new actions.format → OUTPUT_TOGGLE)
             SwitchRuntime switchRuntime = engine.getSwitch("klatka_switch");
             assertNotNull(switchRuntime);
-            assertEquals(ActionType.OUTPUT_TOGGLE, switchRuntime.action());
-            assertEquals("klatka_light", switchRuntime.targetId());
+            assertEquals(ActionType.OUTPUT_TOGGLE, switchRuntime.action(EventType.CLICK));
+            assertEquals("klatka_light", switchRuntime.targetId(EventType.CLICK));
 
             // Light is a togglable target
             LightRuntime lightRuntime = (LightRuntime) engine.getTarget("klatka_light");

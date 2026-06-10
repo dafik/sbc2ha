@@ -28,8 +28,8 @@ class ActionEngineTest {
 
         SwitchRuntime switch1 = engine.getSwitch("switch_1");
         assertNotNull(switch1);
-        assertEquals(ActionType.OUTPUT_TOGGLE, switch1.action());
-        assertEquals("out_1", switch1.targetId());
+        assertEquals(ActionType.OUTPUT_TOGGLE, switch1.action(EventType.CLICK));
+        assertEquals("out_1", switch1.targetId(EventType.CLICK));
 
         DeviceRuntime target = engine.getTarget("out_1");
         assertNotNull(target);
@@ -48,7 +48,7 @@ class ActionEngineTest {
 
         SwitchRuntime switch1 = engine.getSwitch("switch_1");
         assertNotNull(switch1);
-        assertEquals(ActionType.OUTPUT_TOGGLE, switch1.action());
+        assertEquals(ActionType.OUTPUT_TOGGLE, switch1.action(EventType.CLICK));
 
         DeviceRuntime target = engine.getTarget("light_1");
         assertNotNull(target);
@@ -66,8 +66,8 @@ class ActionEngineTest {
 
         SwitchRuntime switch1 = engine.getSwitch("switch_noop");
         assertNotNull(switch1);
-        assertEquals(ActionType.NOOP, switch1.action());
-        assertNull(switch1.targetId());
+        assertEquals(ActionType.NOOP, switch1.action(EventType.CLICK));
+        assertNull(switch1.targetId(EventType.CLICK));
     }
 
     @Test
@@ -79,10 +79,10 @@ class ActionEngineTest {
 
         ActionEngine engine = new ActionEngine(registry);
 
-        engine.dispatchClick(engine.getSwitch("switch_1"));
+        engine.dispatchEvent(engine.getSwitch("switch_1"), EventType.CLICK);
         assertEquals(DeviceState.ON, ((OutputRuntime) engine.getTarget("out_1")).state());
 
-        engine.dispatchClick(engine.getSwitch("switch_1"));
+        engine.dispatchEvent(engine.getSwitch("switch_1"), EventType.CLICK);
         assertEquals(DeviceState.OFF, ((OutputRuntime) engine.getTarget("out_1")).state());
     }
 
@@ -96,7 +96,7 @@ class ActionEngineTest {
         ActionEngine engine = new ActionEngine(registry);
 
         OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
-        engine.dispatchClick(engine.getSwitch("switch_noop"));
+        engine.dispatchEvent(engine.getSwitch("switch_noop"), EventType.CLICK);
         assertEquals(DeviceState.OFF, output.state());
     }
 
@@ -131,10 +131,10 @@ class ActionEngineTest {
         assertEquals(1, engine.targets().size());
 
         // Both switchs should toggle the same output
-        engine.dispatchClick(engine.getSwitch("switch_1"));
+        engine.dispatchEvent(engine.getSwitch("switch_1"), EventType.CLICK);
         assertEquals(DeviceState.ON, ((OutputRuntime) engine.getTarget("out_1")).state());
 
-        engine.dispatchClick(engine.getSwitch("switch_2"));
+        engine.dispatchEvent(engine.getSwitch("switch_2"), EventType.CLICK);
         assertEquals(DeviceState.OFF, ((OutputRuntime) engine.getTarget("out_1")).state());
     }
 
@@ -153,10 +153,10 @@ class ActionEngineTest {
                 ActionType.OUTPUT_ON, "out_1");
         engine.switchs().put("switch_on", switch1);
 
-        engine.dispatchClick(switch1);
+        engine.dispatchEvent(switch1, EventType.CLICK);
         assertEquals(DeviceState.ON, output.state());
 
-        engine.dispatchClick(switch1);
+        engine.dispatchEvent(switch1, EventType.CLICK);
         assertEquals(DeviceState.ON, output.state());
     }
 
@@ -174,12 +174,12 @@ class ActionEngineTest {
                 ActionType.OUTPUT_OFF, "out_1");
         engine.switchs().put("switch_off", switch1);
 
-        engine.dispatchClick(switch1);
+        engine.dispatchEvent(switch1, EventType.CLICK);
         assertEquals(DeviceState.OFF, output.state());
 
         // Ensure ON state can be set first
         output.setState(DeviceState.ON);
-        engine.dispatchClick(switch1);
+        engine.dispatchEvent(switch1, EventType.CLICK);
         assertEquals(DeviceState.OFF, output.state());
     }
 
@@ -392,5 +392,189 @@ class ActionEngineTest {
         InputRuntime input = engine.getInput("door_1");
         assertNotNull(input);
         assertEquals(DeviceState.OFF, input.state());
+    }
+
+    // ---- SBC-012: multi-event dispatch ----
+
+    @Test
+    void dispatchEvent_click_togglesOutput_viaSwitch() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+        SwitchRuntime sw = engine.getSwitch("switch_1");
+
+        engine.dispatchEvent(sw, EventType.CLICK);
+        assertEquals(DeviceState.ON, ((OutputRuntime) engine.getTarget("out_1")).state());
+
+        engine.dispatchEvent(sw, EventType.CLICK);
+        assertEquals(DeviceState.OFF, ((OutputRuntime) engine.getTarget("out_1")).state());
+    }
+
+    @Test
+    void dispatchEvent_double_withNoConfig_doesNothing() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+        SwitchRuntime sw = engine.getSwitch("switch_1");
+
+        // DOUBLE is not configured → NOOP → no state change
+        engine.dispatchEvent(sw, EventType.DOUBLE);
+        assertEquals(DeviceState.OFF, ((OutputRuntime) engine.getTarget("out_1")).state());
+    }
+
+    @Test
+    void dispatchEvent_longWithNoop_doesNothing() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+        SwitchRuntime sw = engine.getSwitch("switch_1");
+
+        // LONG is not configured → NOOP with null target → skip
+        engine.dispatchEvent(sw, EventType.LONG);
+        assertEquals(DeviceState.OFF, ((OutputRuntime) engine.getTarget("out_1")).state());
+    }
+
+    @Test
+    void dispatchEvent_releaseWithNoop_doesNothing() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+        SwitchRuntime sw = engine.getSwitch("switch_1");
+
+        // RELEASE is not configured → NOOP with null target → skip
+        engine.dispatchEvent(sw, EventType.RELEASE);
+        assertEquals(DeviceState.OFF, ((OutputRuntime) engine.getTarget("out_1")).state());
+    }
+
+    @Test
+    void dispatchEvent_outputOn_action() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+        OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
+
+        // Manually create a switch with OUTPUT_ON for CLICK
+        SwitchRuntime sw = new SwitchRuntime(
+                new SwitchDevice("switch_on", "On Switch", "out_1"),
+                new java.util.EnumMap<>(java.util.Map.of(EventType.CLICK, ActionType.OUTPUT_ON)),
+                new java.util.EnumMap<>(java.util.Map.of(EventType.CLICK, "out_1")));
+        engine.switchs().put("switch_on", sw);
+
+        engine.dispatchEvent(sw, EventType.CLICK);
+        assertEquals(DeviceState.ON, output.state());
+
+        // Double-click has NOOP → no change
+        engine.dispatchEvent(sw, EventType.DOUBLE);
+        assertEquals(DeviceState.ON, output.state());
+    }
+
+    @Test
+    void dispatchEvent_outputOff_action() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+        OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
+        output.setState(DeviceState.ON);
+
+        SwitchRuntime sw = new SwitchRuntime(
+                new SwitchDevice("switch_off", "Off Switch", "out_1"),
+                new java.util.EnumMap<>(java.util.Map.of(EventType.CLICK, ActionType.OUTPUT_OFF)),
+                new java.util.EnumMap<>(java.util.Map.of(EventType.CLICK, "out_1")));
+        engine.switchs().put("switch_off", sw);
+
+        engine.dispatchEvent(sw, EventType.CLICK);
+        assertEquals(DeviceState.OFF, output.state());
+    }
+
+    @Test
+    void dispatchEvent_dispatchClick_delegatesToClick() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+        OutputRuntime output = (OutputRuntime) engine.getTarget("out_1");
+
+        // Legacy dispatchClick should delegate to dispatchEvent(CLICK)
+        SwitchRuntime sw = engine.getSwitch("switch_1");
+        Runnable click1 = () -> engine.dispatchClick(sw);
+        click1.run();
+
+        assertEquals(DeviceState.ON, output.state());
+
+        Runnable click2 = () -> engine.dispatchClick(sw);
+        click2.run();
+
+        assertEquals(DeviceState.OFF, output.state());
+    }
+
+    @Test
+    void dispatchEvent_toLight_toggles() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new LightDevice("light_1", "Kitchen Light"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "light_1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+        SwitchRuntime sw = engine.getSwitch("switch_1");
+
+        engine.dispatchEvent(sw, EventType.CLICK);
+        assertEquals(DeviceState.ON, ((LightRuntime) engine.getTarget("light_1")).state());
+
+        engine.dispatchEvent(sw, EventType.CLICK);
+        assertEquals(DeviceState.OFF, ((LightRuntime) engine.getTarget("light_1")).state());
+    }
+
+    @Test
+    void dispatchEvent_unknownTarget_logsError() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+
+        SwitchRuntime sw = new SwitchRuntime(
+                new SwitchDevice("switch_bad", "Bad Switch", "nonexistent"),
+                ActionType.OUTPUT_TOGGLE, "nonexistent");
+
+        // Should not throw, just log error
+        assertDoesNotThrow(() -> engine.dispatchEvent(sw, EventType.CLICK));
+    }
+
+    @Test
+    void dispatchEvent_withStateService_persistsState(@TempDir Path tempDir) {
+        Path stateFile = tempDir.resolve("state.json");
+
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.add(new SwitchDevice("switch_1", "Switch 1", "out_1"));
+        registry.validate();
+
+        StateService stateService = new StateService(stateFile);
+        ActionEngine engine = new ActionEngine(registry, stateService);
+
+        engine.dispatchEvent(engine.getSwitch("switch_1"), EventType.CLICK);
+
+        StateService fresh = new StateService(stateFile);
+        Map<String, DeviceState> restored = fresh.load();
+        assertEquals(1, restored.size());
+        assertEquals(DeviceState.ON, restored.get("out_1"));
     }
 }
