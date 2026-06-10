@@ -1,6 +1,7 @@
 package iot.sbc2ha.runtime;
 
 import iot.sbc2ha.device.LightDevice;
+import iot.sbc2ha.hardware.io.OutputAdapter;
 
 /**
  * Runtime wrapper for a {@link LightDevice}.
@@ -13,6 +14,7 @@ import iot.sbc2ha.device.LightDevice;
 public final class LightRuntime extends DeviceRuntime {
 
     private DeviceState state;
+    private OutputAdapter adapter;
 
     /**
      * Creates a light runtime initialized to {@link DeviceState#OFF}.
@@ -30,6 +32,30 @@ public final class LightRuntime extends DeviceRuntime {
     public LightRuntime(LightDevice device, DeviceState state) {
         super(device);
         this.state = state;
+    }
+
+    /**
+     * Bind a hardware output adapter to this runtime.
+     * <p>
+     * When {@link #apply()} is called, the current state is written
+     * to the adapter. This is how the runtime layer communicates
+     * state changes to physical hardware.
+     *
+     * @param adapter the output adapter (may be {@code null})
+     */
+    public void bindAdapter(OutputAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    /**
+     * Write the current state to the hardware adapter.
+     * <p>
+     * No-op if no adapter is bound.
+     */
+    void apply() {
+        if (adapter != null) {
+            adapter.write(state);
+        }
     }
 
     /**

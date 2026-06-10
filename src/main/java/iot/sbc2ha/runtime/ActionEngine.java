@@ -242,11 +242,13 @@ public final class ActionEngine {
                 if (target instanceof OutputRuntime out) {
                     out.toggle();
                     persist(out.id(), out.state());
+                    out.apply();
                     log.info("Switch '{}' {} toggled output '{}' → {}",
                             switchRuntime.id(), eventType, targetId, out.state());
                 } else if (target instanceof LightRuntime light) {
                     light.toggle();
                     persist(light.id(), light.state());
+                    light.apply();
                     log.info("Switch '{}' {} toggled light '{}' → {}",
                             switchRuntime.id(), eventType, targetId, light.state());
                 }
@@ -255,10 +257,12 @@ public final class ActionEngine {
                 if (target instanceof OutputRuntime out) {
                     out.setState(DeviceState.ON);
                     persist(out.id(), out.state());
+                    out.apply();
                     log.info("Switch '{}' {} set output '{}' ON", switchRuntime.id(), eventType, targetId);
                 } else if (target instanceof LightRuntime light) {
                     light.setState(DeviceState.ON);
                     persist(light.id(), light.state());
+                    light.apply();
                     log.info("Switch '{}' {} set light '{}' ON", switchRuntime.id(), eventType, targetId);
                 }
             }
@@ -266,10 +270,12 @@ public final class ActionEngine {
                 if (target instanceof OutputRuntime out) {
                     out.setState(DeviceState.OFF);
                     persist(out.id(), out.state());
+                    out.apply();
                     log.info("Switch '{}' {} set output '{}' OFF", switchRuntime.id(), eventType, targetId);
                 } else if (target instanceof LightRuntime light) {
                     light.setState(DeviceState.OFF);
                     persist(light.id(), light.state());
+                    light.apply();
                     log.info("Switch '{}' {} set light '{}' OFF", switchRuntime.id(), eventType, targetId);
                 }
             }

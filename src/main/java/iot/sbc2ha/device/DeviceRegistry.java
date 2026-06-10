@@ -68,6 +68,13 @@ public final class DeviceRegistry {
     }
 
     /**
+     * All registered device IDs, in insertion order.
+     */
+    public Set<String> allIds() {
+        return Set.copyOf(byId.keySet());
+    }
+
+    /**
      * All registered devices, in insertion order.
      */
     public List<DeviceConfig> all() {
