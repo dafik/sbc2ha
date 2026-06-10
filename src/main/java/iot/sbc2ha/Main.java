@@ -71,7 +71,7 @@ public class Main {
     private static iot.sbc2ha.boot.BootDisplay createBootDisplay() {
         try {
             return new OledBootDisplay();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.info("OLED display not available, using log-only BootDisplay: {}", e.getMessage());
             return new FakeBootDisplay();
         }

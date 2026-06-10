@@ -12,10 +12,20 @@
 
 ```bash
 cd /home/zw/dev/sbc2ha
-mvn clean package -DskipTests
+mvn clean package
 ```
 
-Produces: `target/sbc2ha-0.0.1-SNAPSHOT.jar` (classes-only, no fat jar).
+Produces a **fat JAR** (shade plugin bundles all deps):
+
+```
+target/sbc2ha-0.0.1-SNAPSHOT.jar    # executable fat JAR (includes all dependencies)
+```
+
+Run directly without `-cp`:
+
+```bash
+java -jar target/sbc2ha-0.0.1-SNAPSHOT.jar .plan/config/bone1-converted.yaml
+```
 
 ## Run — dev workstation (no hardware)
 
@@ -25,11 +35,7 @@ diozero will fail to find BBB GPIO pins, which is handled gracefully
 
 ```bash
 # Minimal: just load config, no hardware
-java \
-  -Dsbc2ha.state=/tmp/sbc2ha-state.json \
-  -Dsbc2ha.logdir=/tmp/sbc2ha-log \
-  -cp target/sbc2ha-0.0.1-SNAPSHOT.jar \
-  iot.sbc2ha.Main \
+java -jar target/sbc2ha-0.0.1-SNAPSHOT.jar \
   .plan/config/bone1-converted.yaml
 ```
 
@@ -41,12 +47,10 @@ On the BBB the app needs root for `/dev/gpiomem` and `/dev/i2c-*`.
 
 ```bash
 # Use production config path
-sudo java \
+sudo java -jar target/sbc2ha-0.0.1-SNAPSHOT.jar \
   -Dsbc2ha.state=/var/lib/sbc2ha/state.json \
   -Dsbc2ha.logdir=/var/log/sbc2ha \
   -Djava.awt.headless=true \
-  -cp target/sbc2ha-0.0.1-SNAPSHOT.jar \
-  iot.sbc2ha.Main \
   /etc/sbc2ha/config.yaml
 ```
 
@@ -55,12 +59,10 @@ sudo java \
 If GPIO isn't available but i2c/devmem are exposed via udev rules:
 
 ```bash
-sudo -u sbc2ha java \
+sudo -u sbc2ha java -jar target/sbc2ha-0.0.1-SNAPSHOT.jar \
   -Dsbc2ha.state=/var/lib/sbc2ha/state.json \
   -Dsbc2ha.logdir=/var/log/sbc2ha \
   -Djava.awt.headless=true \
-  -cp target/sbc2ha-0.0.1-SNAPSHOT.jar \
-  iot.sbc2ha.Main \
   /etc/sbc2ha/config.yaml
 ```
 
