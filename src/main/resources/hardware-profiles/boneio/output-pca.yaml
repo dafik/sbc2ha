@@ -1,0 +1,186 @@
+# BoneIO output PCA profile.
+# Extracted from .plan/oldApp/helper/src/main/resources/extensionBoardDef/boneio/output-pca.txt
+# 16 outputs using PCA chip at I2C address 0x40.
+# NOTE: PCA8574 chip — uses MCP23017 channel type as placeholder.
+
+id: boneio.output-pca
+incomplete: false
+channels:
+  # PCA (0x40): outputs 1-16 (pin 0-15 -> Port A 0-7, Port B 0-7)
+  - type: mcp23017
+    location: "i2c-1:0x40:A:0"
+    port: A
+    pin: 0
+  - type: mcp23017
+    location: "i2c-1:0x40:A:1"
+    port: A
+    pin: 1
+  - type: mcp23017
+    location: "i2c-1:0x40:A:2"
+    port: A
+    pin: 2
+  - type: mcp23017
+    location: "i2c-1:0x40:A:3"
+    port: A
+    pin: 3
+  - type: mcp23017
+    location: "i2c-1:0x40:A:4"
+    port: A
+    pin: 4
+  - type: mcp23017
+    location: "i2c-1:0x40:A:5"
+    port: A
+    pin: 5
+  - type: mcp23017
+    location: "i2c-1:0x40:A:6"
+    port: A
+    pin: 6
+  - type: mcp23017
+    location: "i2c-1:0x40:A:7"
+    port: A
+    pin: 7
+  - type: mcp23017
+    location: "i2c-1:0x40:B:0"
+    port: B
+    pin: 0
+  - type: mcp23017
+    location: "i2c-1:0x40:B:1"
+    port: B
+    pin: 1
+  - type: mcp23017
+    location: "i2c-1:0x40:B:2"
+    port: B
+    pin: 2
+  - type: mcp23017
+    location: "i2c-1:0x40:B:3"
+    port: B
+    pin: 3
+  - type: mcp23017
+    location: "i2c-1:0x40:B:4"
+    port: B
+    pin: 4
+  - type: mcp23017
+    location: "i2c-1:0x40:B:5"
+    port: B
+    pin: 5
+  - type: mcp23017
+    location: "i2c-1:0x40:B:6"
+    port: B
+    pin: 6
+  - type: mcp23017
+    location: "i2c-1:0x40:B:7"
+    port: B
+    pin: 7
+mappings:
+  - logical_id: output_1
+    description: "Output 1 (PCA pin 0 -> A:0)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:0"
+      port: A
+      pin: 0
+  - logical_id: output_2
+    description: "Output 2 (PCA pin 1 -> A:1)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:1"
+      port: A
+      pin: 1
+  - logical_id: output_3
+    description: "Output 3 (PCA pin 2 -> A:2)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:2"
+      port: A
+      pin: 2
+  - logical_id: output_4
+    description: "Output 4 (PCA pin 3 -> A:3)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:3"
+      port: A
+      pin: 3
+  - logical_id: output_5
+    description: "Output 5 (PCA pin 4 -> A:4)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:4"
+      port: A
+      pin: 4
+  - logical_id: output_6
+    description: "Output 6 (PCA pin 5 -> A:5)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:5"
+      port: A
+      pin: 5
+  - logical_id: output_7
+    description: "Output 7 (PCA pin 6 -> A:6)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:6"
+      port: A
+      pin: 6
+  - logical_id: output_8
+    description: "Output 8 (PCA pin 7 -> A:7)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:7"
+      port: A
+      pin: 7
+  - logical_id: output_9
+    description: "Output 9 (PCA pin 8 -> B:0)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:0"
+      port: B
+      pin: 0
+  - logical_id: output_10
+    description: "Output 10 (PCA pin 9 -> B:1)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:1"
+      port: B
+      pin: 1
+  - logical_id: output_11
+    description: "Output 11 (PCA pin 10 -> B:2)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:2"
+      port: B
+      pin: 2
+  - logical_id: output_12
+    description: "Output 12 (PCA pin 11 -> B:3)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:3"
+      port: B
+      pin: 3
+  - logical_id: output_13
+    description: "Output 13 (PCA pin 12 -> B:4)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:4"
+      port: B
+      pin: 4
+  - logical_id: output_14
+    description: "Output 14 (PCA pin 13 -> B:5)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:5"
+      port: B
+      pin: 5
+  - logical_id: output_15
+    description: "Output 15 (PCA pin 14 -> B:6)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:6"
+      port: B
+      pin: 6
+  - logical_id: output_16
+    description: "Output 16 (PCA pin 15 -> B:7)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:7"
+      port: B
+      pin: 7

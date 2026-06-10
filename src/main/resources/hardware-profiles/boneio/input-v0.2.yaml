@@ -1,8 +1,9 @@
-# BoneIO input board v0.3 profile.
-# Extracted from .plan/oldApp/helper/src/main/resources/extensionBoardDef/boneio/input-v0.3.txt
-# 49 digital + 7 analog + 1 casing inputs.
+# BoneIO input board v0.2 profile.
+# Extracted from .plan/oldApp/helper/src/main/resources/extensionBoardDef/boneio/input-v0.2.txt
+# 52 digital + 1 casing + 7 analog inputs.
+# Differences from v0.3: 3 extra digital inputs (50-52 on P8_9/8/7).
 
-id: boneio.input-v0.3
+id: boneio.input-v0.2
 incomplete: false
 channels:
   # Digital inputs 1-10 on P8 (pins 37-46)
@@ -36,7 +37,7 @@ channels:
   - type: gpio
     location: "P8_46"
     direction: input
-  # Digital inputs 11-28 on P9 and P8
+  # Digital inputs 11-28 on P9
   - type: gpio
     location: "P9_42"
     direction: input
@@ -83,15 +84,15 @@ channels:
     location: "P9_14"
     direction: input
   - type: gpio
-    location: "P8_07"
+    location: "P9_13"
     direction: input
   - type: gpio
-    location: "P8_08"
+    location: "P9_12"
     direction: input
   - type: gpio
-    location: "P8_09"
+    location: "P9_11"
     direction: input
-  # Digital inputs 29-49 on P8
+  # Digital inputs 29-52 on P8
   - type: gpio
     location: "P8_36"
     direction: input
@@ -155,6 +156,19 @@ channels:
   - type: gpio
     location: "P8_10"
     direction: input
+  - type: gpio
+    location: "P8_09"
+    direction: input
+  - type: gpio
+    location: "P8_08"
+    direction: input
+  - type: gpio
+    location: "P8_07"
+    direction: input
+  # Casing button on P9
+  - type: gpio
+    location: "P9_41"
+    direction: input
   # Analog inputs 1-7 on P9
   - type: gpio
     location: "P9_33"
@@ -176,10 +190,6 @@ channels:
     direction: input
   - type: gpio
     location: "P9_39"
-    direction: input
-  # Casing button on P9
-  - type: gpio
-    location: "P9_41"
     direction: input
 mappings:
   - logical_id: input_1
@@ -333,22 +343,22 @@ mappings:
       location: "P9_14"
       direction: input
   - logical_id: input_26
-    description: "Digital input 26 (P8_07)"
+    description: "Digital input 26 (P9_13)"
     physical:
       type: gpio
-      location: "P8_07"
+      location: "P9_13"
       direction: input
   - logical_id: input_27
-    description: "Digital input 27 (P8_08)"
+    description: "Digital input 27 (P9_12)"
     physical:
       type: gpio
-      location: "P8_08"
+      location: "P9_12"
       direction: input
   - logical_id: input_28
-    description: "Digital input 28 (P8_09)"
+    description: "Digital input 28 (P9_11)"
     physical:
       type: gpio
-      location: "P8_09"
+      location: "P9_11"
       direction: input
   - logical_id: input_29
     description: "Digital input 29 (P8_36)"
@@ -475,6 +485,24 @@ mappings:
     physical:
       type: gpio
       location: "P8_10"
+      direction: input
+  - logical_id: input_50
+    description: "Digital input 50 (P8_09)"
+    physical:
+      type: gpio
+      location: "P8_09"
+      direction: input
+  - logical_id: input_51
+    description: "Digital input 51 (P8_08)"
+    physical:
+      type: gpio
+      location: "P8_08"
+      direction: input
+  - logical_id: input_52
+    description: "Digital input 52 (P8_07)"
+    physical:
+      type: gpio
+      location: "P8_07"
       direction: input
   - logical_id: analog_1
     description: "Analog input 1 (P9_33)"

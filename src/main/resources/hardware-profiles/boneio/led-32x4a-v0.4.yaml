@@ -1,0 +1,364 @@
+# BoneIO LED board 32x4A v0.4 profile.
+# Extracted from .plan/oldApp/helper/src/main/resources/extensionBoardDef/boneio/led-32x4A-v0.4.txt
+# 32 outputs using PCA chips (no PCA channel type implemented yet).
+# NOTE: PCA8574 chips at I2C addresses 0x40 and 0x41.
+# Uses MCP23017 channel type as placeholder — should be replaced with PCA8574 when available.
+
+id: boneio.led-32x4a-v0.4
+incomplete: false
+channels:
+  # PCA1 (0x40): outputs 1-16 (pin 0-15 -> Port A 0-7, Port B 0-7)
+  - type: mcp23017
+    location: "i2c-1:0x40:A:0"
+    port: A
+    pin: 0
+  - type: mcp23017
+    location: "i2c-1:0x40:A:1"
+    port: A
+    pin: 1
+  - type: mcp23017
+    location: "i2c-1:0x40:A:2"
+    port: A
+    pin: 2
+  - type: mcp23017
+    location: "i2c-1:0x40:A:3"
+    port: A
+    pin: 3
+  - type: mcp23017
+    location: "i2c-1:0x40:A:4"
+    port: A
+    pin: 4
+  - type: mcp23017
+    location: "i2c-1:0x40:A:5"
+    port: A
+    pin: 5
+  - type: mcp23017
+    location: "i2c-1:0x40:A:6"
+    port: A
+    pin: 6
+  - type: mcp23017
+    location: "i2c-1:0x40:A:7"
+    port: A
+    pin: 7
+  - type: mcp23017
+    location: "i2c-1:0x40:B:0"
+    port: B
+    pin: 0
+  - type: mcp23017
+    location: "i2c-1:0x40:B:1"
+    port: B
+    pin: 1
+  - type: mcp23017
+    location: "i2c-1:0x40:B:2"
+    port: B
+    pin: 2
+  - type: mcp23017
+    location: "i2c-1:0x40:B:3"
+    port: B
+    pin: 3
+  - type: mcp23017
+    location: "i2c-1:0x40:B:4"
+    port: B
+    pin: 4
+  - type: mcp23017
+    location: "i2c-1:0x40:B:5"
+    port: B
+    pin: 5
+  - type: mcp23017
+    location: "i2c-1:0x40:B:6"
+    port: B
+    pin: 6
+  - type: mcp23017
+    location: "i2c-1:0x40:B:7"
+    port: B
+    pin: 7
+  # PCA2 (0x41): outputs 17-32 (pin 0-15 -> Port A 0-7, Port B 0-7)
+  - type: mcp23017
+    location: "i2c-1:0x41:A:0"
+    port: A
+    pin: 0
+  - type: mcp23017
+    location: "i2c-1:0x41:A:1"
+    port: A
+    pin: 1
+  - type: mcp23017
+    location: "i2c-1:0x41:A:2"
+    port: A
+    pin: 2
+  - type: mcp23017
+    location: "i2c-1:0x41:A:3"
+    port: A
+    pin: 3
+  - type: mcp23017
+    location: "i2c-1:0x41:A:4"
+    port: A
+    pin: 4
+  - type: mcp23017
+    location: "i2c-1:0x41:A:5"
+    port: A
+    pin: 5
+  - type: mcp23017
+    location: "i2c-1:0x41:A:6"
+    port: A
+    pin: 6
+  - type: mcp23017
+    location: "i2c-1:0x41:A:7"
+    port: A
+    pin: 7
+  - type: mcp23017
+    location: "i2c-1:0x41:B:0"
+    port: B
+    pin: 0
+  - type: mcp23017
+    location: "i2c-1:0x41:B:1"
+    port: B
+    pin: 1
+  - type: mcp23017
+    location: "i2c-1:0x41:B:2"
+    port: B
+    pin: 2
+  - type: mcp23017
+    location: "i2c-1:0x41:B:3"
+    port: B
+    pin: 3
+  - type: mcp23017
+    location: "i2c-1:0x41:B:4"
+    port: B
+    pin: 4
+  - type: mcp23017
+    location: "i2c-1:0x41:B:5"
+    port: B
+    pin: 5
+  - type: mcp23017
+    location: "i2c-1:0x41:B:6"
+    port: B
+    pin: 6
+  - type: mcp23017
+    location: "i2c-1:0x41:B:7"
+    port: B
+    pin: 7
+mappings:
+  - logical_id: led_1
+    description: "LED 1 (PCA1 pin 0 -> A:0)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:0"
+      port: A
+      pin: 0
+  - logical_id: led_2
+    description: "LED 2 (PCA1 pin 1 -> A:1)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:1"
+      port: A
+      pin: 1
+  - logical_id: led_3
+    description: "LED 3 (PCA1 pin 2 -> A:2)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:2"
+      port: A
+      pin: 2
+  - logical_id: led_4
+    description: "LED 4 (PCA1 pin 3 -> A:3)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:3"
+      port: A
+      pin: 3
+  - logical_id: led_5
+    description: "LED 5 (PCA1 pin 4 -> A:4)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:4"
+      port: A
+      pin: 4
+  - logical_id: led_6
+    description: "LED 6 (PCA1 pin 5 -> A:5)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:5"
+      port: A
+      pin: 5
+  - logical_id: led_7
+    description: "LED 7 (PCA1 pin 6 -> A:6)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:6"
+      port: A
+      pin: 6
+  - logical_id: led_8
+    description: "LED 8 (PCA1 pin 7 -> A:7)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:A:7"
+      port: A
+      pin: 7
+  - logical_id: led_9
+    description: "LED 9 (PCA1 pin 8 -> B:0)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:0"
+      port: B
+      pin: 0
+  - logical_id: led_10
+    description: "LED 10 (PCA1 pin 9 -> B:1)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:1"
+      port: B
+      pin: 1
+  - logical_id: led_11
+    description: "LED 11 (PCA1 pin 10 -> B:2)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:2"
+      port: B
+      pin: 2
+  - logical_id: led_12
+    description: "LED 12 (PCA1 pin 11 -> B:3)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:3"
+      port: B
+      pin: 3
+  - logical_id: led_13
+    description: "LED 13 (PCA1 pin 12 -> B:4)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:4"
+      port: B
+      pin: 4
+  - logical_id: led_14
+    description: "LED 14 (PCA1 pin 13 -> B:5)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:5"
+      port: B
+      pin: 5
+  - logical_id: led_15
+    description: "LED 15 (PCA1 pin 14 -> B:6)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:6"
+      port: B
+      pin: 6
+  - logical_id: led_16
+    description: "LED 16 (PCA1 pin 15 -> B:7)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x40:B:7"
+      port: B
+      pin: 7
+  - logical_id: led_17
+    description: "LED 17 (PCA2 pin 0 -> A:0)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:A:0"
+      port: A
+      pin: 0
+  - logical_id: led_18
+    description: "LED 18 (PCA2 pin 1 -> A:1)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:A:1"
+      port: A
+      pin: 1
+  - logical_id: led_19
+    description: "LED 19 (PCA2 pin 2 -> A:2)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:A:2"
+      port: A
+      pin: 2
+  - logical_id: led_20
+    description: "LED 20 (PCA2 pin 3 -> A:3)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:A:3"
+      port: A
+      pin: 3
+  - logical_id: led_21
+    description: "LED 21 (PCA2 pin 4 -> A:4)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:A:4"
+      port: A
+      pin: 4
+  - logical_id: led_22
+    description: "LED 22 (PCA2 pin 5 -> A:5)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:A:5"
+      port: A
+      pin: 5
+  - logical_id: led_23
+    description: "LED 23 (PCA2 pin 6 -> A:6)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:A:6"
+      port: A
+      pin: 6
+  - logical_id: led_24
+    description: "LED 24 (PCA2 pin 7 -> A:7)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:A:7"
+      port: A
+      pin: 7
+  - logical_id: led_25
+    description: "LED 25 (PCA2 pin 8 -> B:0)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:B:0"
+      port: B
+      pin: 0
+  - logical_id: led_26
+    description: "LED 26 (PCA2 pin 9 -> B:1)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:B:1"
+      port: B
+      pin: 1
+  - logical_id: led_27
+    description: "LED 27 (PCA2 pin 10 -> B:2)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:B:2"
+      port: B
+      pin: 2
+  - logical_id: led_28
+    description: "LED 28 (PCA2 pin 11 -> B:3)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:B:3"
+      port: B
+      pin: 3
+  - logical_id: led_29
+    description: "LED 29 (PCA2 pin 12 -> B:4)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:B:4"
+      port: B
+      pin: 4
+  - logical_id: led_30
+    description: "LED 30 (PCA2 pin 13 -> B:5)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:B:5"
+      port: B
+      pin: 5
+  - logical_id: led_31
+    description: "LED 31 (PCA2 pin 14 -> B:6)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:B:6"
+      port: B
+      pin: 6
+  - logical_id: led_32
+    description: "LED 32 (PCA2 pin 15 -> B:7)"
+    physical:
+      type: mcp23017
+      location: "i2c-1:0x41:B:7"
+      port: B
+      pin: 7

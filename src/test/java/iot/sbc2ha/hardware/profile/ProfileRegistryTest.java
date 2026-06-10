@@ -166,9 +166,9 @@ class ProfileRegistryTest {
     void loadFromClasspathSuccess() {
         HardwareProfile loaded = registry.loadFromClasspath("hardware-profiles/boneio/input-v0.3.yaml");
         assertEquals("boneio.input-v0.3", loaded.id());
-        assertTrue(loaded.incomplete());
-        assertEquals(2, loaded.channelCount());
-        assertEquals(2, loaded.mappingCount());
+        assertFalse(loaded.incomplete());
+        assertEquals(57, loaded.channelCount());
+        assertEquals(57, loaded.mappingCount());
     }
 
     @Test

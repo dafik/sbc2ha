@@ -1,0 +1,211 @@
+# Raspberry Pi with no HAT profile.
+# Extracted from .plan/oldApp/helper/src/main/resources/extensionBoardDef/rpi/nohat.txt
+# 23 unique GPIO outputs available on Raspberry Pi header when no HAT is attached.
+# (GPIO_23, GPIO_24, GPIO_26 each appear at 2 different physical pins in source.)
+#
+# WARNING: Several pins share functions with alternate interfaces. When those
+# interfaces are enabled (via device-tree overlays or config.txt), the GPIO
+# function is disabled on the affected pins:
+#   I2C1: GPIO_2 (pin 3),   GPIO_3 (pin 5)
+#   UART0: GPIO_14 (pin 8), GPIO_15 (pin 10)
+#   GPCLK0: GPIO_4 (pin 7)
+#   SPI0: GPIO_10 (pin 19), GPIO_9 (pin 21), GPIO_11 (pin 23), GPIO_8 (pin 24), GPIO_7 (pin 26)
+#   PCM/SPDIF: GPIO_18 (pin 12), GPIO_19 (pin 35), GPIO_20 (pin 38), GPIO_21 (pin 40)
+#   PWM0: GPIO_12 (pin 32), PWM1: GPIO_13 (pin 33)
+#
+# Only use these pins as GPIO when the corresponding alternate function is NOT
+# active in the current system configuration.
+
+id: rpi.nohat
+incomplete: false
+channels:
+  - type: gpio
+    location: "GPIO_2"
+    direction: output
+  - type: gpio
+    location: "GPIO_3"
+    direction: output
+  - type: gpio
+    location: "GPIO_4"
+    direction: output
+  - type: gpio
+    location: "GPIO_17"
+    direction: output
+  - type: gpio
+    location: "GPIO_27"
+    direction: output
+  - type: gpio
+    location: "GPIO_22"
+    direction: output
+  - type: gpio
+    location: "GPIO_23"
+    direction: output
+  - type: gpio
+    location: "GPIO_24"
+    direction: output
+  - type: gpio
+    location: "GPIO_25"
+    direction: output
+  - type: gpio
+    location: "GPIO_26"
+    direction: output
+  - type: gpio
+    location: "GPIO_5"
+    direction: output
+  - type: gpio
+    location: "GPIO_6"
+    direction: output
+  - type: gpio
+    location: "GPIO_13"
+    direction: output
+  - type: gpio
+    location: "GPIO_19"
+    direction: output
+  - type: gpio
+    location: "GPIO_16"
+    direction: output
+  - type: gpio
+    location: "GPIO_20"
+    direction: output
+  - type: gpio
+    location: "GPIO_21"
+    direction: output
+  - type: gpio
+    location: "GPIO_12"
+    direction: output
+  - type: gpio
+    location: "GPIO_18"
+    direction: output
+  - type: gpio
+    location: "GPIO_14"
+    direction: output
+  - type: gpio
+    location: "GPIO_15"
+    direction: output
+mappings:
+  - logical_id: output_1
+    description: "RPI GPIO 2"
+    physical:
+      type: gpio
+      location: "GPIO_2"
+      direction: output
+  - logical_id: output_2
+    description: "RPI GPIO 3"
+    physical:
+      type: gpio
+      location: "GPIO_3"
+      direction: output
+  - logical_id: output_3
+    description: "RPI GPIO 4"
+    physical:
+      type: gpio
+      location: "GPIO_4"
+      direction: output
+  - logical_id: output_4
+    description: "RPI GPIO 17"
+    physical:
+      type: gpio
+      location: "GPIO_17"
+      direction: output
+  - logical_id: output_5
+    description: "RPI GPIO 27"
+    physical:
+      type: gpio
+      location: "GPIO_27"
+      direction: output
+  - logical_id: output_6
+    description: "RPI GPIO 22"
+    physical:
+      type: gpio
+      location: "GPIO_22"
+      direction: output
+  - logical_id: output_7
+    description: "RPI GPIO 23"
+    physical:
+      type: gpio
+      location: "GPIO_23"
+      direction: output
+  - logical_id: output_8
+    description: "RPI GPIO 24"
+    physical:
+      type: gpio
+      location: "GPIO_24"
+      direction: output
+  - logical_id: output_9
+    description: "RPI GPIO 25"
+    physical:
+      type: gpio
+      location: "GPIO_25"
+      direction: output
+  - logical_id: output_10
+    description: "RPI GPIO 26"
+    physical:
+      type: gpio
+      location: "GPIO_26"
+      direction: output
+  - logical_id: output_11
+    description: "RPI GPIO 5"
+    physical:
+      type: gpio
+      location: "GPIO_5"
+      direction: output
+  - logical_id: output_12
+    description: "RPI GPIO 6"
+    physical:
+      type: gpio
+      location: "GPIO_6"
+      direction: output
+  - logical_id: output_13
+    description: "RPI GPIO 13"
+    physical:
+      type: gpio
+      location: "GPIO_13"
+      direction: output
+  - logical_id: output_14
+    description: "RPI GPIO 19"
+    physical:
+      type: gpio
+      location: "GPIO_19"
+      direction: output
+  - logical_id: output_15
+    description: "RPI GPIO 16"
+    physical:
+      type: gpio
+      location: "GPIO_16"
+      direction: output
+  - logical_id: output_16
+    description: "RPI GPIO 20"
+    physical:
+      type: gpio
+      location: "GPIO_20"
+      direction: output
+  - logical_id: output_17
+    description: "RPI GPIO 21"
+    physical:
+      type: gpio
+      location: "GPIO_21"
+      direction: output
+  - logical_id: output_18
+    description: "RPI GPIO 12"
+    physical:
+      type: gpio
+      location: "GPIO_12"
+      direction: output
+  - logical_id: output_19
+    description: "RPI GPIO 18"
+    physical:
+      type: gpio
+      location: "GPIO_18"
+      direction: output
+  - logical_id: output_20
+    description: "RPI GPIO 14"
+    physical:
+      type: gpio
+      location: "GPIO_14"
+      direction: output
+  - logical_id: output_21
+    description: "RPI GPIO 15"
+    physical:
+      type: gpio
+      location: "GPIO_15"
+      direction: output
