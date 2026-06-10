@@ -32,6 +32,12 @@
             <version>${diozero.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.diozero</groupId>
+            <artifactId>diozero-provider-mock</artifactId>
+            <version>${diozero.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>

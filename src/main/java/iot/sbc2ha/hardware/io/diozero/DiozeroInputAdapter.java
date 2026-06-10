@@ -1,4 +1,4 @@
-package iot.sbc2ha.hardware.gpio.diozero;
+package iot.sbc2ha.hardware.io.diozero;
 
 import com.diozero.api.DigitalInputDevice;
 import com.diozero.api.GpioEventTrigger;
@@ -6,7 +6,7 @@ import com.diozero.api.PinInfo;
 import com.diozero.api.RuntimeIOException;
 import com.diozero.sbc.BoardInfo;
 import com.diozero.sbc.DeviceFactoryHelper;
-import iot.sbc2ha.hardware.gpio.GpioInputAdapter;
+import iot.sbc2ha.hardware.io.InputAdapter;
 import iot.sbc2ha.runtime.DeviceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * active-low sensor wiring.</p>
  *
  * <p>This class is the boundary where diozero types enter the system.
- * All other packages must interact through {@link GpioInputAdapter}.</p>
+ * All other packages must interact through {@link InputAdapter}.</p>
  *
  * <h3>Initialization</h3>
  * <p>On construction the native provider is initialised (if not
@@ -30,11 +30,11 @@ import org.slf4j.LoggerFactory;
  * and a {@link DigitalInputDevice} is opened with edge-triggered
  * notifications on both rising and falling edges.</p>
  *
- * @see GpioInputAdapter
+ * @see InputAdapter
  */
-public final class DiozeroGpioInputAdapter implements GpioInputAdapter {
+public final class DiozeroInputAdapter implements InputAdapter {
 
-    private static final Logger Log = LoggerFactory.getLogger(DiozeroGpioInputAdapter.class);
+    private static final Logger Log = LoggerFactory.getLogger(DiozeroInputAdapter.class);
 
     private final DigitalInputDevice device;
     private final boolean inverted;
@@ -46,7 +46,7 @@ public final class DiozeroGpioInputAdapter implements GpioInputAdapter {
      * @param pinId    physical pin identifier (e.g. {@code "P9_11"} for BBB)
      * @param inverted {@code true} to invert the logical reading
      */
-    public DiozeroGpioInputAdapter(String pinId, boolean inverted) {
+    public DiozeroInputAdapter(String pinId, boolean inverted) {
         this.pinId = pinId;
         this.inverted = inverted;
         // Trigger native provider initialisation

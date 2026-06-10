@@ -1,6 +1,6 @@
-package iot.sbc2ha.hardware.gpio.fake;
+package iot.sbc2ha.hardware.io.fake;
 
-import iot.sbc2ha.hardware.gpio.GpioOutputAdapter;
+import iot.sbc2ha.hardware.io.OutputAdapter;
 import iot.sbc2ha.runtime.DeviceState;
 
 /**
@@ -10,7 +10,7 @@ import iot.sbc2ha.runtime.DeviceState;
  * {@link #write(iot.sbc2ha.runtime.DeviceState)} to simulate a state change
  * written to hardware.</p>
  */
-public final class FakeGpioOutputAdapter implements GpioOutputAdapter {
+public final class FakeOutputAdapter implements OutputAdapter {
 
     private DeviceState state = DeviceState.OFF;
 

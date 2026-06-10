@@ -1,4 +1,4 @@
-package iot.sbc2ha.hardware.gpio;
+package iot.sbc2ha.hardware.io;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,17 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
  * rule: diozero must be isolated in hardware adapters, not leak into
  * fake implementations or the core runtime.</p>
  *
- * <p>Additionally, it verifies that the real diozero adapter
- * ({@code iot.sbc2ha.hardware.gpio.diozero}) DOES reference diozero
- * (expected) and does NOT contain diozero in the fake package.</p>
+ * <p>Additionally, it verifies that the real diozero adapters
+ * ({@code iot.sbc2ha.hardware.gpio.diozero}) DO reference diozero
+ * (expected) and do NOT contain diozero in the fake package.</p>
  */
-class DiozeroIsolationTest {
+class InputOutputIsolationTest {
 
     @Test
     void fakePackage_hasNoDiozeroDependencies() {
         // Use target/classes as the root for scanning compiled classes
         String base = System.getProperty("user.dir") + "/target/classes";
-        java.io.File fakeDir = new java.io.File(base, "iot/sbc2ha/hardware/gpio/fake");
+        java.io.File fakeDir = new java.io.File(base, "iot/sbc2ha/hardware/io/fake");
 
         assertTrue(fakeDir.isDirectory(),
                 "Fake class dir should exist after compile: " + fakeDir);
@@ -77,7 +77,7 @@ class DiozeroIsolationTest {
     @Test
     void fakeSource_hasNoDiozeroImports() {
         String base = System.getProperty("user.dir") + "/src/main/java/";
-        java.io.File fakeDir = new java.io.File(base, "iot/sbc2ha/hardware/gpio/fake");
+        java.io.File fakeDir = new java.io.File(base, "iot/sbc2ha/hardware/io/fake");
 
         assertTrue(fakeDir.isDirectory(),
                 "Fake source dir should exist: " + fakeDir);
@@ -111,7 +111,7 @@ class DiozeroIsolationTest {
     @Test
     void diozeroAdapterSource_referencesDiozeroAndInversion() throws IOException {
         String base = System.getProperty("user.dir") + "/src/main/java/";
-        java.io.File diozeroDir = new java.io.File(base, "iot/sbc2ha/hardware/gpio/diozero");
+        java.io.File diozeroDir = new java.io.File(base, "iot/sbc2ha/hardware/io/diozero");
 
         if (!diozeroDir.isDirectory()) {
             // diozero adapter not yet implemented — skip

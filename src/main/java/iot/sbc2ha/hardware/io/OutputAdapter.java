@@ -1,4 +1,4 @@
-package iot.sbc2ha.hardware.gpio;
+package iot.sbc2ha.hardware.io;
 
 import iot.sbc2ha.runtime.DeviceState;
 
@@ -12,7 +12,7 @@ import iot.sbc2ha.runtime.DeviceState;
  * <p>This interface is the boundary: core/domain/config packages must not
  * import diozero, and this interface contains no diozero types.</p>
  */
-public interface GpioOutputAdapter {
+public interface OutputAdapter {
 
     /**
      * Sets the output state of this pin.
