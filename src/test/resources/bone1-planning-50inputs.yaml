@@ -1,0 +1,594 @@
+# ---------------------------------------------------------------------------
+# bone1 — planning config (50 inputs scale check)
+# ---------------------------------------------------------------------------
+# DRAFT — not production-ready. Used to validate that the config model
+# remains readable and parseable at ~50 switch/sensor inputs spread across
+# multiple locations.
+#
+# Location IDs use dotted notation (e.g. floor1.stairs).
+# Dotted keys are plain strings — NOT YAML nesting.
+# Location hierarchy is expressed via `parent` references where needed.
+#
+# Pain points identified during drafting:
+# 1. Repetitive device entries make the file long; no config templates
+#    or loop-back mechanism exists today.
+# 2. Per-device `expose.ha.events` duplication across many switches.
+# 3. Actions.click wiring is verbose for simple toggle patterns.
+# ---------------------------------------------------------------------------
+
+sbc2ha:
+  id: bone1
+  name: bone1 — 50 inputs planning
+  schema: "1"
+
+runtime:
+  offline_first: true
+
+hardware:
+  board: { id: main, type: beaglebone-black }
+  buses:
+    i2c2: { type: i2c, path: /dev/i2c-2 }
+  profiles:
+    input_board:
+      type: boneio.input-v0.4
+      board: main
+    output_board:
+      type: boneio.output-24x16a-v0.4
+      bus: i2c2
+      addresses: { mcp1: 0x20, mcp2: 0x21 }
+
+# ---------------------------------------------------------------------------
+# Locations — building / floor / zone hierarchy
+# Dotted IDs are plain strings (e.g. "floor1.stairs"), not nested YAML.
+# ---------------------------------------------------------------------------
+locations:
+  building: { name: Budynek A }
+  building.floor1: { name: Piętro 1, parent: building }
+  building.floor1.stairs: { name: Klatka, parent: building.floor1 }
+  building.floor1.hallway: { name: Korytarz, parent: building.floor1 }
+  building.floor1.office1: { name: Biuro 1, parent: building.floor1 }
+  building.floor1.office2: { name: Biuro 2, parent: building.floor1 }
+  building.floor1.bathroom: { name: Łazienka, parent: building.floor1 }
+  building.floor1.storage: { name: Piwnica, parent: building.floor1 }
+  building.floor2: { name: Piętro 2, parent: building }
+  building.floor2.stairs: { name: Klatka 2, parent: building.floor2 }
+  building.floor2.hallway: { name: Korytarz 2, parent: building.floor2 }
+  building.floor2.lobby: { name: Foyer, parent: building.floor2 }
+
+devices:
+  # === STAIRS (floor1) — 6 switches ===
+  - id: stairs_btn1
+    name: Klatka przycisk 1
+    type: switch
+    input: input_board.input1
+    location: building.floor1.stairs
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: stairs_light1 }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+
+  - id: stairs_btn2
+    name: Klatka przycisk 2
+    type: switch
+    input: input_board.input2
+    location: building.floor1.stairs
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: stairs_light1 }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+
+  - id: stairs_motion1
+    name: Klatka czujka ruchu 1
+    type: input
+    input: input_board.input3
+    location: building.floor1.stairs
+    sensor_type: motion
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: stairs_door1
+    name: Drzwi klatka
+    type: input
+    input: input_board.input4
+    location: building.floor1.stairs
+    sensor_type: door
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: stairs_light1
+    name: Klatka oświetlenie
+    type: light
+    output: output_board.output1
+    location: building.floor1.stairs
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: stairs_switch1
+    name: Klatka włącznik
+    type: switch
+    input: input_board.input5
+    location: building.floor1.stairs
+    clicks: { click: true, double: false, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: stairs_light1 }
+    expose:
+      ha: { enabled: true, events: [click] }
+
+  # === HALLWAY (floor1) — 6 switches ===
+  - id: hallway_motion1
+    name: Korytarz czujka ruchu 1
+    type: input
+    input: input_board.input6
+    location: building.floor1.hallway
+    sensor_type: motion
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  - id: hallway_door1
+    name: Drzwi korytarz
+    type: input
+    input: input_board.input7
+    location: building.floor1.hallway
+    sensor_type: door
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: hallway_btn1
+    name: Korytarz przycisk 1
+    type: switch
+    input: input_board.input8
+    location: building.floor1.hallway
+    clicks: { click: true, double: true, long: true, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: hallway_light1 }
+      double:
+        - { type: output.toggle, target: hallway_light2 }
+    expose:
+      ha: { enabled: true, events: [click, double, long] }
+
+  - id: hallway_light1
+    name: Korytarz oświetlenie 1
+    type: light
+    output: output_board.output2
+    location: building.floor1.hallway
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: hallway_light2
+    name: Korytarz oświetlenie 2
+    type: light
+    output: output_board.output3
+    location: building.floor1.hallway
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: hallway_contact1
+    name: Kontakt korytarz
+    type: input
+    input: input_board.input9
+    location: building.floor1.hallway
+    sensor_type: contact
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  # === OFFICE 1 (floor1) — 6 switches ===
+  - id: office1_btn1
+    name: Biuro 1 przycisk 1
+    type: switch
+    input: input_board.input10
+    location: building.floor1.office1
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: office1_light1 }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+
+  - id: office1_motion1
+    name: Biuro 1 czujka ruchu 1
+    type: input
+    input: input_board.input11
+    location: building.floor1.office1
+    sensor_type: motion
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: office1_door1
+    name: Drzwi biuro 1
+    type: input
+    input: input_board.input12
+    location: building.floor1.office1
+    sensor_type: door
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: office1_light1
+    name: Biuro 1 oświetlenie
+    type: light
+    output: output_board.output4
+    location: building.floor1.office1
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: office1_switch1
+    name: Biuro 1 włącznik
+    type: switch
+    input: input_board.input13
+    location: building.floor1.office1
+    clicks: { click: true, double: false, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: office1_light1 }
+    expose:
+      ha: { enabled: true, events: [click] }
+
+  - id: office1_contact1
+    name: Kontakt biuro 1
+    type: input
+    input: input_board.input14
+    location: building.floor1.office1
+    sensor_type: contact
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  # === OFFICE 2 (floor1) — 6 switches ===
+  - id: office2_btn1
+    name: Biuro 2 przycisk 1
+    type: switch
+    input: input_board.input15
+    location: building.floor1.office2
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: office2_light1 }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+
+  - id: office2_motion1
+    name: Biuro 2 czujka ruchu 1
+    type: input
+    input: input_board.input16
+    location: building.floor1.office2
+    sensor_type: motion
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: office2_door1
+    name: Drzwi biuro 2
+    type: input
+    input: input_board.input17
+    location: building.floor1.office2
+    sensor_type: door
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: office2_light1
+    name: Biuro 2 oświetlenie
+    type: light
+    output: output_board.output5
+    location: building.floor1.office2
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: office2_switch1
+    name: Biuro 2 włącznik
+    type: switch
+    input: input_board.input18
+    location: building.floor1.office2
+    clicks: { click: true, double: false, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: office2_light1 }
+    expose:
+      ha: { enabled: true, events: [click] }
+
+  - id: office2_contact1
+    name: Kontakt biuro 2
+    type: input
+    input: input_board.input19
+    location: building.floor1.office2
+    sensor_type: contact
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  # === BATHROOM (floor1) — 6 switches ===
+  - id: bathroom_motion1
+    name: Łazienka czujka ruchu 1
+    type: input
+    input: input_board.input20
+    location: building.floor1.bathroom
+    sensor_type: motion
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: bathroom_btn1
+    name: Łazienka przycisk 1
+    type: switch
+    input: input_board.input21
+    location: building.floor1.bathroom
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: bathroom_light1 }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+
+  - id: bathroom_light1
+    name: Łazienka oświetlenie
+    type: light
+    output: output_board.output6
+    location: building.floor1.bathroom
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: bathroom_door1
+    name: Drzwi łazienka
+    type: input
+    input: input_board.input22
+    location: building.floor1.bathroom
+    sensor_type: door
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: bathroom_switch1
+    name: Łazienka włącznik
+    type: switch
+    input: input_board.input23
+    location: building.floor1.bathroom
+    clicks: { click: true, double: false, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: bathroom_light1 }
+    expose:
+      ha: { enabled: true, events: [click] }
+
+  - id: bathroom_contact1
+    name: Kontakt łazienka
+    type: input
+    input: input_board.input24
+    location: building.floor1.bathroom
+    sensor_type: contact
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  # === STORAGE (floor1) — 6 switches ===
+  - id: storage_btn1
+    name: Piwnica przycisk 1
+    type: switch
+    input: input_board.input25
+    location: building.floor1.storage
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: storage_light1 }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+
+  - id: storage_motion1
+    name: Piwnica czujka ruchu 1
+    type: input
+    input: input_board.input26
+    location: building.floor1.storage
+    sensor_type: motion
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: storage_door1
+    name: Drzwi piwnica
+    type: input
+    input: input_board.input27
+    location: building.floor1.storage
+    sensor_type: door
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: storage_light1
+    name: Piwnica oświetlenie
+    type: light
+    output: output_board.output7
+    location: building.floor1.storage
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: storage_switch1
+    name: Piwnica włącznik
+    type: switch
+    input: input_board.input28
+    location: building.floor1.storage
+    clicks: { click: true, double: false, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: storage_light1 }
+    expose:
+      ha: { enabled: true, events: [click] }
+
+  - id: storage_contact1
+    name: Kontakt piwnica
+    type: input
+    input: input_board.input29
+    location: building.floor1.storage
+    sensor_type: contact
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  # === STAIRS (floor2) — 6 switches ===
+  - id: stairs2_btn1
+    name: Klatka 2 przycisk 1
+    type: switch
+    input: input_board.input40
+    location: building.floor2.stairs
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: stairs2_light1 }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+
+  - id: stairs2_motion1
+    name: Klatka 2 czujka ruchu 1
+    type: input
+    input: input_board.input41
+    location: building.floor2.stairs
+    sensor_type: motion
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: stairs2_door1
+    name: Drzwi klatka 2
+    type: input
+    input: input_board.input42
+    location: building.floor2.stairs
+    sensor_type: door
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: stairs2_light1
+    name: Klatka 2 oświetlenie
+    type: light
+    output: output_board.output10
+    location: building.floor2.stairs
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: stairs2_switch1
+    name: Klatka 2 włącznik
+    type: switch
+    input: input_board.input43
+    location: building.floor2.stairs
+    clicks: { click: true, double: false, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: stairs2_light1 }
+    expose:
+      ha: { enabled: true, events: [click] }
+
+  - id: stairs2_contact1
+    name: Kontakt klatka 2
+    type: input
+    input: input_board.input44
+    location: building.floor2.stairs
+    sensor_type: contact
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  # === HALLWAY (floor2) — 6 switches ===
+  - id: hallway2_motion1
+    name: Korytarz 2 czujka ruchu 1
+    type: input
+    input: input_board.input45
+    location: building.floor2.hallway
+    sensor_type: motion
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  - id: hallway2_door1
+    name: Drzwi korytarz 2
+    type: input
+    input: input_board.input46
+    location: building.floor2.hallway
+    sensor_type: door
+    inverted: true
+    expose:
+      ha: { enabled: true }
+
+  - id: hallway2_btn1
+    name: Korytarz 2 przycisk 1
+    type: switch
+    input: input_board.input47
+    location: building.floor2.hallway
+    clicks: { click: true, double: true, long: true, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: hallway2_light1 }
+      double:
+        - { type: output.toggle, target: hallway2_light2 }
+    expose:
+      ha: { enabled: true, events: [click, double, long] }
+
+  - id: hallway2_light1
+    name: Korytarz 2 oświetlenie 1
+    type: light
+    output: output_board.output11
+    location: building.floor2.hallway
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: hallway2_light2
+    name: Korytarz 2 oświetlenie 2
+    type: light
+    output: output_board.output12
+    location: building.floor2.hallway
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: hallway2_contact1
+    name: Kontakt korytarz 2
+    type: input
+    input: input_board.input48
+    location: building.floor2.hallway
+    sensor_type: contact
+    inverted: false
+    expose:
+      ha: { enabled: true }
+
+  # === LOBBY (floor2) — 2 switches ===
+  - id: lobby_btn1
+    name: Foyer przycisk 1
+    type: switch
+    input: input_board.input49
+    location: building.floor2.lobby
+    clicks: { click: true, double: true, long: false, release: false }
+    actions:
+      click:
+        - { type: output.toggle, target: lobby_light1 }
+    expose:
+      ha: { enabled: true, events: [click, double] }
+
+  - id: lobby_light1
+    name: Foyer oświetlenie
+    type: light
+    output: output_board.output13
+    location: building.floor2.lobby
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+mqtt: { enabled: false }
+home_assistant: { enabled: false }

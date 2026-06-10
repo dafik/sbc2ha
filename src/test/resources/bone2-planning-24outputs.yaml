@@ -1,0 +1,274 @@
+# ---------------------------------------------------------------------------
+# bone2 — planning config (24 outputs scale check)
+# ---------------------------------------------------------------------------
+# DRAFT — not production-ready. Used to validate that the config model
+# remains readable and parseable at ~24 light/relay outputs on a single
+# bone2 node.
+#
+# bone2 targets the output-24x16A-v0.4 board (2× MCP23017: 0x20, 0x21).
+# This config exercises all 24 output pins with restore_state enabled.
+#
+# Pain points identified during drafting:
+# 1. 24 output entries are very verbose — repetitive `restore_state` and
+#    `expose.ha` fields on every device.
+# 2. No config template or "default" mechanism exists today.
+# 3. Location grouping by floor is implicit (no programmatic floor query).
+# ---------------------------------------------------------------------------
+
+sbc2ha:
+  id: bone2
+  name: bone2 — 24 outputs planning
+  schema: "1"
+
+runtime:
+  offline_first: true
+
+hardware:
+  board: { id: main, type: beaglebone-black }
+  buses:
+    i2c2: { type: i2c, path: /dev/i2c-2 }
+  profiles:
+    output_board:
+      type: boneio.output-24x16a-v0.4
+      bus: i2c2
+      addresses: { mcp1: 0x20, mcp2: 0x21 }
+
+# ---------------------------------------------------------------------------
+# Locations — separate building from bone1
+# ---------------------------------------------------------------------------
+locations:
+  building2: { name: Budynek B }
+  building2.floor1: { name: Piętro 1, parent: building2 }
+  building2.floor1.zone_a: { name: Strefa A, parent: building2.floor1 }
+  building2.floor1.zone_b: { name: Strefa B, parent: building2.floor1 }
+  building2.floor1.zone_c: { name: Strefa C, parent: building2.floor1 }
+  building2.floor1.zone_d: { name: Strefa D, parent: building2.floor1 }
+  building2.floor2: { name: Piętro 2, parent: building2 }
+  building2.floor2.zone_e: { name: Strefa E, parent: building2.floor2 }
+  building2.floor2.zone_f: { name: Strefa F, parent: building2.floor2 }
+
+devices:
+  # === ZONE A (floor1) — 6 outputs ===
+  - id: zone_a_light1
+    name: Strefa A oświetlenie 1
+    type: light
+    output: output_board.output1
+    location: building2.floor1.zone_a
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_a_light2
+    name: Strefa A oświetlenie 2
+    type: light
+    output: output_board.output2
+    location: building2.floor1.zone_a
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_a_relay1
+    name: Strefa A gniazdko 1
+    type: light
+    output: output_board.output3
+    location: building2.floor1.zone_a
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_a_relay2
+    name: Strefa A gniazdko 2
+    type: light
+    output: output_board.output4
+    location: building2.floor1.zone_a
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_a_relay3
+    name: Strefa A gniazdko 3
+    type: light
+    output: output_board.output5
+    location: building2.floor1.zone_a
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_a_relay4
+    name: Strefa A gniazdko 4
+    type: light
+    output: output_board.output6
+    location: building2.floor1.zone_a
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  # === ZONE B (floor1) — 6 outputs ===
+  - id: zone_b_light1
+    name: Strefa B oświetlenie 1
+    type: light
+    output: output_board.output7
+    location: building2.floor1.zone_b
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_b_light2
+    name: Strefa B oświetlenie 2
+    type: light
+    output: output_board.output8
+    location: building2.floor1.zone_b
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_b_relay1
+    name: Strefa B gniazdko 1
+    type: light
+    output: output_board.output9
+    location: building2.floor1.zone_b
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_b_relay2
+    name: Strefa B gniazdko 2
+    type: light
+    output: output_board.output10
+    location: building2.floor1.zone_b
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_b_relay3
+    name: Strefa B gniazdko 3
+    type: light
+    output: output_board.output11
+    location: building2.floor1.zone_b
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_b_relay4
+    name: Strefa B gniazdko 4
+    type: light
+    output: output_board.output12
+    location: building2.floor1.zone_b
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  # === ZONE C (floor1) — 6 outputs ===
+  - id: zone_c_light1
+    name: Strefa C oświetlenie 1
+    type: light
+    output: output_board.output13
+    location: building2.floor1.zone_c
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_c_light2
+    name: Strefa C oświetlenie 2
+    type: light
+    output: output_board.output14
+    location: building2.floor1.zone_c
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_c_relay1
+    name: Strefa C gniazdko 1
+    type: light
+    output: output_board.output15
+    location: building2.floor1.zone_c
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_c_relay2
+    name: Strefa C gniazdko 2
+    type: light
+    output: output_board.output16
+    location: building2.floor1.zone_c
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_c_relay3
+    name: Strefa C gniazdko 3
+    type: light
+    output: output_board.output17
+    location: building2.floor1.zone_c
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_c_relay4
+    name: Strefa C gniazdko 4
+    type: light
+    output: output_board.output18
+    location: building2.floor1.zone_c
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  # === ZONE D (floor1) — 3 outputs ===
+  - id: zone_d_light1
+    name: Strefa D oświetlenie 1
+    type: light
+    output: output_board.output19
+    location: building2.floor1.zone_d
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_d_light2
+    name: Strefa D oświetlenie 2
+    type: light
+    output: output_board.output20
+    location: building2.floor1.zone_d
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_d_relay1
+    name: Strefa D gniazdko 1
+    type: light
+    output: output_board.output21
+    location: building2.floor1.zone_d
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  # === ZONE E (floor2) — 2 outputs ===
+  - id: zone_e_light1
+    name: Strefa E oświetlenie 1
+    type: light
+    output: output_board.output22
+    location: building2.floor2.zone_e
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  - id: zone_e_relay1
+    name: Strefa E gniazdko 1
+    type: light
+    output: output_board.output23
+    location: building2.floor2.zone_e
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+  # === ZONE F (floor2) — 1 output ===
+  - id: zone_f_light1
+    name: Strefa F oświetlenie 1
+    type: light
+    output: output_board.output24
+    location: building2.floor2.zone_f
+    restore_state: true
+    expose:
+      ha: { enabled: true }
+
+mqtt: { enabled: false }
+home_assistant: { enabled: false }
