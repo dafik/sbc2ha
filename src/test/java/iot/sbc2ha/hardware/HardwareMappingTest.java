@@ -50,4 +50,31 @@ class HardwareMappingTest {
         assertTrue(s.contains("switch 1"));
         assertTrue(s.contains("P9_11"));
     }
+
+    @Test
+    void invertedDefaultsToFalse() {
+        GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
+        assertFalse(mapping.inverted());
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    void setInvertedTogglesValue() {
+        GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
+        HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
+        mapping.setInverted(true);
+        assertTrue(mapping.inverted());
+        mapping.setInverted(false);
+        assertFalse(mapping.inverted());
+    }
+
+    @Test
+    void equalsAndHashCode_invertedIncluded() {
+        GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
+        HardwareMapping a = new HardwareMapping("switch_1", "switch 1", ch);
+        HardwareMapping b = new HardwareMapping("switch_1", "switch 1", ch);
+        a.setInverted(true);
+        assertNotEquals(a, b);
+    }
 }

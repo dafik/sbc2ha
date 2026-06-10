@@ -209,4 +209,57 @@ class HardwareModelTest {
         assertEquals(a, b);
         assertNotEquals(a, c);
     }
+
+    @Test
+    void yamlRoundTrip_withInvertedMapping() throws Exception {
+        String yaml = """
+                board: bone1
+                channels:
+                  - type: gpio
+                    location: "P9_11"
+                    direction: input
+                mappings:
+                  - logical_id: switch_entrance
+                    description: "Active-low door switch"
+                    inverted: true
+                    physical:
+                      type: gpio
+                      location: "P9_11"
+                      direction: input
+                """;
+        Path f = writeYaml(yaml);
+        JsonMapper mapper = JsonMapper.builder(new YAMLFactory())
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .build();
+        HardwareModel model = mapper.readValue(f.toFile(), HardwareModel.class);
+        assertEquals("bone1", model.board());
+        HardwareMapping mapping = model.mappings().getFirst();
+        assertEquals("switch_entrance", mapping.logicalId());
+        assertTrue(mapping.inverted());
+    }
+
+    @Test
+    void yamlRoundTrip_defaultInvertedIsFalse() throws Exception {
+        String yaml = """
+                board: bone1
+                channels:
+                  - type: gpio
+                    location: "P9_11"
+                    direction: input
+                mappings:
+                  - logical_id: switch_normal
+                    description: "Normal switch"
+                    physical:
+                      type: gpio
+                      location: "P9_11"
+                      direction: input
+                """;
+        Path f = writeYaml(yaml);
+        JsonMapper mapper = JsonMapper.builder(new YAMLFactory())
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .build();
+        HardwareModel model = mapper.readValue(f.toFile(), HardwareModel.class);
+        HardwareMapping mapping = model.mappings().getFirst();
+        assertFalse(mapping.inverted());
+    }
 }

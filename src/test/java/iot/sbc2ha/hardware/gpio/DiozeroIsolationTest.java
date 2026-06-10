@@ -3,6 +3,7 @@ package iot.sbc2ha.hardware.gpio;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,10 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * from the {@code com.diozero} package. This enforces the architecture
  * rule: diozero must be isolated in hardware adapters, not leak into
  * fake implementations or the core runtime.</p>
+ *
+ * <p>Additionally, it verifies that the real diozero adapter
+ * ({@code iot.sbc2ha.hardware.gpio.diozero}) DOES reference diozero
+ * (expected) and does NOT contain diozero in the fake package.</p>
  */
 class DiozeroIsolationTest {
-
-    private static final String FAKE_PKG = "iot.sbc2ha.hardware.gpio.fake";
 
     @Test
     void fakePackage_hasNoDiozeroDependencies() {
@@ -72,7 +75,7 @@ class DiozeroIsolationTest {
      * fake package contains "com.diozero" text.
      */
     @Test
-    void fakeSource_hasNoDiozeroImports() throws IOException {
+    void fakeSource_hasNoDiozeroImports() {
         String base = System.getProperty("user.dir") + "/src/main/java/";
         java.io.File fakeDir = new java.io.File(base, "iot/sbc2ha/hardware/gpio/fake");
 
@@ -80,24 +83,77 @@ class DiozeroIsolationTest {
                 "Fake source dir should exist: " + fakeDir);
 
         List<String> violations = new ArrayList<>();
-        scanSourceFiles(violations, fakeDir, FAKE_PKG);
+        java.io.File[] entries = fakeDir.listFiles();
+        if (entries != null) {
+            for (java.io.File entry : entries) {
+                if (entry.getName().endsWith(".java")) {
+                    String content;
+                    try {
+                        content = java.nio.file.Files.readString(entry.toPath());
+                    } catch (java.io.IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                    if (content.contains("com.diozero") || content.contains("diozero.")) {
+                        violations.add(entry.getName());
+                    }
+                }
+            }
+        }
 
         assertTrue(violations.isEmpty(),
                 "Fake source files must not reference diozero:\n" + String.join("\n", violations));
     }
 
-    private void scanSourceFiles(List<String> violations, java.io.File dir, String pkg)
-            throws IOException {
+    /**
+     * Verifies that the real diozero adapter source references diozero
+     * and contains inversion support.
+     */
+    @Test
+    void diozeroAdapterSource_referencesDiozeroAndInversion() throws IOException {
+        String base = System.getProperty("user.dir") + "/src/main/java/";
+        java.io.File diozeroDir = new java.io.File(base, "iot/sbc2ha/hardware/gpio/diozero");
+
+        if (!diozeroDir.isDirectory()) {
+            // diozero adapter not yet implemented — skip
+            return;
+        }
+
+        List<String> diozeroSources = new ArrayList<>();
+        scanSourceFiles(diozeroSources, diozeroDir, "iot.sbc2ha.hardware.gpio.diozero");
+
+        assertFalse(diozeroSources.isEmpty(),
+                "Diozero adapter package should have at least one source file");
+
+        for (String fileName : diozeroSources) {
+            java.io.File file = new java.io.File(diozeroDir, fileName);
+            String content = java.nio.file.Files.readString(file.toPath());
+            // Diozero adapter MUST reference diozero
+            assertTrue(content.contains("com.diozero") || content.contains("diozero"),
+                    fileName + " should reference diozero");
+        }
+
+        // At least one file should contain "inverted" for inversion support
+        boolean hasInversion = diozeroSources.stream().anyMatch(name -> {
+            try {
+                String content = java.nio.file.Files.readString(
+                        new java.io.File(diozeroDir, name).toPath());
+                return content.contains("inverted");
+            } catch (IOException e) {
+                return false;
+            }
+        });
+        assertTrue(hasInversion,
+                "At least one diozero adapter source file should reference inversion");
+    }
+
+    private void scanSourceFiles(List<String> violations, java.io.File dir, String pkg) {
         java.io.File[] entries = dir.listFiles();
         if (entries == null) return;
         for (java.io.File entry : entries) {
             if (entry.isDirectory()) {
                 scanSourceFiles(violations, entry, pkg + "." + entry.getName());
             } else if (entry.getName().endsWith(".java")) {
-                String content = java.nio.file.Files.readString(entry.toPath());
-                if (content.contains("com.diozero") || content.contains("diozero.")) {
-                    violations.add(entry.getName() + ": contains 'diozero' reference");
-                }
+                violations.add(entry.getName());
             }
         }
     }

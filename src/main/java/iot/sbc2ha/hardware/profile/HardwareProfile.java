@@ -1,6 +1,7 @@
 package iot.sbc2ha.hardware.profile;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import iot.sbc2ha.hardware.HardwareMapping;
 import iot.sbc2ha.hardware.PhysicalChannel;
@@ -11,28 +12,8 @@ import java.util.Objects;
 /**
  * Represents a hardware profile — a named, reusable template of physical channels
  * and logical-to-physical mappings.
- * <p>
- * Profiles are loaded from YAML resources and expanded into a
- * {@link iot.sbc2ha.hardware.HardwareModel} via {@link ProfileRegistry}.
- * <p>
- * Profiles marked as incomplete are placeholders and should not be used in production.
- *
- * <pre>
- * id: boneio.input-v0.3
- * incomplete: true
- * channels:
- *   - type: gpio
- *     location: "P9_11"
- *     direction: input
- * mappings:
- *   - logical_id: switch_1
- *     description: "Input 1"
- *     physical:
- *       type: gpio
- *       location: "P9_11"
- *       direction: input
- * </pre>
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class HardwareProfile {
 
     private final String id;

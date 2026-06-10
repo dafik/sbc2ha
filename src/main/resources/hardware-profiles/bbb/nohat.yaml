@@ -1,0 +1,664 @@
+# BeagleBone Black (bare) board profile — no expansion HAT.
+#
+# This profile lists all 63 GPIO-capable pins across P8 (44) and P9 (19)
+# headers plus 7 ADC pins as physical GPIO channels.
+#
+# Use this profile when the BBB runs with no BoneIO or similar expansion
+# board attached — every pin is directly available for manual mapping.
+#
+# WARNING: Many pins share functions with alternate interfaces. When those
+# interfaces are enabled (via device-tree overlays or uEnv.txt), the GPIO
+# function may be disabled on the affected pins:
+#
+#   I2C1: P8_17, P8_18
+#   I2C2: P8_19, P8_20
+#   UART2: P8_21, P8_22, P9_11, P9_13
+#   SPI0: P8_3, P8_5, P8_7, P8_9
+#   PWM:  P8_13, P8_19, P9_14, P9_16
+#
+# Boot-critical pins (internal pull-up):
+#   P8_37, P8_38, P8_45, P8_46, P9_21, P9_22
+# Safe pins (no boot risk): P8_03-10, P8_13-15, P8_23-26,
+# P9_12-16, P9_23, P9_25, P9_27-31, P9_42.
+
+id: bbb.nohat
+incomplete: false
+board: beaglebone-black
+channels:
+  # --- P8 Header (44 pins) ---
+  - type: gpio
+    location: "P8_03"
+    direction: output
+  - type: gpio
+    location: "P8_04"
+    direction: output
+  - type: gpio
+    location: "P8_05"
+    direction: output
+  - type: gpio
+    location: "P8_06"
+    direction: output
+  - type: gpio
+    location: "P8_07"
+    direction: output
+  - type: gpio
+    location: "P8_08"
+    direction: output
+  - type: gpio
+    location: "P8_09"
+    direction: output
+  - type: gpio
+    location: "P8_10"
+    direction: output
+  - type: gpio
+    location: "P8_11"
+    direction: output
+  - type: gpio
+    location: "P8_12"
+    direction: output
+  - type: gpio
+    location: "P8_13"
+    direction: output
+  - type: gpio
+    location: "P8_14"
+    direction: output
+  - type: gpio
+    location: "P8_15"
+    direction: output
+  - type: gpio
+    location: "P8_16"
+    direction: output
+  - type: gpio
+    location: "P8_17"
+    direction: output
+  - type: gpio
+    location: "P8_18"
+    direction: output
+  - type: gpio
+    location: "P8_19"
+    direction: output
+  - type: gpio
+    location: "P8_20"
+    direction: output
+  - type: gpio
+    location: "P8_21"
+    direction: output
+  - type: gpio
+    location: "P8_22"
+    direction: output
+  - type: gpio
+    location: "P8_23"
+    direction: output
+  - type: gpio
+    location: "P8_24"
+    direction: output
+  - type: gpio
+    location: "P8_25"
+    direction: output
+  - type: gpio
+    location: "P8_26"
+    direction: output
+  - type: gpio
+    location: "P8_27"
+    direction: output
+  - type: gpio
+    location: "P8_28"
+    direction: output
+  - type: gpio
+    location: "P8_29"
+    direction: output
+  - type: gpio
+    location: "P8_30"
+    direction: output
+  - type: gpio
+    location: "P8_31"
+    direction: output
+  - type: gpio
+    location: "P8_32"
+    direction: output
+  - type: gpio
+    location: "P8_33"
+    direction: output
+  - type: gpio
+    location: "P8_34"
+    direction: output
+  - type: gpio
+    location: "P8_35"
+    direction: output
+  - type: gpio
+    location: "P8_36"
+    direction: output
+  - type: gpio
+    location: "P8_37"
+    direction: output
+  - type: gpio
+    location: "P8_38"
+    direction: output
+  - type: gpio
+    location: "P8_39"
+    direction: output
+  - type: gpio
+    location: "P8_40"
+    direction: output
+  - type: gpio
+    location: "P8_41"
+    direction: output
+  - type: gpio
+    location: "P8_42"
+    direction: output
+  - type: gpio
+    location: "P8_43"
+    direction: output
+  - type: gpio
+    location: "P8_44"
+    direction: output
+  - type: gpio
+    location: "P8_45"
+    direction: output
+  - type: gpio
+    location: "P8_46"
+    direction: output
+  # --- P9 Header (19 pins) ---
+  - type: gpio
+    location: "P9_11"
+    direction: output
+  - type: gpio
+    location: "P9_12"
+    direction: output
+  - type: gpio
+    location: "P9_13"
+    direction: output
+  - type: gpio
+    location: "P9_14"
+    direction: output
+  - type: gpio
+    location: "P9_15"
+    direction: output
+  - type: gpio
+    location: "P9_16"
+    direction: output
+  - type: gpio
+    location: "P9_17"
+    direction: output
+  - type: gpio
+    location: "P9_18"
+    direction: output
+  - type: gpio
+    location: "P9_21"
+    direction: output
+  - type: gpio
+    location: "P9_22"
+    direction: output
+  - type: gpio
+    location: "P9_23"
+    direction: output
+  - type: gpio
+    location: "P9_25"
+    direction: output
+  - type: gpio
+    location: "P9_27"
+    direction: output
+  - type: gpio
+    location: "P9_28"
+    direction: output
+  - type: gpio
+    location: "P9_29"
+    direction: output
+  - type: gpio
+    location: "P9_30"
+    direction: output
+  - type: gpio
+    location: "P9_31"
+    direction: output
+  - type: gpio
+    location: "P9_41"
+    direction: output
+  - type: gpio
+    location: "P9_42"
+    direction: output
+  # --- ADC pins (7 pins) ---
+  - type: gpio
+    location: "P9_33"
+    direction: input
+  - type: gpio
+    location: "P9_35"
+    direction: input
+  - type: gpio
+    location: "P9_36"
+    direction: input
+  - type: gpio
+    location: "P9_37"
+    direction: input
+  - type: gpio
+    location: "P9_38"
+    direction: input
+  - type: gpio
+    location: "P9_39"
+    direction: input
+  - type: gpio
+    location: "P9_40"
+    direction: input
+mappings:
+  # --- P8 Header outputs (44 mappings) ---
+  - logical_id: gpio_p8_03
+    description: "P8_03 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_03"
+      direction: output
+  - logical_id: gpio_p8_04
+    description: "P8_04 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_04"
+      direction: output
+  - logical_id: gpio_p8_05
+    description: "P8_05 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_05"
+      direction: output
+  - logical_id: gpio_p8_06
+    description: "P8_06 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_06"
+      direction: output
+  - logical_id: gpio_p8_07
+    description: "P8_07 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_07"
+      direction: output
+  - logical_id: gpio_p8_08
+    description: "P8_08 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_08"
+      direction: output
+  - logical_id: gpio_p8_09
+    description: "P8_09 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_09"
+      direction: output
+  - logical_id: gpio_p8_10
+    description: "P8_10 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_10"
+      direction: output
+  - logical_id: gpio_p8_11
+    description: "P8_11 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_11"
+      direction: output
+  - logical_id: gpio_p8_12
+    description: "P8_12 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_12"
+      direction: output
+  - logical_id: gpio_p8_13
+    description: "P8_13 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_13"
+      direction: output
+  - logical_id: gpio_p8_14
+    description: "P8_14 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_14"
+      direction: output
+  - logical_id: gpio_p8_15
+    description: "P8_15 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_15"
+      direction: output
+  - logical_id: gpio_p8_16
+    description: "P8_16 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_16"
+      direction: output
+  - logical_id: gpio_p8_17
+    description: "P8_17 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_17"
+      direction: output
+  - logical_id: gpio_p8_18
+    description: "P8_18 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_18"
+      direction: output
+  - logical_id: gpio_p8_19
+    description: "P8_19 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_19"
+      direction: output
+  - logical_id: gpio_p8_20
+    description: "P8_20 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_20"
+      direction: output
+  - logical_id: gpio_p8_21
+    description: "P8_21 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_21"
+      direction: output
+  - logical_id: gpio_p8_22
+    description: "P8_22 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_22"
+      direction: output
+  - logical_id: gpio_p8_23
+    description: "P8_23 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_23"
+      direction: output
+  - logical_id: gpio_p8_24
+    description: "P8_24 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_24"
+      direction: output
+  - logical_id: gpio_p8_25
+    description: "P8_25 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_25"
+      direction: output
+  - logical_id: gpio_p8_26
+    description: "P8_26 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_26"
+      direction: output
+  - logical_id: gpio_p8_27
+    description: "P8_27 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_27"
+      direction: output
+  - logical_id: gpio_p8_28
+    description: "P8_28 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_28"
+      direction: output
+  - logical_id: gpio_p8_29
+    description: "P8_29 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_29"
+      direction: output
+  - logical_id: gpio_p8_30
+    description: "P8_30 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_30"
+      direction: output
+  - logical_id: gpio_p8_31
+    description: "P8_31 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_31"
+      direction: output
+  - logical_id: gpio_p8_32
+    description: "P8_32 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_32"
+      direction: output
+  - logical_id: gpio_p8_33
+    description: "P8_33 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_33"
+      direction: output
+  - logical_id: gpio_p8_34
+    description: "P8_34 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_34"
+      direction: output
+  - logical_id: gpio_p8_35
+    description: "P8_35 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_35"
+      direction: output
+  - logical_id: gpio_p8_36
+    description: "P8_36 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_36"
+      direction: output
+  - logical_id: gpio_p8_37
+    description: "P8_37 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_37"
+      direction: output
+  - logical_id: gpio_p8_38
+    description: "P8_38 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_38"
+      direction: output
+  - logical_id: gpio_p8_39
+    description: "P8_39 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_39"
+      direction: output
+  - logical_id: gpio_p8_40
+    description: "P8_40 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_40"
+      direction: output
+  - logical_id: gpio_p8_41
+    description: "P8_41 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_41"
+      direction: output
+  - logical_id: gpio_p8_42
+    description: "P8_42 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_42"
+      direction: output
+  - logical_id: gpio_p8_43
+    description: "P8_43 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_43"
+      direction: output
+  - logical_id: gpio_p8_44
+    description: "P8_44 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_44"
+      direction: output
+  - logical_id: gpio_p8_45
+    description: "P8_45 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_45"
+      direction: output
+  - logical_id: gpio_p8_46
+    description: "P8_46 GPIO output"
+    physical:
+      type: gpio
+      location: "P8_46"
+      direction: output
+  # --- P9 Header outputs (19 mappings) ---
+  - logical_id: gpio_p9_11
+    description: "P9_11 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_11"
+      direction: output
+  - logical_id: gpio_p9_12
+    description: "P9_12 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_12"
+      direction: output
+  - logical_id: gpio_p9_13
+    description: "P9_13 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_13"
+      direction: output
+  - logical_id: gpio_p9_14
+    description: "P9_14 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_14"
+      direction: output
+  - logical_id: gpio_p9_15
+    description: "P9_15 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_15"
+      direction: output
+  - logical_id: gpio_p9_16
+    description: "P9_16 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_16"
+      direction: output
+  - logical_id: gpio_p9_17
+    description: "P9_17 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_17"
+      direction: output
+  - logical_id: gpio_p9_18
+    description: "P9_18 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_18"
+      direction: output
+  - logical_id: gpio_p9_21
+    description: "P9_21 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_21"
+      direction: output
+  - logical_id: gpio_p9_22
+    description: "P9_22 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_22"
+      direction: output
+  - logical_id: gpio_p9_23
+    description: "P9_23 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_23"
+      direction: output
+  - logical_id: gpio_p9_25
+    description: "P9_25 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_25"
+      direction: output
+  - logical_id: gpio_p9_27
+    description: "P9_27 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_27"
+      direction: output
+  - logical_id: gpio_p9_28
+    description: "P9_28 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_28"
+      direction: output
+  - logical_id: gpio_p9_29
+    description: "P9_29 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_29"
+      direction: output
+  - logical_id: gpio_p9_30
+    description: "P9_30 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_30"
+      direction: output
+  - logical_id: gpio_p9_31
+    description: "P9_31 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_31"
+      direction: output
+  - logical_id: gpio_p9_41
+    description: "P9_41 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_41"
+      direction: output
+  - logical_id: gpio_p9_42
+    description: "P9_42 GPIO output"
+    physical:
+      type: gpio
+      location: "P9_42"
+      direction: output
+  # --- ADC inputs (7 mappings) ---
+  - logical_id: adc_1
+    description: "ADC channel 1 (P9_33)"
+    physical:
+      type: gpio
+      location: "P9_33"
+      direction: input
+  - logical_id: adc_2
+    description: "ADC channel 2 (P9_35)"
+    physical:
+      type: gpio
+      location: "P9_35"
+      direction: input
+  - logical_id: adc_3
+    description: "ADC channel 3 (P9_36)"
+    physical:
+      type: gpio
+      location: "P9_36"
+      direction: input
+  - logical_id: adc_4
+    description: "ADC channel 4 (P9_37)"
+    physical:
+      type: gpio
+      location: "P9_37"
+      direction: input
+  - logical_id: adc_5
+    description: "ADC channel 5 (P9_38)"
+    physical:
+      type: gpio
+      location: "P9_38"
+      direction: input
+  - logical_id: adc_6
+    description: "ADC channel 6 (P9_39)"
+    physical:
+      type: gpio
+      location: "P9_39"
+      direction: input
+  - logical_id: adc_7
+    description: "ADC channel 7 (P9_40)"
+    physical:
+      type: gpio
+      location: "P9_40"
+      direction: input
