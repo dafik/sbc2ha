@@ -3,6 +3,7 @@ package iot.sbc2ha;
 import iot.sbc2ha.boot.FakeBootDisplay;
 import iot.sbc2ha.boot.Lifecycle;
 import iot.sbc2ha.boot.LifecycleState;
+import iot.sbc2ha.boot.OledBootDisplay;
 import iot.sbc2ha.config.ConfigLoader;
 import iot.sbc2ha.config.HardwareConfig;
 import iot.sbc2ha.config.Sbc2haConfig;
@@ -52,8 +53,20 @@ public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
     private static final String DEFAULT_STATE_FILE = "state.json";
 
+    /**
+     * Create a BootDisplay, trying real OLED first and falling back to log-only.
+     */
+    private static iot.sbc2ha.boot.BootDisplay createBootDisplay() {
+        try {
+            return new OledBootDisplay();
+        } catch (Exception e) {
+            log.info("OLED display not available, using log-only BootDisplay: {}", e.getMessage());
+            return new FakeBootDisplay();
+        }
+    }
+
     public static void main(String[] args) {
-        Lifecycle lifecycle = new Lifecycle(new FakeBootDisplay());
+        Lifecycle lifecycle = new Lifecycle(createBootDisplay());
         lifecycle.transition(LifecycleState.BOOTING);
 
         Sbc2haConfig config = null;
@@ -84,7 +97,7 @@ public class Main {
      * @param config the validated application configuration
      */
     public static void start(Sbc2haConfig config) {
-        start(config, new Lifecycle(new FakeBootDisplay()));
+        start(config, new Lifecycle(createBootDisplay()));
     }
 
     /**
