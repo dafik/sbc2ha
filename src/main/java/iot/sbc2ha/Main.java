@@ -48,10 +48,22 @@ import java.util.concurrent.ScheduledExecutorService;
  *   <li>HARDWARE_MINIMAL_READY: create hardware adapters and wire runtime</li>
  *   <li>OFFLINE_READY: all cores operational (MQTT/HA optional layers may be disabled)</li>
  * </ol>
+ *
+ * <h3>Filesystem layout</h3>
+ * <ul>
+ *   <li>Config: mandatory CLI arg (args[0])</li>
+ *   <li>State: -Dsbc2ha.state (default /var/lib/sbc2ha/state.json)</li>
+ *   <li>Logs: logback.xml, configurable via -Dsbc2ha.logdir</li>
+ * </ul>
+ *
+ * @see <a href="https://github.com/zw/sbc2ha/tree/next/ops">ops/ deployment docs</a>
  */
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
-    private static final String DEFAULT_STATE_FILE = "state.json";
+    /** Default state file path — see ops/filesystem-layout.md */
+    static final String DEFAULT_STATE_FILE = "/var/lib/sbc2ha/state.json";
+    /** Default log directory — see ops/filesystem-layout.md */
+    static final String DEFAULT_LOG_DIR = "/var/log/sbc2ha";
 
     /**
      * Create a BootDisplay, trying real OLED first and falling back to log-only.

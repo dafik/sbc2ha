@@ -1,0 +1,34 @@
+[Unit]
+Description=sbc2ha — SBC automation runtime
+Documentation=file:///usr/share/doc/sbc2ha/filesystem-layout.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sbc2ha
+Group=sbc2ha
+
+# Filesystem layout (see filesystem-layout.md)
+Environment=SBC2HA_CONFIG=/etc/sbc2ha/config.yaml
+Environment=SBC2HA_STATE=/var/lib/sbc2ha/state.json
+Environment=SBC2HA_LOG_DIR=/var/log/sbc2ha
+
+# JVM config — headless
+Environment=JAVA_OPTS=-Dsbc2ha.state=${SBC2HA_STATE} -Djava.awt.headless=true
+
+ExecStart=/usr/bin/java ${JAVA_OPTS} -jar /usr/share/sbc2ha/sbc2ha.jar ${SBC2HA_CONFIG}
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ReadWritePaths=/var/lib/sbc2ha /var/log/sbc2ha
+
+[Install]
+WantedBy=multi-user.target

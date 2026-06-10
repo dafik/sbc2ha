@@ -6,7 +6,17 @@
         </encoder>
     </appender>
 
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${sbc2ha.logdir:-/var/log/sbc2ha}/sbc2ha.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <prudent>false</prudent>
+        <!-- Fail-open: if log dir doesn't exist (e.g. tests, dev), skip file logging -->
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>
