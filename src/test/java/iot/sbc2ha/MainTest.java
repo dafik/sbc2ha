@@ -1,8 +1,8 @@
 package iot.sbc2ha;
 
 import iot.sbc2ha.config.Sbc2haConfig;
-import iot.sbc2ha.device.SwitchDevice;
 import iot.sbc2ha.device.OutputDevice;
+import iot.sbc2ha.device.SwitchDevice;
 import iot.sbc2ha.runtime.ActionEngine;
 import iot.sbc2ha.runtime.SwitchRuntime;
 import iot.sbc2ha.runtime.DeviceRuntime;

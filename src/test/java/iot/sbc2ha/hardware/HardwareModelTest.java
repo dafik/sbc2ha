@@ -3,10 +3,10 @@ package iot.sbc2ha.hardware;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.databind.MapperFeature;
-import iot.sbc2ha.device.SwitchDevice;
 import iot.sbc2ha.device.DeviceConfig;
 import iot.sbc2ha.device.DeviceRegistry;
 import iot.sbc2ha.device.OutputDevice;
+import iot.sbc2ha.device.SwitchDevice;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

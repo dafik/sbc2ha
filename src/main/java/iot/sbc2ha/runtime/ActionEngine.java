@@ -1,9 +1,9 @@
 package iot.sbc2ha.runtime;
 
 import iot.sbc2ha.device.ActionMapping;
-import iot.sbc2ha.device.SwitchDevice;
 import iot.sbc2ha.device.DeviceConfig;
 import iot.sbc2ha.device.DeviceRegistry;
+import iot.sbc2ha.device.SwitchDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

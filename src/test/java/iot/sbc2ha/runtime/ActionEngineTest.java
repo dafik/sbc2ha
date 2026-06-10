@@ -1,9 +1,9 @@
 package iot.sbc2ha.runtime;
 
-import iot.sbc2ha.device.SwitchDevice;
 import iot.sbc2ha.device.DeviceRegistry;
 import iot.sbc2ha.device.LightDevice;
 import iot.sbc2ha.device.OutputDevice;
+import iot.sbc2ha.device.SwitchDevice;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
