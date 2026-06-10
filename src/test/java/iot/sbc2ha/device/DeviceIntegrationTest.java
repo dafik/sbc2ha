@@ -112,4 +112,36 @@ class DeviceIntegrationTest {
         Sbc2haConfig config = iot.sbc2ha.config.ConfigLoader.load(writeYaml(yaml));
         assertEquals(0, config.devices().size());
     }
+
+    @Test
+    void configWithInputDevice_loadsCorrectly() {
+        String yaml = """
+                node_id: bbb-core-1
+                schema: "1"
+                devices:
+                  - type: input
+                    id: door_entrance
+                    display_name: Entrance door
+                    sensor_type: door
+                  - type: input
+                    id: motion_kitchen
+                    display_name: Kitchen motion
+                    sensor_type: motion
+                    inverted: true
+                """;
+        Sbc2haConfig config = iot.sbc2ha.config.ConfigLoader.load(writeYaml(yaml));
+        assertEquals(2, config.devices().size());
+        assertInstanceOf(InputDevice.class, config.devices().getFirst());
+        assertInstanceOf(InputDevice.class, config.devices().getLast());
+
+        InputDevice door = (InputDevice) config.devices().getFirst();
+        assertEquals("door_entrance", door.id());
+        assertEquals(InputDevice.SensorType.DOOR, door.sensorType());
+        assertFalse(door.inverted());
+
+        InputDevice motion = (InputDevice) config.devices().getLast();
+        assertEquals("motion_kitchen", motion.id());
+        assertEquals(InputDevice.SensorType.MOTION, motion.sensorType());
+        assertTrue(motion.inverted());
+    }
 }

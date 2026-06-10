@@ -1,9 +1,6 @@
 package iot.sbc2ha.runtime;
 
-import iot.sbc2ha.device.DeviceRegistry;
-import iot.sbc2ha.device.LightDevice;
-import iot.sbc2ha.device.OutputDevice;
-import iot.sbc2ha.device.SwitchDevice;
+import iot.sbc2ha.device.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -280,5 +277,120 @@ class ActionEngineTest {
 
         LightRuntime light = (LightRuntime) engine.getTarget("light_1");
         assertEquals(DeviceState.ON, light.state());
+    }
+
+    @Test
+    void engineIndexesInputDevices() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new InputDevice("door_1", "Door 1", InputDevice.SensorType.DOOR, false));
+        registry.add(new InputDevice("motion_1", "Motion 1", InputDevice.SensorType.MOTION, false));
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+
+        // Input devices are indexed in targets
+        assertNotNull(engine.getTarget("door_1"));
+        assertNotNull(engine.getTarget("motion_1"));
+        assertNotNull(engine.getTarget("out_1"));
+        assertInstanceOf(InputRuntime.class, engine.getTarget("door_1"));
+        assertInstanceOf(InputRuntime.class, engine.getTarget("motion_1"));
+        assertInstanceOf(OutputRuntime.class, engine.getTarget("out_1"));
+    }
+
+    @Test
+    void getInput_returnsInputRuntime() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new InputDevice("door_1", "Door 1", InputDevice.SensorType.DOOR, false));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+
+        InputRuntime input = engine.getInput("door_1");
+        assertNotNull(input);
+        assertEquals(DeviceState.OFF, input.state());
+    }
+
+    @Test
+    void getInput_returnsNullForNonInput() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new OutputDevice("out_1", "Relay 1"));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+
+        assertNull(engine.getInput("out_1"));
+    }
+
+    @Test
+    void dispatchInput_updatesState() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new InputDevice("door_1", "Door 1", InputDevice.SensorType.DOOR, false));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+
+        InputRuntime input = engine.getInput("door_1");
+        assertNotNull(input);
+        assertEquals(DeviceState.OFF, input.state());
+
+        engine.dispatchInput("door_1", DeviceState.ON);
+        assertEquals(DeviceState.ON, input.state());
+        assertEquals(DeviceState.ON, input.rawState());
+    }
+
+    @Test
+    void dispatchInput_invertedSensor() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new InputDevice("contact_1", "Contact 1", InputDevice.SensorType.CONTACT, true));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+
+        InputRuntime input = engine.getInput("contact_1");
+        assertNotNull(input);
+        // Inverted sensor: raw OFF → logical ON (default raw state)
+        assertEquals(DeviceState.ON, input.state());
+
+        // Raw ON on inverted → logical OFF
+        engine.dispatchInput("contact_1", DeviceState.ON);
+        assertEquals(DeviceState.OFF, input.state());
+        assertEquals(DeviceState.ON, input.rawState());
+
+        // Raw OFF on inverted → logical ON
+        engine.dispatchInput("contact_1", DeviceState.OFF);
+        assertEquals(DeviceState.ON, input.state());
+        assertEquals(DeviceState.OFF, input.rawState());
+    }
+
+    @Test
+    void dispatchInput_unknownDevice_doesNothing() {
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new InputDevice("door_1", "Door 1", InputDevice.SensorType.DOOR, false));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry);
+
+        assertFalse(engine.dispatchInput("nonexistent", DeviceState.ON));
+    }
+
+    @Test
+    void engineWithStateService_doesNotRestoreInputDevices(@TempDir Path tempDir) {
+        Path stateFile = tempDir.resolve("state.json");
+
+        StateService stateService = new StateService(stateFile);
+        stateService.setState("door_1", DeviceState.ON);
+        stateService.persist();
+
+        DeviceRegistry registry = new DeviceRegistry();
+        registry.add(new InputDevice("door_1", "Door 1", InputDevice.SensorType.DOOR, false));
+        registry.validate();
+
+        ActionEngine engine = new ActionEngine(registry, stateService);
+
+        // Input devices are NOT restored from state — they start OFF
+        InputRuntime input = engine.getInput("door_1");
+        assertNotNull(input);
+        assertEquals(DeviceState.OFF, input.state());
     }
 }

@@ -48,6 +48,9 @@ public final class ActionEngine {
      * runtimes and resolving target references. If a {@code stateService} is
      * provided, persisted states are loaded and applied to all target runtimes.
      *
+     * <p>Indexing order: outputs and lights first (for restore_state), then
+     * input devices (binary sensors, transient — not restored from state).</p>
+     *
      * @param registry     the validated device registry
      * @param stateService persistent state store, or {@code null} for no restore
      */
@@ -63,7 +66,7 @@ public final class ActionEngine {
             }
         }
 
-        // Restore persisted states
+        // Restore persisted states for togglable targets
         if (stateService != null) {
             Map<String, DeviceState> restored = stateService.load();
             for (var entry : restored.entrySet()) {
@@ -76,6 +79,15 @@ public final class ActionEngine {
                     }
                     log.info("Restored state for {}: {}", entry.getKey(), entry.getValue());
                 }
+            }
+        }
+
+        // Index input devices (binary sensors) — transient, not restored
+        for (DeviceConfig dev : registry.all()) {
+            if (dev instanceof iot.sbc2ha.device.InputDevice inputDev) {
+                targetMap.put(dev.id(), new InputRuntime(inputDev));
+                log.info("Indexed input device '{}': type={}, inverted={}",
+                        dev.id(), inputDev.sensorType(), inputDev.inverted());
             }
         }
 
@@ -213,13 +225,51 @@ public final class ActionEngine {
     }
 
     /**
-     * Get a target runtime (output or light) by device ID.
+     * Get a target runtime (output, light, or input) by device ID.
      *
      * @param deviceId the stable device ID
      * @return the target runtime, or {@code null} if not found
      */
     public DeviceRuntime getTarget(String deviceId) {
         return targetMap.get(deviceId);
+    }
+
+    /**
+     * Get an input (binary sensor) runtime by device ID.
+     *
+     * @param deviceId the stable device ID
+     * @return the input runtime, or {@code null} if not found or not an input device
+     */
+    public InputRuntime getInput(String deviceId) {
+        DeviceRuntime target = targetMap.get(deviceId);
+        if (target instanceof InputRuntime inputRuntime) {
+            return inputRuntime;
+        }
+        return null;
+    }
+
+    /**
+     * Simulate a hardware state change on a binary input device.
+     * <p>
+     * This is the primary method for the hardware layer (or fake runtime)
+     * to notify the engine of a sensor state change. The engine tracks
+     * the raw state and the logical state (with inversion applied) is
+     * available via {@link InputRuntime#state()}.
+     *
+     * @param deviceId the stable device ID of the input device
+     * @param rawState the new raw hardware state (ON = sensor triggered)
+     * @return true if the device was found and state was updated
+     */
+    public boolean dispatchInput(String deviceId, DeviceState rawState) {
+        InputRuntime input = getInput(deviceId);
+        if (input == null) {
+            log.warn("dispatchInput: unknown input device '{}'", deviceId);
+            return false;
+        }
+        input.setRawState(rawState);
+        log.debug("Input '{}' state changed: raw={} logical={}",
+                deviceId, rawState, input.state());
+        return true;
     }
 
     /**

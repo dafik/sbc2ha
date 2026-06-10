@@ -19,7 +19,8 @@ import java.util.Objects;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SwitchDevice.class, name = "switch"),
         @JsonSubTypes.Type(value = LightDevice.class, name = "light"),
-        @JsonSubTypes.Type(value = OutputDevice.class, name = "output")
+        @JsonSubTypes.Type(value = OutputDevice.class, name = "output"),
+        @JsonSubTypes.Type(value = InputDevice.class, name = "input")
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class DeviceConfig {
@@ -109,6 +110,7 @@ public abstract class DeviceConfig {
     public enum DeviceType {
         SWITCH,
         LIGHT,
-        OUTPUT
+        OUTPUT,
+        INPUT
     }
 }

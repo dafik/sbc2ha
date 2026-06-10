@@ -105,6 +105,16 @@ public final class DeviceRegistry {
     }
 
     /**
+     * All input (binary sensor) devices.
+     */
+    public List<InputDevice> inputs() {
+        return devices.stream()
+                .filter(d -> d instanceof InputDevice)
+                .map(d -> (InputDevice) d)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Number of devices.
      */
     public int size() {

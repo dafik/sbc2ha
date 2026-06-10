@@ -95,4 +95,15 @@ class DeviceRegistryTest {
         DeviceRegistry reg = new DeviceRegistry();
         assertNull(reg.getById("nonexistent"));
     }
+
+    @Test
+    void inputs_returnsOnlyInputs() {
+        DeviceRegistry reg = new DeviceRegistry();
+        reg.add(new InputDevice("door_1", "D1", InputDevice.SensorType.DOOR));
+        reg.add(new InputDevice("motion_1", "M1", InputDevice.SensorType.MOTION, true));
+        reg.add(new SwitchDevice("switch_1", "S1", null));
+        reg.add(new OutputDevice("out_1", "O1"));
+        assertEquals(2, reg.inputs().size());
+        assertInstanceOf(InputDevice.class, reg.inputs().getFirst());
+    }
 }
