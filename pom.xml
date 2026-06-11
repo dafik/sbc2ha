@@ -18,6 +18,7 @@
         <junit.version>5.11.3</junit.version>
         <logback.version>1.5.34</logback.version>
         <diozero.version>1.4.2-dfi</diozero.version>
+        <paho.version>1.2.5</paho.version>
     </properties>
 
     <dependencies>
@@ -36,6 +37,11 @@
             <artifactId>diozero-provider-mock</artifactId>
             <version>${diozero.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>${paho.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

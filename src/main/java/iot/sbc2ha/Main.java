@@ -31,6 +31,7 @@ import iot.sbc2ha.runtime.LightRuntime;
 import iot.sbc2ha.runtime.OutputRuntime;
 import iot.sbc2ha.runtime.StateService;
 import iot.sbc2ha.runtime.SwitchRuntime;
+import iot.sbc2ha.mqtt.MqttBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +63,6 @@ public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
     /** Default state file path — see ops/filesystem-layout.md */
     static final String DEFAULT_STATE_FILE = "/var/lib/sbc2ha/state.json";
-    /** Default log directory — see ops/filesystem-layout.md */
-    static final String DEFAULT_LOG_DIR = "/var/log/sbc2ha";
 
     /**
      * Create a BootDisplay, trying real OLED first and falling back to log-only.
@@ -115,7 +114,7 @@ public class Main {
     /**
      * Internal start that owns the lifecycle manager.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings("Resource") // ScheduledExecutorService managed by shutdown hook
     private static void start(Sbc2haConfig config, Lifecycle lifecycle) {
         String stateFilePath = System.getProperty("sbc2ha.state", DEFAULT_STATE_FILE);
         StateService stateService = new StateService(Paths.get(stateFilePath));
@@ -128,17 +127,32 @@ public class Main {
 
         // Wire real hardware: resolve physical channels, create adapters, bind to runtimes
         // Note: scheduler is long-lived (app lifetime), not managed here
-        @SuppressWarnings("resource")
         var sharedScheduler = hardwareReady(config, engine);
 
         lifecycle.transition(LifecycleState.HARDWARE_MINIMAL_READY);
         lifecycle.transition(LifecycleState.OFFLINE_READY);
         log.info("sbc2ha ready (OFFLINE_READY).");
 
-        // TODO: enter main event loop (MQTT, WebSocket, etc.)
+        // Optional MQTT layer — never blocks OFFLINE_READY, managed by shutdown hook
+        final MqttBroker mqttBrokerRef;
+        if (config.mqtt() != null && config.mqtt().isEnabled()) {
+            mqttBrokerRef = new MqttBroker(config.mqtt(), lifecycle);
+            mqttBrokerRef.connect();
+        } else {
+            mqttBrokerRef = null;
+        }
 
-        // Shutdown hook: clean up shared scheduler
+        // TODO: enter main event loop (WebSocket, etc.)
+
+        // Shutdown hook: clean up shared scheduler and MQTT broker
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                if (mqttBrokerRef != null) {
+                    mqttBrokerRef.shutdown();
+                }
+            } catch (Exception e) {
+                log.warn("MQTT broker close failed: {}", e.getMessage());
+            }
             if (sharedScheduler != null) {
                 sharedScheduler.shutdownNow();
                 log.info("Shared scheduler shut down.");
