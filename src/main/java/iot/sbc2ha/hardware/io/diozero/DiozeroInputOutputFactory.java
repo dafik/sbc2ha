@@ -15,11 +15,14 @@ import iot.sbc2ha.hardware.OledChannel;
 import iot.sbc2ha.hardware.PhysicalChannel;
 import iot.sbc2ha.hardware.io.InputOutputFactory;
 import iot.sbc2ha.hardware.io.InputAdapter;
+import iot.sbc2ha.hardware.io.InputDelegate;
 import iot.sbc2ha.hardware.io.OutputAdapter;
 import iot.sbc2ha.hardware.io.OutputDelegate;
 import iot.sbc2ha.runtime.DeviceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * Diozero-backed implementation of {@link InputOutputFactory}.
@@ -29,9 +32,10 @@ import org.slf4j.LoggerFactory;
  * on the classpath (e.g. BBBioLib, RPi).</p>
  *
  * <ul>
- *   <li><b>Input</b> — direct BBB GPIO via {@link DiozeroInputAdapter}</li>
+ *   <li><b>Input</b> — dispatches by {@link PhysicalChannel#channelType()} to create
+ *      MCP23017 or GPIO adapters, each backed by an {@link InputDelegate}</li>
  *   <li><b>Output</b> — dispatches by {@link PhysicalChannel#channelType()} to create
- *      MCP23017, PCA9685, or GPIO adapters</li>
+ *      MCP23017, PCA9685, or GPIO adapters, each backed by an {@link OutputDelegate}</li>
  * </ul>
  *
  * <h3>Singleton</h3>
@@ -43,6 +47,17 @@ import org.slf4j.LoggerFactory;
 public final class DiozeroInputOutputFactory implements InputOutputFactory {
 
     private static final Logger Log = LoggerFactory.getLogger(DiozeroInputOutputFactory.class);
+
+    /** Pre-loaded pin-mode overrides from classpath resource. */
+    private static final Map<String, java.util.Set<com.diozero.api.DeviceMode>> MODE_OVERRIDES;
+
+    /** Pre-loaded chip + line offset overrides (header:pin → PinOverride). */
+    private static final Map<String, PinModeOverrides.PinOverride> CHIP_OVERRIDES;
+
+    static {
+        MODE_OVERRIDES = PinModeOverrides.loadModes("");
+        CHIP_OVERRIDES = PinModeOverrides.loadChipOverrides("");
+    }
 
     @SuppressWarnings("unused")
     public static final DiozeroInputOutputFactory INSTANCE = new DiozeroInputOutputFactory();
@@ -74,13 +89,58 @@ public final class DiozeroInputOutputFactory implements InputOutputFactory {
     }
 
     private InputAdapter createMcp23017Input(Mcp23017Channel channel, HardwareModel model) {
-        // TODO: MCP23017 input support — deferred to next iteration
-        throw new UnsupportedOperationException(
-                "MCP23017 input not yet supported (pin=" + channel.pin() + ")");
+        String busId = channel.bus();
+        int i2cBus, i2cAddress;
+
+        if (model != null && busId != null) {
+            HardwareChip chip = model.getChip(busId);
+            if (chip == null) {
+                throw new IllegalArgumentException(
+                        "Unknown chip id '" + busId + "' for MCP23017 input channel pin=" + channel.pin());
+            }
+            i2cBus = chip.i2cBus();
+            i2cAddress = chip.i2cAddress();
+        } else {
+            i2cBus = 2;
+            i2cAddress = 0x20;
+            Log.warn("No HardwareModel provided for MCP23017 input channel — using default bus={}, addr=0x20",
+                    i2cBus);
+        }
+
+        int globalPin = channel.pin();
+
+        HardwareComponentKey chipKey = new HardwareComponentKey(
+                "mcp23017", i2cBus + ":" + i2cAddress);
+        MCP23017 mcp = HardwareComponentRegistry.INSTANCE.getOrRegister(chipKey, () -> {
+            try {
+                Log.info("Creating MCP23017 for input: bus={}, addr=0x{}", i2cBus, Integer.toHexString(i2cAddress));
+                return new MCP23017(i2cBus, i2cAddress, MCP23xxx.INTERRUPT_GPIO_NOT_SET);
+            } catch (Exception e) {
+                Log.error("Failed to create MCP23017 for input: {}", e.getMessage());
+                return null;
+            }
+        });
+
+        InputDelegate delegate = mcp != null
+                ? InputDelegateFactory.create(mcp, globalPin)
+                : createNoopInputDelegate(chipKey, globalPin);
+
+        return new DiozeroInputAdapter(false, delegate);
     }
 
     private InputAdapter createGpioInput(GpioChannel channel) {
-        return new DiozeroInputAdapter(channel.pinLabel(), false);
+        String pinId = channel.pinLabel();
+        DeviceFactoryHelper.getNativeDeviceFactory();
+        BoardInfo board = DeviceFactoryHelper.getNativeDeviceFactory().getBoardInfo();
+        PinInfo pinInfo = GpioInputBus.resolvePin(board, pinId);
+        if (pinInfo == null) {
+            throw new IllegalArgumentException("Unknown GPIO input pin: " + pinId);
+        }
+        PinInfo resolved = PinModeOverrides.wrap(pinInfo, MODE_OVERRIDES, CHIP_OVERRIDES);
+        Log.info("Creating GPIO input adapter for pin '{}' (sysfs={}, chip={})",
+                pinId, resolved.getSysFsNumber(), resolved.getChip());
+        InputDelegate delegate = InputDelegateFactory.create(resolved, pinId);
+        return new DiozeroInputAdapter(false, delegate);
     }
 
     @Override
@@ -141,7 +201,7 @@ public final class DiozeroInputOutputFactory implements InputOutputFactory {
                 "mcp23017", i2cBus + ":" + i2cAddress);
         MCP23017 mcp = HardwareComponentRegistry.INSTANCE.getOrRegister(chipKey, () -> {
             try {
-                Log.info("Creating MCP23017: bus={}, addr=0x{:02X}", i2cBus, i2cAddress);
+                Log.info("Creating MCP23017: bus={}, addr=0x{}", i2cBus, Integer.toHexString(i2cAddress));
                 return new MCP23017(i2cBus, i2cAddress, MCP23xxx.INTERRUPT_GPIO_NOT_SET);
             } catch (Exception e) {
                 Log.error("Failed to create MCP23017: {}", e.getMessage());
@@ -160,7 +220,7 @@ public final class DiozeroInputOutputFactory implements InputOutputFactory {
         String pinId = channel.pinLabel();
         DeviceFactoryHelper.getNativeDeviceFactory();
         BoardInfo board = DeviceFactoryHelper.getNativeDeviceFactory().getBoardInfo();
-        PinInfo pinInfo = DiozeroInputAdapter.resolvePin(board, pinId);
+        PinInfo pinInfo = GpioInputBus.resolvePin(board, pinId);
         if (pinInfo == null) {
             throw new IllegalArgumentException("Unknown GPIO output pin: " + pinId);
         }
@@ -182,6 +242,23 @@ public final class DiozeroInputOutputFactory implements InputOutputFactory {
             public void write(DeviceState state) {}
             @Override
             public DeviceState read() { return DeviceState.OFF; }
+            @Override
+            public void close() {}
+        };
+    }
+
+    /**
+     * Create a no-op input delegate for when the MCP23017 chip could not be created.
+     */
+    private static InputDelegate createNoopInputDelegate(HardwareComponentKey chipKey, int globalPin) {
+        Log.warn("MCP23017 not created for key {} — returning non-functional input delegate", chipKey);
+        return new InputDelegate() {
+            @Override
+            public DeviceState read() { return DeviceState.OFF; }
+            @Override
+            public void addInputListener(InputAdapter.InputListener listener) {}
+            @Override
+            public void removeInputListener(InputAdapter.InputListener listener) {}
             @Override
             public void close() {}
         };
@@ -214,7 +291,7 @@ public final class DiozeroInputOutputFactory implements InputOutputFactory {
                 Log.warn("No HardwareModel provided for OLED channel — using default bus={}, addr=0x3C",
                         i2cBus);
             }
-            Log.info("Creating OLED display: bus={}, addr=0x{:02X}", i2cBus, i2cAddress);
+            Log.info("Creating OLED display: bus={}, addr=0x{}", i2cBus, Integer.toHexString(i2cAddress));
             return new OledBootDisplay(i2cBus, i2cAddress);
         } catch (Exception e) {
             Log.warn("OLED display creation failed (non-fatal): {}", e.getMessage());

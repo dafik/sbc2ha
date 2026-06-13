@@ -27,7 +27,6 @@ import iot.sbc2ha.hardware.profile.HardwareProfile;
 import iot.sbc2ha.hardware.profile.ProfileRegistry;
 import iot.sbc2ha.hardware.io.InputAdapter;
 import iot.sbc2ha.hardware.io.InputAdapter.InputListener;
-import iot.sbc2ha.hardware.io.InputOutputFactory;
 import iot.sbc2ha.hardware.io.OutputAdapter;
 import iot.sbc2ha.hardware.io.diozero.DiozeroInputOutputFactory;
 import iot.sbc2ha.input.ClickDetector;
@@ -204,7 +203,6 @@ public class Main {
                 log.info("Loaded hardware profile '{}' as alias '{}' from {}", type, alias, resourcePath);
             } catch (Exception e) {
                 log.warn("Failed to load profile '{}' as alias '{}': {}", pconf.type(), alias, e.getMessage());
-                continue;
             }
         }
 
@@ -230,7 +228,7 @@ public class Main {
             log.info("All device hardware references validated");
 
             // Create real hardware factory
-            InputOutputFactory factory = DiozeroInputOutputFactory.INSTANCE;
+            DiozeroInputOutputFactory factory = DiozeroInputOutputFactory.INSTANCE;
 
             // Discover OLED channel from profiles and swap display
             OledChannel oledChannel = findOledChannel(aliasProfileMap);
@@ -246,8 +244,7 @@ public class Main {
                     }
                     if (oledModel != null) break;
                 }
-                BootDisplay oledDisplay = ((DiozeroInputOutputFactory) factory)
-                        .createOledDisplay(oledChannel, oledModel);
+                BootDisplay oledDisplay = factory.createOledDisplay(oledChannel, oledModel);
                 if (oledDisplay != null) {
                     lifecycle.setDisplay(oledDisplay);
                     log.info("OLED display swapped from FakeBootDisplay to OledBootDisplay");
@@ -270,14 +267,7 @@ public class Main {
                     switch (dev) {
                         case SwitchDevice switchDev -> {
                             // Switch: input adapter → debouncer → click detector
-                            InputAdapter inputAdapter;
-                            if (channel instanceof GpioChannel gpioCh) {
-                                inputAdapter = factory.createInput(gpioCh.pinLabel());
-                            } else {
-                                // MCP23017 input — use factory with model for chip resolution
-                                inputAdapter = ((DiozeroInputOutputFactory) factory)
-                                        .createInput(channel, devModel);
-                            }
+                            InputAdapter inputAdapter = factory.createInput(channel, devModel);
                             SwitchRuntime switchRuntime = (SwitchRuntime) engine.getTarget(dev.id());
                             if (switchRuntime != null) {
                                 ClicksConfig clicksConfig = switchDev.clicks() != null
@@ -311,8 +301,7 @@ public class Main {
                         }
                         case OutputDevice _ -> {
                             // Output: physical output adapter bound to OutputRuntime
-                            OutputAdapter outAdapter = ((DiozeroInputOutputFactory) factory)
-                                    .createOutput(channel, devModel);
+                            OutputAdapter outAdapter = factory.createOutput(channel, devModel);
                             OutputRuntime outRuntime = (OutputRuntime) engine.getTarget(dev.id());
                             if (outRuntime != null) {
                                 outRuntime.bindAdapter(outAdapter);
@@ -321,8 +310,7 @@ public class Main {
                         }
                         case LightDevice _ -> {
                             // Light: physical output adapter bound to LightRuntime
-                            OutputAdapter lightAdapter = ((DiozeroInputOutputFactory) factory)
-                                    .createOutput(channel, devModel);
+                            OutputAdapter lightAdapter = factory.createOutput(channel, devModel);
                             LightRuntime lightRuntime = (LightRuntime) engine.getTarget(dev.id());
                             if (lightRuntime != null) {
                                 lightRuntime.bindAdapter(lightAdapter);
@@ -331,13 +319,7 @@ public class Main {
                         }
                         case InputDevice _ -> {
                             // Input: physical input adapter bound to InputRuntime
-                            InputAdapter inAdapter;
-                            if (channel instanceof GpioChannel gpioCh) {
-                                inAdapter = factory.createInput(gpioCh.pinLabel());
-                            } else {
-                                inAdapter = ((DiozeroInputOutputFactory) factory)
-                                        .createInput(channel, devModel);
-                            }
+                            InputAdapter inAdapter = factory.createInput(channel, devModel);
                             InputRuntime inRuntime = (InputRuntime) engine.getTarget(dev.id());
                             if (inRuntime != null) {
                                 inRuntime.bindAdapter(inAdapter);
