@@ -11,36 +11,65 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <p>
  * Subtypes model different bus/technologies (GPIO, I2C expander, etc.).
  * Jackson polymorphic deserialization uses {@code type} property.
+ * <p>
+ * I2C channels (MCP23017, PCA9685, OLED) reference a chip by {@code bus} id
+ * — the chip is declared in the profile's {@code chips:} section.
+ * GPIO channels have no bus — they reference board pins directly.
  */
 @JsonTypeInfo(use = Id.NAME, property = "type", include = As.EXISTING_PROPERTY)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = GpioChannel.class, name = "gpio"),
-        @JsonSubTypes.Type(value = Mcp23017Channel.class, name = "mcp23017")
+        @JsonSubTypes.Type(value = Mcp23017Channel.class, name = "mcp23017"),
+        @JsonSubTypes.Type(value = OledChannel.class, name = "oled")
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class PhysicalChannel {
 
     /**
-     * Board-bus-module path identifying the channel's physical location.
-     * E.g. "P9_11" for a direct BBB GPIO pin, "i2c-1:42:0" for MCP23017 port A pin 0.
+     * Bus id referencing a chip declared in the profile's {@code chips:} section.
+     * Null for GPIO channels (no bus abstraction).
      */
-    private String location;
+    private String bus;
 
     protected PhysicalChannel() {}
 
-    public PhysicalChannel(String location) {
-        this.location = location;
+    protected PhysicalChannel(String bus) {
+        this.bus = bus;
     }
 
-    public String location() {
-        return location;
+    /**
+     * Bus id referencing a chip, or {@code null} for GPIO channels.
+     */
+    public String bus() {
+        return bus;
     }
 
     public abstract ChannelType channelType();
 
+    /**
+     * Numeric pin number for this channel.
+     * Returns -1 for channels that don't have a numeric pin (e.g. OLED displays).
+     * For MCP23017 channels, returns the global pin number (0-15).
+     * For GPIO channels, returns the numeric suffix of the board pin.
+     */
+    public int pin() {
+        return -1;
+    }
+
+    /**
+     * A human-readable location identifier for this channel.
+     * For GPIO channels, returns the board pin (e.g. "P9_11").
+     * For I2C channels (MCP23017, PCA9685, OLED), returns the bus id.
+     */
+    public String location() {
+        return bus;
+    }
+
     public enum ChannelType {
         GPIO,
-        MCP23017
+        MCP23017,
+        PCA9685,
+        OLED
     }
 
     @Override
@@ -48,16 +77,16 @@ public abstract class PhysicalChannel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PhysicalChannel that = (PhysicalChannel) o;
-        return java.util.Objects.equals(location, that.location);
+        return java.util.Objects.equals(bus, that.bus);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(location);
+        return java.util.Objects.hash(bus);
     }
 
     @Override
     public String toString() {
-        return "PhysicalChannel{location='" + location + "'}";
+        return "PhysicalChannel{bus='" + bus + "'}";
     }
 }

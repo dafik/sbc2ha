@@ -14,7 +14,7 @@ import java.util.Objects;
  * Actual hardware mapping is manual — profiles do not auto-generate mappings.
  *
  * <p>
- * Example: "bone1" = BBB + MCP23017 on I2C-1 + SH1106 OLED on I2C-2.
+ * Example: "bone1" = BBB + MCP23017 on I2C-2 + SH1106 OLED on I2C-2.
  */
 public final class BoardProfile {
 

@@ -1,5 +1,6 @@
 package iot.sbc2ha.hardware.profile;
 
+import iot.sbc2ha.hardware.GpioChannel;
 import iot.sbc2ha.hardware.HardwareMapping;
 import iot.sbc2ha.hardware.PhysicalChannel;
 import org.junit.jupiter.api.DynamicTest;
@@ -110,17 +111,17 @@ class AllProfilesValidationTest {
                                 relativePath + ": " + profile.channelCount() + " channels vs "
                                         + profile.mappingCount() + " mappings")),
 
-                dynamicTest(name + " — no duplicate channel locations",
+                dynamicTest(name + " — no duplicate channel definitions",
                         () -> {
                             Set<String> duplicates = profile.channels().stream()
-                                    .map(PhysicalChannel::location)
-                                    .collect(Collectors.groupingBy(loc -> loc, Collectors.counting()))
+                                    .map(this::channelKey)
+                                    .collect(Collectors.groupingBy(key -> key, Collectors.counting()))
                                     .entrySet().stream()
                                     .filter(e -> e.getValue() > 1)
                                     .map(Map.Entry::getKey)
                                     .collect(Collectors.toSet());
                             assertTrue(duplicates.isEmpty(),
-                                    relativePath + ": duplicate channel locations: " + duplicates);
+                                    relativePath + ": duplicate channel definitions: " + duplicates);
                         }),
 
                 dynamicTest(name + " — no duplicate mapping logical_ids",
@@ -149,5 +150,26 @@ class AllProfilesValidationTest {
             }
             return null;
         }
+    }
+
+    /**
+     * Build a unique key for a channel to detect duplicates.
+     * <p>
+     * GPIO channels use just their pin name (e.g. "P9_11").
+     * I2C channels (MCP23017, PCA9685, OLED) use bus:pin (e.g. "mcp1:0").
+     * OLED channels have a bus but no pin — key is just the bus.
+     */
+    private String channelKey(PhysicalChannel ch) {
+        if (ch.channelType() == PhysicalChannel.ChannelType.GPIO) {
+            return ((GpioChannel) ch).pinLabel();
+        }
+        // For I2C channels, pin() is the hardware pin number
+        // For OLED, pin is -1 — key is just the bus
+        int pin = ch.pin();
+        if (pin >= 0) {
+            return ch.bus() + ":" + pin;
+        }
+        // OLED: bus only
+        return ch.bus();
     }
 }

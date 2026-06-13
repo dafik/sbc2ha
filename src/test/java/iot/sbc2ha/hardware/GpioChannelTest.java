@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class GpioChannelTest {
 
     @Test
-    void createsWithLocationAndDirection() {
+    void createsWithPinAndDirection() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        assertEquals("P9_11", ch.location());
+        assertEquals("P9_11", ch.pinLabel());
         assertEquals(GpioChannel.Direction.INPUT, ch.direction());
         assertEquals(PhysicalChannel.ChannelType.GPIO, ch.channelType());
     }

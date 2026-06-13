@@ -1,5 +1,7 @@
 package iot.sbc2ha.hardware.io;
 
+import iot.sbc2ha.hardware.PhysicalChannel;
+
 /**
  * Factory for creating GPIO input and output adapters.
  *
@@ -17,10 +19,13 @@ public interface InputOutputFactory {
     InputAdapter createInput(String pinId);
 
     /**
-     * Creates an output adapter for the given pin identifier.
+     * Creates an output adapter for the given physical channel.
      *
-     * @param pinId the physical pin identifier (e.g. "P9_11" for BBB)
+     * <p>The factory dispatches by {@link PhysicalChannel#channelType()} to create
+     * the appropriate adapter (MCP23017, PCA9685, GPIO, etc.).</p>
+     *
+     * @param channel the physical channel definition (not null)
      * @return a new output adapter
      */
-    OutputAdapter createOutput(String pinId);
+    OutputAdapter createOutput(PhysicalChannel channel);
 }

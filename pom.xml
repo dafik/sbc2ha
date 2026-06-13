@@ -19,17 +19,67 @@
         <logback.version>1.5.34</logback.version>
         <diozero.version>1.4.2-dfi</diozero.version>
         <paho.version>1.2.5</paho.version>
+        <jar.finalName>${project.name}-${project.version}</jar.finalName>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>oldkernel</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <jar.finalName>sbc2ha-oldkernel-${project.version}</jar.finalName>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>iot.sbc2ha</groupId>
+                    <artifactId>diozero-provider-oldkernel</artifactId>
+                    <version>0.0.1-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals><goal>shade</goal></goals>
+                                <configuration>
+                                    <finalName>${jar.finalName}</finalName>
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                            <mainClass>iot.sbc2ha.Main</mainClass>
+                                        </transformer>
+                                    </transformers>
+                                    <filters>
+                                        <!-- Exclude GpioChip from diozero-core so oldkernel version wins -->
+                                        <filter>
+                                            <artifact>com.diozero:diozero-core</artifact>
+                                            <excludes>
+                                                <exclude>com/diozero/internal/provider/builtin/gpio/GpioChip*.class</exclude>
+                                                <exclude>com/diozero/internal/provider/builtin/gpio/GpioLine*.class</exclude>
+                                                <exclude>com/diozero/internal/provider/builtin/gpio/NativeGpioDevice*.class</exclude>
+                                                <exclude>com/diozero/internal/provider/builtin/gpio/SysFsGpioUtil*.class</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
             <groupId>com.diozero</groupId>
             <artifactId>diozero-core</artifactId>
-            <version>${diozero.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.diozero</groupId>
-            <artifactId>diozero-provider-bbbiolib</artifactId>
             <version>${diozero.version}</version>
         </dependency>
         <dependency>
@@ -88,10 +138,9 @@
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
+                        <goals><goal>shade</goal></goals>
                         <configuration>
+                            <finalName>${jar.finalName}</finalName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>iot.sbc2ha.Main</mainClass>

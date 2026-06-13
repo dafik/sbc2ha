@@ -4,143 +4,144 @@
 
 id: fake.input
 incomplete: false
+chips: []
 channels:
   # Digital inputs 1-9
   - type: gpio
-    location: "FAKE_1"
+    pin: "FAKE_1"
     direction: input
   - type: gpio
-    location: "FAKE_2"
+    pin: "FAKE_2"
     direction: input
   - type: gpio
-    location: "FAKE_3"
+    pin: "FAKE_3"
     direction: input
   - type: gpio
-    location: "FAKE_4"
+    pin: "FAKE_4"
     direction: input
   - type: gpio
-    location: "FAKE_5"
+    pin: "FAKE_5"
     direction: input
   - type: gpio
-    location: "FAKE_6"
+    pin: "FAKE_6"
     direction: input
   - type: gpio
-    location: "FAKE_7"
+    pin: "FAKE_7"
     direction: input
   - type: gpio
-    location: "FAKE_8"
+    pin: "FAKE_8"
     direction: input
   - type: gpio
-    location: "FAKE_9"
+    pin: "FAKE_9"
     direction: input
   # Casing button
   - type: gpio
-    location: "FAKE_10"
+    pin: "FAKE_10"
     direction: input
   # Analog inputs 1-5
   - type: gpio
-    location: "FAKE_21"
+    pin: "FAKE_21"
     direction: input
   - type: gpio
-    location: "FAKE_22"
+    pin: "FAKE_22"
     direction: input
   - type: gpio
-    location: "FAKE_23"
+    pin: "FAKE_23"
     direction: input
   - type: gpio
-    location: "FAKE_24"
+    pin: "FAKE_24"
     direction: input
   - type: gpio
-    location: "FAKE_25"
+    pin: "FAKE_25"
     direction: input
 mappings:
   - logical_id: input_1
     description: "Fake digital input 1"
     physical:
       type: gpio
-      location: "FAKE_1"
+      pin: "FAKE_1"
       direction: input
   - logical_id: input_2
     description: "Fake digital input 2"
     physical:
       type: gpio
-      location: "FAKE_2"
+      pin: "FAKE_2"
       direction: input
   - logical_id: input_3
     description: "Fake digital input 3"
     physical:
       type: gpio
-      location: "FAKE_3"
+      pin: "FAKE_3"
       direction: input
   - logical_id: input_4
     description: "Fake digital input 4"
     physical:
       type: gpio
-      location: "FAKE_4"
+      pin: "FAKE_4"
       direction: input
   - logical_id: input_5
     description: "Fake digital input 5"
     physical:
       type: gpio
-      location: "FAKE_5"
+      pin: "FAKE_5"
       direction: input
   - logical_id: input_6
     description: "Fake digital input 6"
     physical:
       type: gpio
-      location: "FAKE_6"
+      pin: "FAKE_6"
       direction: input
   - logical_id: input_7
     description: "Fake digital input 7"
     physical:
       type: gpio
-      location: "FAKE_7"
+      pin: "FAKE_7"
       direction: input
   - logical_id: input_8
     description: "Fake digital input 8"
     physical:
       type: gpio
-      location: "FAKE_8"
+      pin: "FAKE_8"
       direction: input
   - logical_id: input_9
     description: "Fake digital input 9"
     physical:
       type: gpio
-      location: "FAKE_9"
+      pin: "FAKE_9"
       direction: input
   - logical_id: casing_1
     description: "Fake casing button"
     physical:
       type: gpio
-      location: "FAKE_10"
+      pin: "FAKE_10"
       direction: input
   - logical_id: analog_1
     description: "Fake analog input 1"
     physical:
       type: gpio
-      location: "FAKE_21"
+      pin: "FAKE_21"
       direction: input
   - logical_id: analog_2
     description: "Fake analog input 2"
     physical:
       type: gpio
-      location: "FAKE_22"
+      pin: "FAKE_22"
       direction: input
   - logical_id: analog_3
     description: "Fake analog input 3"
     physical:
       type: gpio
-      location: "FAKE_23"
+      pin: "FAKE_23"
       direction: input
   - logical_id: analog_4
     description: "Fake analog input 4"
     physical:
       type: gpio
-      location: "FAKE_24"
+      pin: "FAKE_24"
       direction: input
   - logical_id: analog_5
     description: "Fake analog input 5"
     physical:
       type: gpio
-      location: "FAKE_25"
+      pin: "FAKE_25"
       direction: input

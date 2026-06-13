@@ -25,7 +25,7 @@ import java.awt.image.BufferedImage;
  * blocked by a display failure.</p>
  *
  * <h3>Hardware notes</h3>
- * <p>Uses I2C bus 1 with the standard SH1106 address (0x3C).
+ * <p>Uses I2C bus 2 with the standard SH1106 address (0x3C).
  * For different configurations use the package-private constructor.</p>
  *
  * @see BootDisplay
@@ -38,14 +38,16 @@ public final class OledBootDisplay implements BootDisplay {
     static final int I2C_ADDRESS = 0x3C;
 
     private final SH1106 oled;
+    // I2CDevice tracks I2C connection; stored to prevent GC and enable cleanup
+    private I2CDevice i2cDevice;
 
     /**
-     * Create an OledBootDisplay on I2C bus 1 with the standard
+     * Create an OledBootDisplay on I2C bus 2 with the standard
      * SH1106 address (0x3C) and 128x64 size.
      */
     @SuppressWarnings("unused")
     public OledBootDisplay() {
-        this(1, I2C_ADDRESS);
+        this(2, I2C_ADDRESS);
     }
 
     /**
@@ -54,11 +56,12 @@ public final class OledBootDisplay implements BootDisplay {
      * @param i2cBus  the I2C bus number
      * @param i2cAddr the I2C device address
      */
-    OledBootDisplay(int i2cBus, int i2cAddr) {
-        I2CDevice i2cDevice = null;
+    public OledBootDisplay(int i2cBus, int i2cAddr) {
         SH1106 localOled = null;
         try {
-            i2cDevice = new I2CDevice(i2cBus, i2cAddr);
+            i2cDevice = I2CDevice.builder(i2cAddr)
+                    .setController(i2cBus)
+                    .build();
             SsdOledCommunicationChannel channel =
                     new SsdOledCommunicationChannel.I2cCommunicationChannel(i2cDevice);
             // 128 width, Height.TALL = 64 lines
@@ -67,9 +70,6 @@ public final class OledBootDisplay implements BootDisplay {
                     Integer.toHexString(i2cAddr));
         } catch (Exception e) {
             log.warn("OledBootDisplay initialisation failed (non-fatal): {}", e.getMessage());
-            if (i2cDevice != null) {
-                try { i2cDevice.close(); } catch (Exception ignored) {}
-            }
         }
         this.oled = localOled;
     }
@@ -97,8 +97,11 @@ public final class OledBootDisplay implements BootDisplay {
         try {
             if (oled != null) {
                 oled.close();
-                log.info("OledBootDisplay closed");
             }
+            if (i2cDevice != null) {
+                i2cDevice.close();
+            }
+            log.info("OledBootDisplay closed");
         } catch (Exception e) {
             log.warn("OledBootDisplay.close failed (non-fatal): {}", e.getMessage());
         }

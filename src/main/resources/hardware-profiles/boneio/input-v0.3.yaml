@@ -4,523 +4,535 @@
 
 id: boneio.input-v0.3
 incomplete: false
+chips:
+  - id: oled1
+    type: oled
+    i2c_address: 0x3C
 channels:
   # Digital inputs 1-10 on P8 (pins 37-46)
   - type: gpio
-    location: "P8_37"
+    pin: "P8_37"
     direction: input
   - type: gpio
-    location: "P8_38"
+    pin: "P8_38"
     direction: input
   - type: gpio
-    location: "P8_39"
+    pin: "P8_39"
     direction: input
   - type: gpio
-    location: "P8_40"
+    pin: "P8_40"
     direction: input
   - type: gpio
-    location: "P8_41"
+    pin: "P8_41"
     direction: input
   - type: gpio
-    location: "P8_42"
+    pin: "P8_42"
     direction: input
   - type: gpio
-    location: "P8_43"
+    pin: "P8_43"
     direction: input
   - type: gpio
-    location: "P8_44"
+    pin: "P8_44"
     direction: input
   - type: gpio
-    location: "P8_45"
+    pin: "P8_45"
     direction: input
   - type: gpio
-    location: "P8_46"
+    pin: "P8_46"
     direction: input
   # Digital inputs 11-28 on P9 and P8
   - type: gpio
-    location: "P9_42"
+    pin: "P9_42"
     direction: input
   - type: gpio
-    location: "P9_31"
+    pin: "P9_31"
     direction: input
   - type: gpio
-    location: "P9_30"
+    pin: "P9_30"
     direction: input
   - type: gpio
-    location: "P9_29"
+    pin: "P9_29"
     direction: input
   - type: gpio
-    location: "P9_28"
+    pin: "P9_28"
     direction: input
   - type: gpio
-    location: "P9_27"
+    pin: "P9_27"
     direction: input
   - type: gpio
-    location: "P9_25"
+    pin: "P9_25"
     direction: input
   - type: gpio
-    location: "P9_23"
+    pin: "P9_23"
     direction: input
   - type: gpio
-    location: "P9_22"
+    pin: "P9_22"
     direction: input
   - type: gpio
-    location: "P9_21"
+    pin: "P9_21"
     direction: input
   - type: gpio
-    location: "P9_18"
+    pin: "P9_18"
     direction: input
   - type: gpio
-    location: "P9_17"
+    pin: "P9_17"
     direction: input
   - type: gpio
-    location: "P9_16"
+    pin: "P9_16"
     direction: input
   - type: gpio
-    location: "P9_15"
+    pin: "P9_15"
     direction: input
   - type: gpio
-    location: "P9_14"
+    pin: "P9_14"
     direction: input
   - type: gpio
-    location: "P8_07"
+    pin: "P8_07"
     direction: input
   - type: gpio
-    location: "P8_08"
+    pin: "P8_08"
     direction: input
   - type: gpio
-    location: "P8_09"
+    pin: "P8_09"
     direction: input
   # Digital inputs 29-49 on P8
   - type: gpio
-    location: "P8_36"
+    pin: "P8_36"
     direction: input
   - type: gpio
-    location: "P8_35"
+    pin: "P8_35"
     direction: input
   - type: gpio
-    location: "P8_34"
+    pin: "P8_34"
     direction: input
   - type: gpio
-    location: "P8_33"
+    pin: "P8_33"
     direction: input
   - type: gpio
-    location: "P8_32"
+    pin: "P8_32"
     direction: input
   - type: gpio
-    location: "P8_31"
+    pin: "P8_31"
     direction: input
   - type: gpio
-    location: "P8_30"
+    pin: "P8_30"
     direction: input
   - type: gpio
-    location: "P8_29"
+    pin: "P8_29"
     direction: input
   - type: gpio
-    location: "P8_28"
+    pin: "P8_28"
     direction: input
   - type: gpio
-    location: "P8_27"
+    pin: "P8_27"
     direction: input
   - type: gpio
-    location: "P8_26"
+    pin: "P8_26"
     direction: input
   - type: gpio
-    location: "P8_19"
+    pin: "P8_19"
     direction: input
   - type: gpio
-    location: "P8_18"
+    pin: "P8_18"
     direction: input
   - type: gpio
-    location: "P8_17"
+    pin: "P8_17"
     direction: input
   - type: gpio
-    location: "P8_16"
+    pin: "P8_16"
     direction: input
   - type: gpio
-    location: "P8_15"
+    pin: "P8_15"
     direction: input
   - type: gpio
-    location: "P8_14"
+    pin: "P8_14"
     direction: input
   - type: gpio
-    location: "P8_13"
+    pin: "P8_13"
     direction: input
   - type: gpio
-    location: "P8_12"
+    pin: "P8_12"
     direction: input
   - type: gpio
-    location: "P8_11"
+    pin: "P8_11"
     direction: input
   - type: gpio
-    location: "P8_10"
+    pin: "P8_10"
     direction: input
   # Analog inputs 1-7 on P9
   - type: gpio
-    location: "P9_33"
+    pin: "P9_33"
     direction: input
   - type: gpio
-    location: "P9_36"
+    pin: "P9_36"
     direction: input
   - type: gpio
-    location: "P9_35"
+    pin: "P9_35"
     direction: input
   - type: gpio
-    location: "P9_38"
+    pin: "P9_38"
     direction: input
   - type: gpio
-    location: "P9_37"
+    pin: "P9_37"
     direction: input
   - type: gpio
-    location: "P9_40"
+    pin: "P9_40"
     direction: input
   - type: gpio
-    location: "P9_39"
+    pin: "P9_39"
     direction: input
   # Casing button on P9
   - type: gpio
-    location: "P9_41"
+    pin: "P9_41"
     direction: input
+  # SH1106 OLED display on I2C bus 2
+  - type: oled
+    bus: oled1
 mappings:
   - logical_id: input_1
     description: "Digital input 1 (P8_37)"
     physical:
       type: gpio
-      location: "P8_37"
+      pin: "P8_37"
       direction: input
   - logical_id: input_2
     description: "Digital input 2 (P8_38)"
     physical:
       type: gpio
-      location: "P8_38"
+      pin: "P8_38"
       direction: input
   - logical_id: input_3
     description: "Digital input 3 (P8_39)"
     physical:
       type: gpio
-      location: "P8_39"
+      pin: "P8_39"
       direction: input
   - logical_id: input_4
     description: "Digital input 4 (P8_40)"
     physical:
       type: gpio
-      location: "P8_40"
+      pin: "P8_40"
       direction: input
   - logical_id: input_5
     description: "Digital input 5 (P8_41)"
     physical:
       type: gpio
-      location: "P8_41"
+      pin: "P8_41"
       direction: input
   - logical_id: input_6
     description: "Digital input 6 (P8_42)"
     physical:
       type: gpio
-      location: "P8_42"
+      pin: "P8_42"
       direction: input
   - logical_id: input_7
     description: "Digital input 7 (P8_43)"
     physical:
       type: gpio
-      location: "P8_43"
+      pin: "P8_43"
       direction: input
   - logical_id: input_8
     description: "Digital input 8 (P8_44)"
     physical:
       type: gpio
-      location: "P8_44"
+      pin: "P8_44"
       direction: input
   - logical_id: input_9
     description: "Digital input 9 (P8_45)"
     physical:
       type: gpio
-      location: "P8_45"
+      pin: "P8_45"
       direction: input
   - logical_id: input_10
     description: "Digital input 10 (P8_46)"
     physical:
       type: gpio
-      location: "P8_46"
+      pin: "P8_46"
       direction: input
   - logical_id: input_11
     description: "Digital input 11 (P9_42)"
     physical:
       type: gpio
-      location: "P9_42"
+      pin: "P9_42"
       direction: input
   - logical_id: input_12
     description: "Digital input 12 (P9_31)"
     physical:
       type: gpio
-      location: "P9_31"
+      pin: "P9_31"
       direction: input
   - logical_id: input_13
     description: "Digital input 13 (P9_30)"
     physical:
       type: gpio
-      location: "P9_30"
+      pin: "P9_30"
       direction: input
   - logical_id: input_14
     description: "Digital input 14 (P9_29)"
     physical:
       type: gpio
-      location: "P9_29"
+      pin: "P9_29"
       direction: input
   - logical_id: input_15
     description: "Digital input 15 (P9_28)"
     physical:
       type: gpio
-      location: "P9_28"
+      pin: "P9_28"
       direction: input
   - logical_id: input_16
     description: "Digital input 16 (P9_27)"
     physical:
       type: gpio
-      location: "P9_27"
+      pin: "P9_27"
       direction: input
   - logical_id: input_17
     description: "Digital input 17 (P9_25)"
     physical:
       type: gpio
-      location: "P9_25"
+      pin: "P9_25"
       direction: input
   - logical_id: input_18
     description: "Digital input 18 (P9_23)"
     physical:
       type: gpio
-      location: "P9_23"
+      pin: "P9_23"
       direction: input
   - logical_id: input_19
     description: "Digital input 19 (P9_22)"
     physical:
       type: gpio
-      location: "P9_22"
+      pin: "P9_22"
       direction: input
   - logical_id: input_20
     description: "Digital input 20 (P9_21)"
     physical:
       type: gpio
-      location: "P9_21"
+      pin: "P9_21"
       direction: input
   - logical_id: input_21
     description: "Digital input 21 (P9_18)"
     physical:
       type: gpio
-      location: "P9_18"
+      pin: "P9_18"
       direction: input
   - logical_id: input_22
     description: "Digital input 22 (P9_17)"
     physical:
       type: gpio
-      location: "P9_17"
+      pin: "P9_17"
       direction: input
   - logical_id: input_23
     description: "Digital input 23 (P9_16)"
     physical:
       type: gpio
-      location: "P9_16"
+      pin: "P9_16"
       direction: input
   - logical_id: input_24
     description: "Digital input 24 (P9_15)"
     physical:
       type: gpio
-      location: "P9_15"
+      pin: "P9_15"
       direction: input
   - logical_id: input_25
     description: "Digital input 25 (P9_14)"
     physical:
       type: gpio
-      location: "P9_14"
+      pin: "P9_14"
       direction: input
   - logical_id: input_26
     description: "Digital input 26 (P8_07)"
     physical:
       type: gpio
-      location: "P8_07"
+      pin: "P8_07"
       direction: input
   - logical_id: input_27
     description: "Digital input 27 (P8_08)"
     physical:
       type: gpio
-      location: "P8_08"
+      pin: "P8_08"
       direction: input
   - logical_id: input_28
     description: "Digital input 28 (P8_09)"
     physical:
       type: gpio
-      location: "P8_09"
+      pin: "P8_09"
       direction: input
   - logical_id: input_29
     description: "Digital input 29 (P8_36)"
     physical:
       type: gpio
-      location: "P8_36"
+      pin: "P8_36"
       direction: input
   - logical_id: input_30
     description: "Digital input 30 (P8_35)"
     physical:
       type: gpio
-      location: "P8_35"
+      pin: "P8_35"
       direction: input
   - logical_id: input_31
     description: "Digital input 31 (P8_34)"
     physical:
       type: gpio
-      location: "P8_34"
+      pin: "P8_34"
       direction: input
   - logical_id: input_32
     description: "Digital input 32 (P8_33)"
     physical:
       type: gpio
-      location: "P8_33"
+      pin: "P8_33"
       direction: input
   - logical_id: input_33
     description: "Digital input 33 (P8_32)"
     physical:
       type: gpio
-      location: "P8_32"
+      pin: "P8_32"
       direction: input
   - logical_id: input_34
     description: "Digital input 34 (P8_31)"
     physical:
       type: gpio
-      location: "P8_31"
+      pin: "P8_31"
       direction: input
   - logical_id: input_35
     description: "Digital input 35 (P8_30)"
     physical:
       type: gpio
-      location: "P8_30"
+      pin: "P8_30"
       direction: input
   - logical_id: input_36
     description: "Digital input 36 (P8_29)"
     physical:
       type: gpio
-      location: "P8_29"
+      pin: "P8_29"
       direction: input
   - logical_id: input_37
     description: "Digital input 37 (P8_28)"
     physical:
       type: gpio
-      location: "P8_28"
+      pin: "P8_28"
       direction: input
   - logical_id: input_38
     description: "Digital input 38 (P8_27)"
     physical:
       type: gpio
-      location: "P8_27"
+      pin: "P8_27"
       direction: input
   - logical_id: input_39
     description: "Digital input 39 (P8_26)"
     physical:
       type: gpio
-      location: "P8_26"
+      pin: "P8_26"
       direction: input
   - logical_id: input_40
     description: "Digital input 40 (P8_19)"
     physical:
       type: gpio
-      location: "P8_19"
+      pin: "P8_19"
       direction: input
   - logical_id: input_41
     description: "Digital input 41 (P8_18)"
     physical:
       type: gpio
-      location: "P8_18"
+      pin: "P8_18"
       direction: input
   - logical_id: input_42
     description: "Digital input 42 (P8_17)"
     physical:
       type: gpio
-      location: "P8_17"
+      pin: "P8_17"
       direction: input
   - logical_id: input_43
     description: "Digital input 43 (P8_16)"
     physical:
       type: gpio
-      location: "P8_16"
+      pin: "P8_16"
       direction: input
   - logical_id: input_44
     description: "Digital input 44 (P8_15)"
     physical:
       type: gpio
-      location: "P8_15"
+      pin: "P8_15"
       direction: input
   - logical_id: input_45
     description: "Digital input 45 (P8_14)"
     physical:
       type: gpio
-      location: "P8_14"
+      pin: "P8_14"
       direction: input
   - logical_id: input_46
     description: "Digital input 46 (P8_13)"
     physical:
       type: gpio
-      location: "P8_13"
+      pin: "P8_13"
       direction: input
   - logical_id: input_47
     description: "Digital input 47 (P8_12)"
     physical:
       type: gpio
-      location: "P8_12"
+      pin: "P8_12"
       direction: input
   - logical_id: input_48
     description: "Digital input 48 (P8_11)"
     physical:
       type: gpio
-      location: "P8_11"
+      pin: "P8_11"
       direction: input
   - logical_id: input_49
     description: "Digital input 49 (P8_10)"
     physical:
       type: gpio
-      location: "P8_10"
+      pin: "P8_10"
       direction: input
   - logical_id: analog_1
     description: "Analog input 1 (P9_33)"
     physical:
       type: gpio
-      location: "P9_33"
+      pin: "P9_33"
       direction: input
   - logical_id: analog_2
     description: "Analog input 2 (P9_36)"
     physical:
       type: gpio
-      location: "P9_36"
+      pin: "P9_36"
       direction: input
   - logical_id: analog_3
     description: "Analog input 3 (P9_35)"
     physical:
       type: gpio
-      location: "P9_35"
+      pin: "P9_35"
       direction: input
   - logical_id: analog_4
     description: "Analog input 4 (P9_38)"
     physical:
       type: gpio
-      location: "P9_38"
+      pin: "P9_38"
       direction: input
   - logical_id: analog_5
     description: "Analog input 5 (P9_37)"
     physical:
       type: gpio
-      location: "P9_37"
+      pin: "P9_37"
       direction: input
   - logical_id: analog_6
     description: "Analog input 6 (P9_40)"
     physical:
       type: gpio
-      location: "P9_40"
+      pin: "P9_40"
       direction: input
   - logical_id: analog_7
     description: "Analog input 7 (P9_39)"
     physical:
       type: gpio
-      location: "P9_39"
+      pin: "P9_39"
       direction: input
   - logical_id: casing_1
     description: "Casing button (P9_41)"
     physical:
       type: gpio
-      location: "P9_41"
+      pin: "P9_41"
       direction: input
+  - logical_id: oled_display
+    description: "SH1106 OLED display (128x64)"
+    physical:
+      type: oled
+      bus: oled1

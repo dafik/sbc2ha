@@ -4,50 +4,51 @@
 
 id: fake.output
 incomplete: false
+chips: []
 channels:
   - type: gpio
-    location: "FAKE_11"
+    pin: "FAKE_11"
     direction: output
   - type: gpio
-    location: "FAKE_12"
+    pin: "FAKE_12"
     direction: output
   - type: gpio
-    location: "FAKE_13"
+    pin: "FAKE_13"
     direction: output
   - type: gpio
-    location: "FAKE_14"
+    pin: "FAKE_14"
     direction: output
   - type: gpio
-    location: "FAKE_15"
+    pin: "FAKE_15"
     direction: output
 mappings:
   - logical_id: output_1
     description: "Fake output 1"
     physical:
       type: gpio
-      location: "FAKE_11"
+      pin: "FAKE_11"
       direction: output
   - logical_id: output_2
     description: "Fake output 2"
     physical:
       type: gpio
-      location: "FAKE_12"
+      pin: "FAKE_12"
       direction: output
   - logical_id: output_3
     description: "Fake output 3"
     physical:
       type: gpio
-      location: "FAKE_13"
+      pin: "FAKE_13"
       direction: output
   - logical_id: output_4
     description: "Fake output 4"
     physical:
       type: gpio
-      location: "FAKE_14"
+      pin: "FAKE_14"
       direction: output
   - logical_id: output_5
     description: "Fake output 5"
     physical:
       type: gpio
-      location: "FAKE_15"
+      pin: "FAKE_15"
       direction: output

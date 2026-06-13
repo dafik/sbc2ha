@@ -1,5 +1,7 @@
 package iot.sbc2ha.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * MQTT configuration — top-level {@code mqtt:} key.
  *
@@ -27,6 +29,7 @@ public final class MqttConfig {
     private String clientId;
 
     /** Base topic prefix, e.g. {@code sbc2ha}. */
+    @JsonProperty("topic_prefix")
     private String topicPrefix;
 
     /** Default QoS level (0, 1, or 2). Defaults to 0. */

@@ -47,7 +47,7 @@ class ProfileRegistryTest {
     void registerAndHasProfile() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(ch), List.of(mapping));
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(ch), List.of(mapping));
         registry.register(profile);
         assertTrue(registry.hasProfile("test"));
         assertEquals(1, registry.profileCount());
@@ -55,12 +55,12 @@ class ProfileRegistryTest {
     }
 
     @Test
-    void registerDuplicateThrows() {
-        HardwareProfile p1 = new HardwareProfile("test", false, List.of(), List.of());
+    void registerDuplicateIsIdempotent() {
+        HardwareProfile p1 = new HardwareProfile("test", false, List.of(), List.of(), List.of());
         registry.register(p1);
-        HardwareProfile p2 = new HardwareProfile("test", false, List.of(), List.of());
-        ProfileLoadingException ex = assertThrows(ProfileLoadingException.class, () -> registry.register(p2));
-        assertTrue(ex.getMessage().contains("already registered"));
+        HardwareProfile p2 = new HardwareProfile("test", false, List.of(), List.of(), List.of());
+        registry.register(p2);  // Should be a no-op, not throw
+        assertEquals(1, registry.profileCount());
     }
 
     @Test
@@ -74,7 +74,7 @@ class ProfileRegistryTest {
     void expandPreservesChannels() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(ch), List.of(mapping));
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(ch), List.of(mapping));
         registry.register(profile);
 
         HardwareModel model = registry.expand("test", null, null);
@@ -88,7 +88,7 @@ class ProfileRegistryTest {
     @Test
     void expandWithExtraAppends() {
         GpioChannel ch1 = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(ch1), List.of());
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(ch1), List.of());
         registry.register(profile);
 
         GpioChannel ch2 = new GpioChannel("P9_12", GpioChannel.Direction.INPUT);
@@ -100,7 +100,7 @@ class ProfileRegistryTest {
     void expandWithExtraMappingsAppends() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping m1 = new HardwareMapping("switch_1", "switch 1", ch);
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(ch), List.of(m1));
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(ch), List.of(m1));
         registry.register(profile);
 
         HardwareMapping m2 = new HardwareMapping("switch_2", "switch 2", ch);
@@ -121,7 +121,7 @@ class ProfileRegistryTest {
     void expandWithOverridesReplacesChannels() {
         GpioChannel profileCh = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         GpioChannel overrideCh = new GpioChannel("P9_11", GpioChannel.Direction.OUTPUT);
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(profileCh), List.of());
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(profileCh), List.of());
         registry.register(profile);
 
         HardwareModel model = registry.expandWithOverrides("test", List.of(overrideCh), null);
@@ -135,7 +135,7 @@ class ProfileRegistryTest {
         GpioChannel overrideCh = new GpioChannel("P9_12", GpioChannel.Direction.OUTPUT);
         HardwareMapping profileMapping = new HardwareMapping("switch_1", "switch 1", profileCh);
         HardwareMapping overrideMapping = new HardwareMapping("switch_1", "switch 1 OVER", overrideCh);
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(profileCh), List.of(profileMapping));
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(profileCh), List.of(profileMapping));
         registry.register(profile);
 
         HardwareModel model = registry.expandWithOverrides("test", null, List.of(overrideMapping));
@@ -147,12 +147,12 @@ class ProfileRegistryTest {
     void expandWithOverridesAddsNew() {
         GpioChannel ch1 = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         GpioChannel ch2 = new GpioChannel("P9_99", GpioChannel.Direction.INPUT);
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(ch1), List.of());
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(ch1), List.of());
         registry.register(profile);
 
         HardwareModel model = registry.expandWithOverrides("test", List.of(ch2), null);
         assertEquals(2, model.channelCount());
-        assertTrue(model.channels().stream().anyMatch(c -> "P9_99".equals(c.location())));
+        assertTrue(model.channels().stream().anyMatch(c -> "P9_99".equals(((GpioChannel) c).pinLabel())));
     }
 
     @Test
@@ -167,8 +167,8 @@ class ProfileRegistryTest {
         HardwareProfile loaded = registry.loadFromClasspath("hardware-profiles/boneio/input-v0.3.yaml");
         assertEquals("boneio.input-v0.3", loaded.id());
         assertFalse(loaded.incomplete());
-        assertEquals(57, loaded.channelCount());
-        assertEquals(57, loaded.mappingCount());
+        assertEquals(58, loaded.channelCount());
+        assertEquals(58, loaded.mappingCount());
     }
 
     @Test
@@ -185,16 +185,17 @@ class ProfileRegistryTest {
         String yaml = """
                 id: file-profile
                 incomplete: true
+                chips: []
                 channels:
                   - type: gpio
-                    location: "P8_07"
+                    pin: "P8_07"
                     direction: input
                 mappings:
                   - logical_id: input_1
                     description: "File input"
                     physical:
                       type: gpio
-                      location: "P8_07"
+                      pin: "P8_07"
                       direction: input
                 """;
         Path f = writeYaml(yaml);
@@ -212,7 +213,7 @@ class ProfileRegistryTest {
         HardwareMapping mapping = new HardwareMapping("switch_entrance", "Entrance door", ch);
 
         // Register profile
-        HardwareProfile profile = new HardwareProfile("equiv-test", false, List.of(ch), List.of(mapping));
+        HardwareProfile profile = new HardwareProfile("equiv-test", false, List.of(), List.of(ch), List.of(mapping));
         registry.register(profile);
 
         // Expand from profile
@@ -221,6 +222,7 @@ class ProfileRegistryTest {
         // Create manual model with same channels and mappings
         HardwareModel fromManual = new HardwareModel(
                 "equiv-test", null,
+                List.of(),
                 List.of(ch),
                 List.of(mapping));
 
@@ -239,18 +241,20 @@ class ProfileRegistryTest {
         String yaml = """
                 id: roundtrip-test
                 incomplete: true
+                chips:
+                  - id: mcp1
+                    type: mcp23017
+                    i2c_address: 0x20
                 channels:
                   - type: mcp23017
-                    location: "i2c-1:0x20:A:0"
-                    port: A
+                    bus: mcp1
                     pin: 0
                 mappings:
                   - logical_id: out_1
                     description: "First relay"
                     physical:
                       type: mcp23017
-                      location: "i2c-1:0x20:A:0"
-                      port: A
+                      bus: mcp1
                       pin: 0
                 """;
         Path f = writeYaml(yaml);
@@ -261,11 +265,12 @@ class ProfileRegistryTest {
 
         assertEquals("roundtrip-test", profile.id());
         assertTrue(profile.incomplete());
+        assertEquals(1, profile.chips().size());
         assertEquals(1, profile.channelCount());
         assertEquals(1, profile.mappingCount());
         assertInstanceOf(Mcp23017Channel.class, profile.channels().getFirst());
         Mcp23017Channel mcp = (Mcp23017Channel) profile.channels().getFirst();
-        assertEquals(Mcp23017Channel.Port.A, mcp.port());
+        assertEquals("mcp1", mcp.bus());
         assertEquals(0, mcp.pin());
     }
 
@@ -274,23 +279,23 @@ class ProfileRegistryTest {
     @Test
     void hardwareProfileEqualsAndHashCode() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareProfile a = new HardwareProfile("test", false, List.of(ch), List.of());
-        HardwareProfile b = new HardwareProfile("test", false, List.of(ch), List.of());
+        HardwareProfile a = new HardwareProfile("test", false, List.of(), List.of(ch), List.of());
+        HardwareProfile b = new HardwareProfile("test", false, List.of(), List.of(ch), List.of());
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test
     void hardwareProfileNotEqual_differentId() {
-        HardwareProfile a = new HardwareProfile("test-a", false, List.of(), List.of());
-        HardwareProfile b = new HardwareProfile("test-b", false, List.of(), List.of());
+        HardwareProfile a = new HardwareProfile("test-a", false, List.of(), List.of(), List.of());
+        HardwareProfile b = new HardwareProfile("test-b", false, List.of(), List.of(), List.of());
         assertNotEquals(a, b);
     }
 
     @Test
     void hardwareProfileNotEqual_differentIncomplete() {
-        HardwareProfile a = new HardwareProfile("test", true, List.of(), List.of());
-        HardwareProfile b = new HardwareProfile("test", false, List.of(), List.of());
+        HardwareProfile a = new HardwareProfile("test", true, List.of(), List.of(), List.of());
+        HardwareProfile b = new HardwareProfile("test", false, List.of(), List.of(), List.of());
         assertNotEquals(a, b);
     }
 
@@ -298,7 +303,7 @@ class ProfileRegistryTest {
 
     @Test
     void hardwareProfileToStringIncludesFields() {
-        HardwareProfile profile = new HardwareProfile("test", true, List.of(), List.of());
+        HardwareProfile profile = new HardwareProfile("test", true, List.of(), List.of(), List.of());
         String s = profile.toString();
         assertTrue(s.contains("test"));
         assertTrue(s.contains("incomplete=true"));
@@ -306,7 +311,7 @@ class ProfileRegistryTest {
 
     @Test
     void profileRegistryToString() {
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of());
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(), List.of());
         registry.register(profile);
         String s = registry.toString();
         assertTrue(s.contains("test"));

@@ -73,6 +73,38 @@ class LifecycleTest {
         assertDoesNotThrow(lifecycle::shutdown);
     }
 
+    @Test
+    void setDisplaySwapsDisplay() {
+        LogRecordingBootDisplay original = new LogRecordingBootDisplay();
+        LogRecordingBootDisplay replacement = new LogRecordingBootDisplay();
+        Lifecycle lifecycle = new Lifecycle(original);
+
+        lifecycle.transition(LifecycleState.CONFIG_LOADED);
+        assertEquals(1, original.updates.size());
+
+        lifecycle.setDisplay(replacement);
+        lifecycle.transition(LifecycleState.OFFLINE_READY);
+
+        // Original received only the first update
+        assertEquals(1, original.updates.size());
+        // Replacement received the second update
+        assertEquals(1, replacement.updates.size());
+        assertEquals(LifecycleState.OFFLINE_READY, replacement.updates.getFirst());
+    }
+
+    @Test
+    void shutdownClosesCurrentDisplay() {
+        LogRecordingBootDisplay original = new LogRecordingBootDisplay();
+        LogRecordingBootDisplay replacement = new LogRecordingBootDisplay();
+        Lifecycle lifecycle = new Lifecycle(original);
+
+        lifecycle.setDisplay(replacement);
+        lifecycle.shutdown();
+
+        assertFalse(original.closed);
+        assertTrue(replacement.closed);
+    }
+
     /** {@link BootDisplay} that always throws on update. */
     private static class ThrowingBootDisplay implements BootDisplay {
         @Override

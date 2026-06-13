@@ -12,7 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Diozero-backed GPIO input adapter.
@@ -42,11 +46,40 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * and a {@link DigitalInputDevice} is opened with edge-triggered
  * notifications on both rising and falling edges.</p>
  *
+ * <h3>Pin-mode overrides</h3>
+ * <p>BBB LCD cape pins (P8_37–P8_46) have empty mode lists in both the
+ * kernel's gpiolib-cdev and diozero's board definitions.  This adapter
+ * loads a {@code bbb-modes.txt} resource (inherited from the old app)
+ * that independently defines valid modes per pin, injecting
+ * {@code DIGITAL_INPUT} support so diozero's validation succeeds.</p>
+ *
+ * <h3>Chip number overrides (kernel 6.x)</h3>
+ * <p>On kernel 6.x BBBs the gpiochip numbers differ from diozero's
+ * embedded board definition (written for kernel 4.x + cape-universal).
+ * This adapter auto-detects the kernel version and applies chip overrides
+ * from {@code bbb-chip-mappings.txt}.  Overrides are enabled automatically
+ * for kernel >= 6.0, or when the system property
+ * {@code sbc2ha.bbb.chip-override} is set to {@code true}.</p>
+ *
  * @see InputAdapter
  */
 public final class DiozeroInputAdapter implements InputAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(DiozeroInputAdapter.class);
+
+    /** Pattern for BBB header-pin notation: P8_37, P9_42, etc. */
+    static final Pattern HEADER_PIN_PATTERN = Pattern.compile("^(P[89])_(\\d+)$");
+
+    /** Pre-loaded pin-mode overrides from classpath resource. */
+    private static final Map<String, java.util.Set<com.diozero.api.DeviceMode>> MODE_OVERRIDES;
+
+    /** Pre-loaded chip + line offset overrides (header:pin → PinOverride). */
+    private static final Map<String, PinModeOverrides.PinOverride> CHIP_OVERRIDES;
+
+    static {
+        MODE_OVERRIDES = PinModeOverrides.loadModes("");
+        CHIP_OVERRIDES = PinModeOverrides.loadChipOverrides("");
+    }
 
     private final DigitalInputDevice device;
     private final boolean inverted;
@@ -67,13 +100,16 @@ public final class DiozeroInputAdapter implements InputAdapter {
         // Trigger native provider initialisation
         DeviceFactoryHelper.getNativeDeviceFactory();
         BoardInfo board = DeviceFactoryHelper.getNativeDeviceFactory().getBoardInfo();
-        PinInfo pinInfo = board.getByName(pinId);
+        PinInfo pinInfo = resolvePin(board, pinId);
         if (pinInfo == null) {
             throw new IllegalArgumentException("Unknown pin: " + pinId);
         }
-        log.info("Opening GPIO pin '{}' (sysfs={}, inverted={})",
-                pinId, pinInfo.getSysFsNumber(), inverted);
-        this.device = DigitalInputDevice.Builder.builder(pinInfo)
+        // Apply pin-mode + chip overrides (e.g. BBB LCD cape pins with empty modes,
+        // kernel 6.x chip number corrections)
+        PinInfo resolved = PinModeOverrides.wrap(pinInfo, MODE_OVERRIDES, CHIP_OVERRIDES);
+        log.info("Opening GPIO pin '{}' (sysfs={}, chip={}, inverted={})",
+                pinId, resolved.getSysFsNumber(), resolved.getChip(), inverted);
+        this.device = DigitalInputDevice.Builder.builder(resolved)
                 .setTrigger(GpioEventTrigger.BOTH)
                 .build();
 
@@ -85,6 +121,40 @@ public final class DiozeroInputAdapter implements InputAdapter {
         device.whenActivated(this::firePress);
         device.whenDeactivated(this::fireRelease);
         log.debug("Registered edge-triggered callbacks for pin '{}' (BOTH edge)", pinId);
+    }
+
+    /**
+     * Resolve a pin identifier to a {@link PinInfo}.
+     *
+     * <p>Tries two strategies in order:</p>
+     * <ol>
+     *   <li>{@code getByPhysicalPin("P8", 37)} for BBB header-pin notation (e.g. "P8_37")</li>
+     *   <li>{@code getByName(kernelName)} for kernel device tree names (e.g. "LCD_DATA8")</li>
+     * </ol>
+     *
+     * @param board the board info from the active diozero provider
+     * @param pinId the pin identifier from the hardware profile
+     * @return the resolved {@link PinInfo}, or {@code null} if no match
+     */
+    static PinInfo resolvePin(BoardInfo board, String pinId) {
+        // Try BBB header-pin notation first: P8_37, P9_42
+        Matcher m = HEADER_PIN_PATTERN.matcher(pinId);
+        if (m.matches()) {
+            String header = m.group(1);
+            int physicalPin = Integer.parseInt(m.group(2));
+            Optional<PinInfo> result = board.getByPhysicalPin(header, physicalPin);
+            if (result.isPresent()) {
+                return result.get();
+            }
+            log.debug("Header pin {}_{} not found in board definitions", header, physicalPin);
+        }
+        // Fall back to kernel device tree name
+        PinInfo byName = board.getByName(pinId);
+        if (byName != null) {
+            log.debug("Resolved '{}' by kernel name", pinId);
+            return byName;
+        }
+        return null;
     }
 
     private void firePress(long timestamp) {

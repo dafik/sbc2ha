@@ -118,6 +118,8 @@ public final class InputDevice extends DeviceConfig {
         /** Motion detection sensor. */
         MOTION,
         /** Contact sensor (same as door, generic). */
-        CONTACT
+        CONTACT,
+        /** Window open/close sensor. */
+        WINDOW
     }
 }

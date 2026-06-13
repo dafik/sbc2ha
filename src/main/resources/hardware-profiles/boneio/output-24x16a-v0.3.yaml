@@ -1,268 +1,234 @@
+# BoneIO output board 24x16A v0.3 profile.
+# Extracted from .plan/oldApp/helper/src/main/resources/extensionBoardDef/boneio/output-24x16A-v0.3.txt
+# 24 outputs across 2 MCP23017 chips at I2C addresses 0x20 (chip 1) and 0x21 (chip 2).
+# NOTE: v0.3 has interleaved wiring (different pin layout than v0.4).
+
 id: boneio.output-24x16a-v0.3
 incomplete: false
+chips:
+  - id: mcp1
+    type: mcp23017
+    i2c_address: 0x20
+  - id: mcp2
+    type: mcp23017
+    i2c_address: 0x21
 channels:
-- type: mcp23017
-  location: i2c-1:0x20:B:1
-  port: B
-  pin: 1
-- type: mcp23017
-  location: i2c-1:0x20:B:0
-  port: B
-  pin: 0
-- type: mcp23017
-  location: i2c-1:0x20:B:5
-  port: B
-  pin: 5
-- type: mcp23017
-  location: i2c-1:0x20:B:4
-  port: B
-  pin: 4
-- type: mcp23017
-  location: i2c-1:0x20:B:3
-  port: B
-  pin: 3
-- type: mcp23017
-  location: i2c-1:0x20:B:2
-  port: B
-  pin: 2
-- type: mcp23017
-  location: i2c-1:0x20:B:7
-  port: B
-  pin: 7
-- type: mcp23017
-  location: i2c-1:0x20:A:1
-  port: A
-  pin: 1
-- type: mcp23017
-  location: i2c-1:0x20:A:0
-  port: A
-  pin: 0
-- type: mcp23017
-  location: i2c-1:0x20:A:5
-  port: A
-  pin: 5
-- type: mcp23017
-  location: i2c-1:0x20:A:4
-  port: A
-  pin: 4
-- type: mcp23017
-  location: i2c-1:0x20:A:3
-  port: A
-  pin: 3
-- type: mcp23017
-  location: i2c-1:0x20:A:2
-  port: A
-  pin: 2
-- type: mcp23017
-  location: i2c-1:0x20:A:6
-  port: A
-  pin: 6
-- type: mcp23017
-  location: i2c-1:0x21:A:1
-  port: A
-  pin: 1
-- type: mcp23017
-  location: i2c-1:0x21:A:0
-  port: A
-  pin: 0
-- type: mcp23017
-  location: i2c-1:0x21:B:6
-  port: B
-  pin: 6
-- type: mcp23017
-  location: i2c-1:0x21:B:7
-  port: B
-  pin: 7
-- type: mcp23017
-  location: i2c-1:0x21:B:5
-  port: B
-  pin: 5
-- type: mcp23017
-  location: i2c-1:0x21:B:4
-  port: B
-  pin: 4
-- type: mcp23017
-  location: i2c-1:0x21:B:8
-  port: B
-  pin: 8
-- type: mcp23017
-  location: i2c-1:0x21:B:9
-  port: B
-  pin: 9
-- type: mcp23017
-  location: i2c-1:0x21:B:11
-  port: B
-  pin: 11
-- type: mcp23017
-  location: i2c-1:0x21:B:10
-  port: B
-  pin: 10
-mappings:
-- logical_id: output_1
-  description: Output 1 (MCP1 ch 9)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:B:1
-    port: B
-    pin: 1
-- logical_id: output_2
-  description: Output 2 (MCP1 ch 8)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:B:0
-    port: B
+  # MCP1 (0x20): outputs 1-20 — all pins used: 0-13
+  - type: mcp23017
+    bus: mcp1
     pin: 0
-- logical_id: output_3
-  description: Output 3 (MCP2 ch 1)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:A:1
-    port: A
+  - type: mcp23017
+    bus: mcp1
     pin: 1
-- logical_id: output_4
-  description: Output 4 (MCP2 ch 0)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:A:0
-    port: A
-    pin: 0
-- logical_id: output_5
-  description: Output 5 (MCP1 ch 13)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:B:5
-    port: B
-    pin: 5
-- logical_id: output_6
-  description: Output 6 (MCP1 ch 12)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:B:4
-    port: B
-    pin: 4
-- logical_id: output_7
-  description: Output 7 (MCP1 ch 11)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:B:3
-    port: B
-    pin: 3
-- logical_id: output_8
-  description: Output 8 (MCP1 ch 10)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:B:2
-    port: B
+  - type: mcp23017
+    bus: mcp1
     pin: 2
-- logical_id: output_9
-  description: Output 9 (MCP2 ch 14)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:B:6
-    port: B
-    pin: 6
-- logical_id: output_10
-  description: Output 10 (MCP2 ch 15)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:B:7
-    port: B
-    pin: 7
-- logical_id: output_11
-  description: Output 11 (MCP2 ch 13)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:B:5
-    port: B
-    pin: 5
-- logical_id: output_12
-  description: Output 12 (MCP2 ch 12)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:B:4
-    port: B
-    pin: 4
-- logical_id: output_13
-  description: Output 13 (MCP1 ch 6)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:A:6
-    port: A
-    pin: 6
-- logical_id: output_14
-  description: Output 14 (MCP1 ch 5)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:A:5
-    port: A
-    pin: 5
-- logical_id: output_15
-  description: Output 15 (MCP1 ch 4)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:A:4
-    port: A
-    pin: 4
-- logical_id: output_16
-  description: Output 16 (MCP1 ch 3)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:A:3
-    port: A
+  - type: mcp23017
+    bus: mcp1
     pin: 3
-- logical_id: output_17
-  description: Output 17 (MCP1 ch 2)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:A:2
-    port: A
-    pin: 2
-- logical_id: output_18
-  description: Output 18 (MCP1 ch 0)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:A:0
-    port: A
-    pin: 0
-- logical_id: output_19
-  description: Output 19 (MCP1 ch 1)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:A:1
-    port: A
-    pin: 1
-- logical_id: output_20
-  description: Output 20 (MCP1 ch 7)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x20:B:7
-    port: B
+  - type: mcp23017
+    bus: mcp1
+    pin: 4
+  - type: mcp23017
+    bus: mcp1
+    pin: 5
+  - type: mcp23017
+    bus: mcp1
+    pin: 6
+  - type: mcp23017
+    bus: mcp1
     pin: 7
-- logical_id: output_21
-  description: Output 21 (MCP2 ch 8)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:B:8
-    port: B
+  - type: mcp23017
+    bus: mcp1
     pin: 8
-- logical_id: output_22
-  description: Output 22 (MCP2 ch 9)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:B:9
-    port: B
+  - type: mcp23017
+    bus: mcp1
     pin: 9
-- logical_id: output_23
-  description: Output 23 (MCP2 ch 11)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:B:11
-    port: B
-    pin: 11
-- logical_id: output_24
-  description: Output 24 (MCP2 ch 10)
-  physical:
-    type: mcp23017
-    location: i2c-1:0x21:B:10
-    port: B
+  - type: mcp23017
+    bus: mcp1
     pin: 10
+  - type: mcp23017
+    bus: mcp1
+    pin: 11
+  - type: mcp23017
+    bus: mcp1
+    pin: 12
+  - type: mcp23017
+    bus: mcp1
+    pin: 13
+  # MCP2 (0x21): outputs 3-24 — pins 0,1,8-15
+  - type: mcp23017
+    bus: mcp2
+    pin: 0
+  - type: mcp23017
+    bus: mcp2
+    pin: 1
+  - type: mcp23017
+    bus: mcp2
+    pin: 8
+  - type: mcp23017
+    bus: mcp2
+    pin: 9
+  - type: mcp23017
+    bus: mcp2
+    pin: 10
+  - type: mcp23017
+    bus: mcp2
+    pin: 11
+  - type: mcp23017
+    bus: mcp2
+    pin: 12
+  - type: mcp23017
+    bus: mcp2
+    pin: 13
+  - type: mcp23017
+    bus: mcp2
+    pin: 14
+  - type: mcp23017
+    bus: mcp2
+    pin: 15
+mappings:
+  - logical_id: output_1
+    description: "Output 1 (MCP1 pin 9 -> B:1)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 9
+  - logical_id: output_2
+    description: "Output 2 (MCP1 pin 8 -> B:0)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 8
+  - logical_id: output_3
+    description: "Output 3 (MCP2 pin 1 -> A:1)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 1
+  - logical_id: output_4
+    description: "Output 4 (MCP2 pin 0 -> A:0)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 0
+  - logical_id: output_5
+    description: "Output 5 (MCP1 pin 13 -> B:5)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 13
+  - logical_id: output_6
+    description: "Output 6 (MCP1 pin 12 -> B:4)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 12
+  - logical_id: output_7
+    description: "Output 7 (MCP1 pin 11 -> B:3)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 11
+  - logical_id: output_8
+    description: "Output 8 (MCP1 pin 10 -> B:2)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 10
+  - logical_id: output_9
+    description: "Output 9 (MCP2 pin 14 -> B:6)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 14
+  - logical_id: output_10
+    description: "Output 10 (MCP2 pin 15 -> B:7)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 15
+  - logical_id: output_11
+    description: "Output 11 (MCP2 pin 13 -> B:5)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 13
+  - logical_id: output_12
+    description: "Output 12 (MCP2 pin 12 -> B:4)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 12
+  - logical_id: output_13
+    description: "Output 13 (MCP1 pin 6 -> A:6)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 6
+  - logical_id: output_14
+    description: "Output 14 (MCP1 pin 5 -> A:5)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 5
+  - logical_id: output_15
+    description: "Output 15 (MCP1 pin 4 -> A:4)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 4
+  - logical_id: output_16
+    description: "Output 16 (MCP1 pin 3 -> A:3)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 3
+  - logical_id: output_17
+    description: "Output 17 (MCP1 pin 2 -> A:2)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 2
+  - logical_id: output_18
+    description: "Output 18 (MCP1 pin 0 -> A:0)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 0
+  - logical_id: output_19
+    description: "Output 19 (MCP1 pin 1 -> A:1)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 1
+  - logical_id: output_20
+    description: "Output 20 (MCP1 pin 7 -> B:7)"
+    physical:
+      type: mcp23017
+      bus: mcp1
+      pin: 7
+  - logical_id: output_21
+    description: "Output 21 (MCP2 pin 8 -> B:0)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 8
+  - logical_id: output_22
+    description: "Output 22 (MCP2 pin 9 -> B:1)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 9
+  - logical_id: output_23
+    description: "Output 23 (MCP2 pin 11 -> B:3)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 11
+  - logical_id: output_24
+    description: "Output 24 (MCP2 pin 10 -> B:2)"
+    physical:
+      type: mcp23017
+      bus: mcp2
+      pin: 10

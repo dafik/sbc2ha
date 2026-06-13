@@ -6,63 +6,57 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * MCP23017 I2C GPIO expander channel.
  *
- * <p>Location encodes I2C bus, device address, port and pin index.</p>
+ * <p>References a chip by {@code bus} id (declared in the profile's
+ * {@code chips:} section) and a global pin number 0-15.</p>
  *
  * <pre>
  * type: mcp23017
- * location: "i2c-1:0x20:A:0"
+ * bus: mcp1
+ * pin: 10
  * </pre>
  * <p>
- * Location format: {@code "<i2c-bus>:<address>:<port>:<pin>"}
- * where port is {@code "A"} or {@code "B"}, pin is 0-7.
+ * Global pin 0-7 maps to PORT A, 8-15 maps to PORT B.
+ * The chip's I2C address/bus are resolved from the referenced chip.
  * </p>
  */
 public final class Mcp23017Channel extends PhysicalChannel {
 
-    private Port port;
     private int pin;
 
     public Mcp23017Channel() {}
 
     @JsonCreator
     public Mcp23017Channel(
-            @JsonProperty("location") String location,
-            @JsonProperty("port") Port port,
+            @JsonProperty("bus") String bus,
             @JsonProperty("pin") int pin) {
-        super(location);
-        this.port = port;
+        super(bus);
+        if (pin < 0 || pin > 15) {
+            throw new IllegalArgumentException("MCP23017 pin must be 0-15, got " + pin);
+        }
         this.pin = pin;
     }
 
     /**
-     * I2C address as integer (e.g. 0x20 = 32).
-     * Derivable from location; convenience accessor for programmatic construction.
-     * Supports both hex (0x20) and decimal (32) formats.
+     * Global pin number on the MCP23017 chip (0-15).
+     * 0-7 = PORT A, 8-15 = PORT B.
      */
-    public int i2cAddress() {
-        // Parse from location string: "i2c-1:0x20:A:0" or "i2c-1:32:A:0" -> 32
-        String[] parts = location().split(":");
-        if (parts.length >= 2) {
-            String addrStr = parts[1];
-            if (addrStr.startsWith("0x") || addrStr.startsWith("0X")) {
-                return Integer.parseUnsignedInt(addrStr.substring(2), 16);
-            } else {
-                try {
-                    return Integer.parseInt(addrStr);
-                } catch (NumberFormatException e) {
-                    return -1;
-                }
-            }
-        }
-        return -1;
-    }
-
-    public Port port() {
-        return port;
-    }
-
+    @Override
     public int pin() {
         return pin;
+    }
+
+    /**
+     * PORT A pin number (0-7), or -1 if pin is on PORT B.
+     */
+    public int portAPin() {
+        return pin >= 0 && pin <= 7 ? pin : -1;
+    }
+
+    /**
+     * PORT B pin number (0-7), or -1 if pin is on PORT A.
+     */
+    public int portBPin() {
+        return pin >= 8 && pin <= 15 ? pin - 8 : -1;
     }
 
     @Override
@@ -76,21 +70,16 @@ public final class Mcp23017Channel extends PhysicalChannel {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Mcp23017Channel that = (Mcp23017Channel) o;
-        return pin == that.pin && port == that.port;
+        return pin == that.pin;
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(super.hashCode(), port, pin);
+        return java.util.Objects.hash(super.hashCode(), pin);
     }
 
     @Override
     public String toString() {
-        return "Mcp23017Channel{location='" + location() + "', port=" + port + ", pin=" + pin + "}";
-    }
-
-    public enum Port {
-        A,
-        B
+        return "Mcp23017Channel{bus='" + bus() + "', pin=" + pin + "}";
     }
 }

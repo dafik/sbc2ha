@@ -36,7 +36,7 @@ class HardwareModelTest {
 
     @Test
     void emptyModelByDefault() {
-        HardwareModel model = new HardwareModel(null, null, null);
+        HardwareModel model = new HardwareModel(null, null, null, null, null);
         assertNull(model.board());
         assertEquals(0, model.channelCount());
         assertEquals(0, model.mappingCount());
@@ -46,21 +46,21 @@ class HardwareModelTest {
     void resolvesKnownLogicalId() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_entrance", "Entrance", ch);
-        HardwareModel model = new HardwareModel("bone1", List.of(ch), List.of(mapping));
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(ch), List.of(mapping));
         assertSame(ch, model.getPhysicalChannel("switch_entrance"));
         assertSame(mapping, model.getMapping("switch_entrance"));
     }
 
     @Test
     void resolvesNullForUnknownLogicalId() {
-        HardwareModel model = new HardwareModel("bone1", List.of(), List.of());
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(), List.of());
         assertNull(model.getPhysicalChannel("unknown"));
         assertNull(model.getMapping("unknown"));
     }
 
     @Test
     void resolveThrowsForUnknownLogicalId() {
-        HardwareModel model = new HardwareModel("bone1", List.of(), List.of());
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(), List.of());
         HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.resolve("switch_x"));
         assertTrue(ex.getMessage().contains("No hardware mapping"));
     }
@@ -69,13 +69,13 @@ class HardwareModelTest {
     void validatePassesWhenAllDevicesMapped() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
-        HardwareModel model = new HardwareModel("bone1", List.of(ch), List.of(mapping));
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(ch), List.of(mapping));
         assertDoesNotThrow(() -> model.validate(Set.of("switch_1")));
     }
 
     @Test
     void validateFailsWhenDevicesMissing() {
-        HardwareModel model = new HardwareModel("bone1", List.of(), List.of());
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(), List.of());
         HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.validate(Set.of("switch_1", "switch_2")));
         assertTrue(ex.getMessage().contains("Missing hardware mappings"));
         assertTrue(ex.getMessage().contains("switch_1"));
@@ -86,14 +86,14 @@ class HardwareModelTest {
     void validatePartialMissing() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
-        HardwareModel model = new HardwareModel("bone1", List.of(ch), List.of(mapping));
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(ch), List.of(mapping));
         HardwareMappingException ex = assertThrows(HardwareMappingException.class, () -> model.validate(Set.of("switch_1", "switch_missing")));
         assertTrue(ex.getMessage().contains("switch_missing"));
     }
 
     @Test
     void channelsAndMappingsAreUnmodifiable() {
-        HardwareModel model = new HardwareModel("bone1", List.of(), List.of());
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(), List.of());
         assertThrows(UnsupportedOperationException.class, () -> addToList(model.channels()));
         assertThrows(UnsupportedOperationException.class, () -> addToList(model.mappings()));
     }
@@ -104,17 +104,17 @@ class HardwareModelTest {
 
     @Test
     void boardIsSet() {
-        HardwareModel model = new HardwareModel("bone1", List.of(), List.of());
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(), List.of());
         assertEquals("bone1", model.board());
     }
 
     @Test
     void integrationWithDeviceRegistry_mapsOutputs() {
         GpioChannel switchCh = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        Mcp23017Channel outCh = new Mcp23017Channel("i2c-1:0x20:A:0", Mcp23017Channel.Port.A, 0);
+        Mcp23017Channel outCh = new Mcp23017Channel("mcp1", 0);
         HardwareMapping switchMapping = new HardwareMapping("switch_entrance", "Entrance", switchCh);
         HardwareMapping outMapping = new HardwareMapping("out_relay1", "Relay 1", outCh);
-        HardwareModel model = new HardwareModel("bone1", List.of(switchCh, outCh), List.of(switchMapping, outMapping));
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(switchCh, outCh), List.of(switchMapping, outMapping));
 
         DeviceRegistry reg = new DeviceRegistry();
         reg.add(new SwitchDevice("switch_entrance", "Entrance", "out_relay1"));
@@ -131,19 +131,19 @@ class HardwareModelTest {
     }
 
     @Test
-    void yamRoundTrip() throws Exception {
+    void yamlRoundTrip() throws Exception {
         String yaml = """
                 board: bone1
                 channels:
                   - type: gpio
-                    location: "P9_11"
+                    pin: "P9_11"
                     direction: input
                 mappings:
                   - logical_id: switch_entrance
                     description: "Entrance door switch"
                     physical:
                       type: gpio
-                      location: "P9_11"
+                      pin: "P9_11"
                       direction: input
                 """;
         Path f = writeYaml(yaml);
@@ -158,7 +158,7 @@ class HardwareModelTest {
         PhysicalChannel ch = model.channels().getFirst();
         assertInstanceOf(GpioChannel.class, ch);
         GpioChannel gpio = (GpioChannel) ch;
-        assertEquals("P9_11", gpio.location());
+        assertEquals("P9_11", gpio.pinLabel());
         assertEquals(GpioChannel.Direction.INPUT, gpio.direction());
 
         HardwareMapping mapping = model.mappings().getFirst();
@@ -170,8 +170,8 @@ class HardwareModelTest {
     void equalsAndHashCode() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
-        HardwareModel a = new HardwareModel("bone1", List.of(ch), List.of(mapping));
-        HardwareModel b = new HardwareModel("bone1", List.of(ch), List.of(mapping));
+        HardwareModel a = new HardwareModel("bone1", null, List.of(), List.of(ch), List.of(mapping));
+        HardwareModel b = new HardwareModel("bone1", null, List.of(), List.of(ch), List.of(mapping));
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
     }
@@ -179,15 +179,15 @@ class HardwareModelTest {
     @Test
     void notEqual_differentBoard() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareModel a = new HardwareModel("bone1", List.of(ch), List.of());
-        HardwareModel b = new HardwareModel("bone2", List.of(ch), List.of());
+        HardwareModel a = new HardwareModel("bone1", null, List.of(), List.of(ch), List.of());
+        HardwareModel b = new HardwareModel("bone2", null, List.of(), List.of(ch), List.of());
         assertNotEquals(a, b);
     }
 
     @Test
     void profileFieldSetAndAccessed() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareModel model = new HardwareModel("bone1", "boneio.input-v0.3", List.of(ch), List.of());
+        HardwareModel model = new HardwareModel("bone1", "boneio.input-v0.3", List.of(), List.of(ch), List.of());
         assertEquals("boneio.input-v0.3", model.profile());
         assertEquals("bone1", model.board());
     }
@@ -195,7 +195,7 @@ class HardwareModelTest {
     @Test
     void profileNullWhenNotSet() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareModel model = new HardwareModel("bone1", List.of(ch), List.of());
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(ch), List.of());
         assertNull(model.profile());
     }
 
@@ -203,9 +203,9 @@ class HardwareModelTest {
     void profileIncludedInEqualsAndHashCode() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         var mappings = List.<HardwareMapping>of();
-        HardwareModel a = new HardwareModel("bone1", "profile-a", List.of(ch), mappings);
-        HardwareModel b = new HardwareModel("bone1", "profile-a", List.of(ch), mappings);
-        HardwareModel c = new HardwareModel("bone1", "profile-b", List.of(ch), mappings);
+        HardwareModel a = new HardwareModel("bone1", "profile-a", List.of(), List.of(ch), mappings);
+        HardwareModel b = new HardwareModel("bone1", "profile-a", List.of(), List.of(ch), mappings);
+        HardwareModel c = new HardwareModel("bone1", "profile-b", List.of(), List.of(ch), mappings);
         assertEquals(a, b);
         assertNotEquals(a, c);
     }
@@ -216,7 +216,7 @@ class HardwareModelTest {
                 board: bone1
                 channels:
                   - type: gpio
-                    location: "P9_11"
+                    pin: "P9_11"
                     direction: input
                 mappings:
                   - logical_id: switch_entrance
@@ -224,7 +224,7 @@ class HardwareModelTest {
                     inverted: true
                     physical:
                       type: gpio
-                      location: "P9_11"
+                      pin: "P9_11"
                       direction: input
                 """;
         Path f = writeYaml(yaml);
@@ -244,14 +244,14 @@ class HardwareModelTest {
                 board: bone1
                 channels:
                   - type: gpio
-                    location: "P9_11"
+                    pin: "P9_11"
                     direction: input
                 mappings:
                   - logical_id: switch_normal
                     description: "Normal switch"
                     physical:
                       type: gpio
-                      location: "P9_11"
+                      pin: "P9_11"
                       direction: input
                 """;
         Path f = writeYaml(yaml);
@@ -261,5 +261,25 @@ class HardwareModelTest {
         HardwareModel model = mapper.readValue(f.toFile(), HardwareModel.class);
         HardwareMapping mapping = model.mappings().getFirst();
         assertFalse(mapping.inverted());
+    }
+
+    @Test
+    void chipsSectionPopulatesChipRegistry() {
+        HardwareChip chip1 = new HardwareChip("mcp1", "mcp23017", 0x20);
+        HardwareChip chip2 = new HardwareChip("mcp2", "mcp23017", 0x21);
+        Mcp23017Channel ch = new Mcp23017Channel("mcp1", 0);
+        HardwareMapping mapping = new HardwareMapping("out_1", "Output 1", ch);
+        HardwareModel model = new HardwareModel("bone1", null, List.of(chip1, chip2), List.of(ch), List.of(mapping));
+        assertEquals(2, model.chips().size());
+        assertSame(chip1, model.getChip("mcp1"));
+        assertSame(chip2, model.getChip("mcp2"));
+        assertNull(model.getChip("nonexistent"));
+    }
+
+    @Test
+    void chipsEmptyWhenNotDeclared() {
+        GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
+        HardwareModel model = new HardwareModel("bone1", null, List.of(), List.of(ch), List.of());
+        assertEquals(0, model.chips().size());
     }
 }

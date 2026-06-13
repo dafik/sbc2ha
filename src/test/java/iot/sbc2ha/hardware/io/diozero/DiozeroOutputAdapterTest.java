@@ -1,6 +1,10 @@
 package iot.sbc2ha.hardware.io.diozero;
 
+import com.diozero.devices.MCP23017;
+import com.diozero.devices.mcp23xxx.MCP23xxx;
+import iot.sbc2ha.hardware.io.OutputDelegate;
 import iot.sbc2ha.runtime.DeviceState;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,87 +15,33 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for {@link DiozeroOutputAdapter}.
  *
- * <p>Tests the I2C address/pin parsing logic, write/read semantics,
- * and inversion support. Hardware communication tests are covered
- * by integration tests on real hardware.</p>
+ * <p>Tests inversion logic, write/read semantics, and state tracking.
+ * String parsing is tested in {@link DiozeroInputOutputFactoryTest}
+ * since the adapter no longer knows about I2C addresses or pins.</p>
  */
 @DisplayName("DiozeroOutputAdapter")
 class DiozeroOutputAdapterTest {
 
     @BeforeAll
     static void setUp() {
-        // Use mock provider so I2C operations hit MockI2CDevice instead of real hardware
         System.setProperty("diozero.devicefactory", "com.diozero.internal.provider.mock.MockDeviceFactory");
     }
 
+    @AfterEach
+    void tearDown() {
+        HardwareComponentRegistry.INSTANCE.clear();
+    }
+
     // -----------------------------------------------------------------------
-    // Location string parsing
+    // Helper: create an adapter with a pre-built MCP23017 chip
     // -----------------------------------------------------------------------
 
-    @Nested
-    @DisplayName("Location parsing")
-    class LocationParsing {
-
-        @Test
-        @DisplayName("parses hex address location string")
-        void parsesHexAddressLocation() {
-            // pinId = "i2c-1:0x20:A:0" → bus=1, addr=0x20=32, port=A, pin=0
-            // The constructor reads OLAT from chip on construction.
-            // We test via the package-private constructor to avoid real I2C.
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 0, false);
-            assertEquals(1, adapter.i2cBus());
-            assertEquals(0x20, adapter.i2cAddress());
-            assertEquals(0, adapter.pin());
-        }
-
-        @Test
-        @DisplayName("parses decimal address location string")
-        void parsesDecimalAddressLocation() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 32, 0, false);
-            assertEquals(1, adapter.i2cBus());
-            assertEquals(32, adapter.i2cAddress());
-        }
-
-        @Test
-        @DisplayName("parses port B pins (offset +8)")
-        void parsesPortB() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 8, false);
-            assertEquals(1, adapter.i2cBus());
-            assertEquals(0x20, adapter.i2cAddress());
-            assertEquals(8, adapter.pin());
-        }
-
-        @Test
-        @DisplayName("parses highest port B pin (pin 15)")
-        void parsesHighestPin() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(0, 0x27, 15, false);
-            assertEquals(0, adapter.i2cBus());
-            assertEquals(0x27, adapter.i2cAddress());
-            assertEquals(15, adapter.pin());
-        }
-
-        @Test
-        @DisplayName("throws on missing colon-separated parts")
-        void rejectsMissingParts() {
-            // Package-private constructor bypasses parsing — test the parsing separately
-            // by catching the constructor that takes the string
-            assertThrows(IllegalArgumentException.class,
-                    () -> new DiozeroOutputAdapter("invalid", false));
-        }
-
-        @Test
-        @DisplayName("throws on invalid port (not A or B)")
-        void rejectsInvalidPort() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> new DiozeroOutputAdapter("i2c-1:0x20:C:0", false));
-        }
-
-        @Test
-        @DisplayName("throws on invalid pin number (>7)")
-        void rejectsInvalidPin() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> new DiozeroOutputAdapter("i2c-1:0x20:A:8", false));
-        }
+    private DiozeroOutputAdapter createAdapter(int i2cBus, int i2cAddress, int globalPin, boolean inverted) {
+        HardwareComponentKey chipKey = new HardwareComponentKey("mcp23017", i2cBus + ":" + i2cAddress);
+        MCP23017 mcp = new MCP23017(i2cBus, i2cAddress, MCP23xxx.INTERRUPT_GPIO_NOT_SET);
+        HardwareComponentRegistry.INSTANCE.getOrRegister(chipKey, () -> mcp);
+        OutputDelegate delegate = OutputDelegateFactory.create(mcp, globalPin);
+        return new DiozeroOutputAdapter(inverted, delegate);
     }
 
     // -----------------------------------------------------------------------
@@ -105,7 +55,7 @@ class DiozeroOutputAdapterTest {
         @Test
         @DisplayName("write(ON) sets logical state to ON")
         void writeOnSetsState() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 0, false);
+            DiozeroOutputAdapter adapter = createAdapter(1, 0x20, 0, false);
             adapter.write(DeviceState.ON);
             assertEquals(DeviceState.ON, adapter.getState());
         }
@@ -113,7 +63,7 @@ class DiozeroOutputAdapterTest {
         @Test
         @DisplayName("write(OFF) sets logical state to OFF")
         void writeOffSetsState() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 5, false);
+            DiozeroOutputAdapter adapter = createAdapter(1, 0x20, 5, false);
             adapter.write(DeviceState.OFF);
             assertEquals(DeviceState.OFF, adapter.getState());
         }
@@ -121,7 +71,7 @@ class DiozeroOutputAdapterTest {
         @Test
         @DisplayName("write toggles state between ON and OFF")
         void writeToggles() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 3, false);
+            DiozeroOutputAdapter adapter = createAdapter(1, 0x20, 3, false);
             adapter.write(DeviceState.ON);
             assertEquals(DeviceState.ON, adapter.getState());
             adapter.write(DeviceState.OFF);
@@ -142,7 +92,7 @@ class DiozeroOutputAdapterTest {
         @Test
         @DisplayName("non-inverted write(ON) sets state to ON")
         void nonInvertedWriteOn() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 0, false);
+            DiozeroOutputAdapter adapter = createAdapter(1, 0x20, 0, false);
             adapter.write(DeviceState.ON);
             assertEquals(DeviceState.ON, adapter.getState());
         }
@@ -150,7 +100,7 @@ class DiozeroOutputAdapterTest {
         @Test
         @DisplayName("inverted write(ON) still sets logical state to ON")
         void invertedWriteOn() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 0, true);
+            DiozeroOutputAdapter adapter = createAdapter(1, 0x20, 0, true);
             adapter.write(DeviceState.ON);
             // Logical state is ON (physical would be LOW/0)
             assertEquals(DeviceState.ON, adapter.getState());
@@ -159,7 +109,7 @@ class DiozeroOutputAdapterTest {
         @Test
         @DisplayName("inverted write(OFF) sets logical state to OFF")
         void invertedWriteOff() {
-            DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 0, true);
+            DiozeroOutputAdapter adapter = createAdapter(1, 0x20, 0, true);
             adapter.write(DeviceState.OFF);
             assertEquals(DeviceState.OFF, adapter.getState());
         }
@@ -170,22 +120,50 @@ class DiozeroOutputAdapterTest {
     // -----------------------------------------------------------------------
 
     @Test
-    @DisplayName("toString includes bus, address, and pin")
+    @DisplayName("toString includes adapter class name")
     void toStringContainsInfo() {
-        DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 3, false);
+        DiozeroOutputAdapter adapter = createAdapter(1, 0x20, 3, false);
         String s = adapter.toString();
         assertTrue(s.contains("DiozeroOutputAdapter"));
-        assertTrue(s.contains("bus=1"));
-        assertTrue(s.contains("0x20"));
-        assertTrue(s.contains("pin=3"));
     }
 
     @Test
     @DisplayName("getState returns last written state")
     void getStateReturnsLastState() {
-        DiozeroOutputAdapter adapter = new DiozeroOutputAdapter(1, 0x20, 7, false);
+        DiozeroOutputAdapter adapter = createAdapter(1, 0x20, 7, false);
         assertEquals(DeviceState.OFF, adapter.getState()); // default from OLAT read
         adapter.write(DeviceState.ON);
         assertEquals(DeviceState.ON, adapter.getState());
+    }
+
+    // -----------------------------------------------------------------------
+    // Chip sharing (registry singleton per bus+addr)
+    // -----------------------------------------------------------------------
+
+    @Nested
+    @DisplayName("Chip sharing")
+    class ChipSharing {
+
+        @Test
+        @DisplayName("adapters on same chip share the same registry entry")
+        void adaptersShareChipInstance() {
+            DiozeroOutputAdapter a1 = createAdapter(1, 0x20, 0, false);
+            DiozeroOutputAdapter a2 = createAdapter(1, 0x20, 5, false);
+
+            var key = new HardwareComponentKey("mcp23017", "1:32");
+            assertNotNull(HardwareComponentRegistry.INSTANCE.getComponent(key));
+        }
+
+        @Test
+        @DisplayName("adapters on different chips have separate registry entries")
+        void differentChipsSeparateEntries() {
+            DiozeroOutputAdapter a1 = createAdapter(1, 0x20, 0, false);
+            DiozeroOutputAdapter a2 = createAdapter(1, 0x21, 0, false);
+
+            var key0x20 = new HardwareComponentKey("mcp23017", "1:32");
+            var key0x21 = new HardwareComponentKey("mcp23017", "1:33");
+            assertNotNull(HardwareComponentRegistry.INSTANCE.getComponent(key0x20));
+            assertNotNull(HardwareComponentRegistry.INSTANCE.getComponent(key0x21));
+        }
     }
 }

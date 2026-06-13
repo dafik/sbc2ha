@@ -5,3 +5,4 @@ README.md
 angular-test.iml
 target/
 /.qwen/
+/CONTINUATION_PROMPT.md

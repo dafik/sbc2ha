@@ -1,0 +1,165 @@
+# BBB chip + line offset overrides for kernel 6.x + BONEIO-BLACK-PINS overlay.
+#
+# Format: HEADER,PIN,DIOZERO_CHIP,DIOZERO_LINE,KERNEL_CHIP,KERNEL_LINE
+#
+# Derived from:
+#   - Diozero ti_am335x-bone.txt (kernel 4.x board definitions)
+#   - Kernel 6.18.34-bone37 gpioinfo dump (gpiochip + line mapping)
+#
+# Diozero assigns chip/line offsets baked into PinInfo objects.
+# Kernel 6.x gpiochip numbers AND line offsets differ for many pins.
+#
+# HOW TO DISCOVER YOUR MAPPING ON KERNEL 6.x:
+#   gpiodump -c 0 -c 1 -c 2 -c 3
+#   Or: gpioinfo /dev/gpiochip0   (repeat for chip 1,2,3)
+#
+# PINS NOT LISTED: diozero chip+line matches kernel 6.x — no override needed.
+#
+# KERNEL 4.x: If you're on kernel 4.x with cape-universal, diozero's board
+#   definitions work as-is (no overrides). See
+#   hardware-profiles/boneio/bbb-kernel4-bbb-chip-mappings.txt for the old
+#   kernel chip assignment reference table.
+#
+# Verified on: kernel 6.18.34-bone37 (BeagleBoard.org Debian Trixie Base Image 2026-05-19)
+#
+# ── Diozero chip 0 → Kernel chip 2 (P9_41) ──
+# P9_41: diozero chip=0, line=20 → kernel gpiochip2, line=20
+P9,41,0,20,2,20
+# ── Diozero chip 0 → Kernel chip 3 (P8_14, P8_17, P8_31, P8_32, P8_33, P8_35, P9_11, P9_13, P9_17, P9_18, P9_19, P9_20, P9_21, P9_22, P9_24, P9_26) ──
+# P8_14: diozero chip=0, line=26 → kernel gpiochip3, line=26
+P8,14,0,26,3,26
+# P8_17: diozero chip=0, line=27 → kernel gpiochip3, line=27
+P8,17,0,27,3,27
+# P8_31: diozero chip=0, line=10 → kernel gpiochip3, line=10
+P8,31,0,10,3,10
+# P8_32: diozero chip=0, line=11 → kernel gpiochip3, line=11
+P8,32,0,11,3,11
+# P8_33: diozero chip=0, line=9 → kernel gpiochip3, line=9
+P8,33,0,9,3,9
+# P8_35: diozero chip=0, line=8 → kernel gpiochip3, line=8
+P8,35,0,8,3,8
+# P9_11: diozero chip=0, line=30 → kernel gpiochip3, line=30
+P9,11,0,30,3,30
+# P9_13: diozero chip=0, line=31 → kernel gpiochip3, line=31
+P9,13,0,31,3,31
+# P9_17: diozero chip=0, line=5 → kernel gpiochip3, line=5
+P9,17,0,5,3,5
+# P9_18: diozero chip=0, line=4 → kernel gpiochip3, line=4
+P9,18,0,4,3,4
+# P9_19: diozero chip=0, line=13 → kernel gpiochip3, line=13
+P9,19,0,13,3,13
+# P9_20: diozero chip=0, line=12 → kernel gpiochip3, line=12
+P9,20,0,12,3,12
+# P9_21: diozero chip=0, line=3 → kernel gpiochip3, line=3
+P9,21,0,3,3,3
+# P9_22: diozero chip=0, line=2 → kernel gpiochip3, line=2
+P9,22,0,2,3,2
+# P9_24: diozero chip=0, line=15 → kernel gpiochip3, line=15
+P9,24,0,15,3,15
+# P9_26: diozero chip=0, line=14 → kernel gpiochip3, line=14
+P9,26,0,14,3,14
+# ── Diozero chip 1 → Kernel chip 0 (P8_3, P8_4, P8_5, P8_6, P8_11, P8_12, P8_15, P8_16, P8_20, P8_21, P8_22, P8_23, P8_25, P8_26, P9_12, P9_23) ──
+# P8_3: diozero chip=1, line=6 → kernel gpiochip0, line=6
+P8,3,1,6,0,6
+# P8_4: diozero chip=1, line=7 → kernel gpiochip0, line=7
+P8,4,1,7,0,7
+# P8_5: diozero chip=1, line=2 → kernel gpiochip0, line=2
+P8,5,1,2,0,2
+# P8_6: diozero chip=1, line=3 → kernel gpiochip0, line=3
+P8,6,1,3,0,3
+# P8_11: diozero chip=1, line=13 → kernel gpiochip0, line=13
+P8,11,1,13,0,13
+# P8_12: diozero chip=1, line=12 → kernel gpiochip0, line=12
+P8,12,1,12,0,12
+# P8_15: diozero chip=1, line=15 → kernel gpiochip0, line=15
+P8,15,1,15,0,15
+# P8_16: diozero chip=1, line=14 → kernel gpiochip0, line=14
+P8,16,1,14,0,14
+# P8_20: diozero chip=1, line=31 → kernel gpiochip0, line=31
+P8,20,1,31,0,31
+# P8_21: diozero chip=1, line=30 → kernel gpiochip0, line=30
+P8,21,1,30,0,30
+# P8_22: diozero chip=1, line=5 → kernel gpiochip0, line=5
+P8,22,1,5,0,5
+# P8_23: diozero chip=1, line=4 → kernel gpiochip0, line=4
+P8,23,1,4,0,4
+# P8_25: diozero chip=1, line=0 → kernel gpiochip0, line=0
+P8,25,1,0,0,0
+# P8_26: diozero chip=1, line=29 → kernel gpiochip0, line=29
+P8,26,1,29,0,29
+# P9_12: diozero chip=1, line=28 → kernel gpiochip0, line=28
+P9,12,1,28,0,28
+# P9_23: diozero chip=1, line=17 → kernel gpiochip0, line=17
+P9,23,1,17,0,17
+# ── Diozero chip 1 → Kernel chip 1 (P9_15) ──
+# P9_15: diozero chip=1, line=16 → kernel gpiochip1, line=0
+# P9,15,1,16,1,0  # LINE ONLY: 16→0
+# ── Diozero chip 2 → Kernel chip 1 (P8_7, P8_8, P8_9, P8_10, P8_18, P8_27, P8_28, P8_29, P8_30, P8_34, P8_36, P8_37, P8_38, P8_39, P8_40, P8_41, P8_42, P8_43, P8_44, P8_45, P8_46) ──
+# P8_7: diozero chip=2, line=2 → kernel gpiochip1, line=2
+P8,7,2,2,1,2
+# P8_8: diozero chip=2, line=3 → kernel gpiochip1, line=3
+P8,8,2,3,1,3
+# P8_9: diozero chip=2, line=5 → kernel gpiochip1, line=5
+P8,9,2,5,1,5
+# P8_10: diozero chip=2, line=4 → kernel gpiochip1, line=4
+P8,10,2,4,1,4
+# P8_18: diozero chip=2, line=1 → kernel gpiochip1, line=1
+P8,18,2,1,1,1
+# P8_27: diozero chip=2, line=22 → kernel gpiochip1, line=22
+P8,27,2,22,1,22
+# P8_28: diozero chip=2, line=24 → kernel gpiochip1, line=24
+P8,28,2,24,1,24
+# P8_29: diozero chip=2, line=23 → kernel gpiochip1, line=23
+P8,29,2,23,1,23
+# P8_30: diozero chip=2, line=25 → kernel gpiochip1, line=25
+P8,30,2,25,1,25
+# P8_34: diozero chip=2, line=17 → kernel gpiochip1, line=17
+P8,34,2,17,1,17
+# P8_36: diozero chip=2, line=16 → kernel gpiochip1, line=16
+P8,36,2,16,1,16
+# P8_37: diozero chip=2, line=14 → kernel gpiochip1, line=14
+P8,37,2,14,1,14
+# P8_38: diozero chip=2, line=15 → kernel gpiochip1, line=15
+P8,38,2,15,1,15
+# P8_39: diozero chip=2, line=12 → kernel gpiochip1, line=12
+P8,39,2,12,1,12
+# P8_40: diozero chip=2, line=13 → kernel gpiochip1, line=13
+P8,40,2,13,1,13
+# P8_41: diozero chip=2, line=10 → kernel gpiochip1, line=10
+P8,41,2,10,1,10
+# P8_42: diozero chip=2, line=11 → kernel gpiochip1, line=11
+P8,42,2,11,1,11
+# P8_43: diozero chip=2, line=8 → kernel gpiochip1, line=8
+P8,43,2,8,1,8
+# P8_44: diozero chip=2, line=9 → kernel gpiochip1, line=9
+P8,44,2,9,1,9
+# P8_45: diozero chip=2, line=6 → kernel gpiochip1, line=6
+P8,45,2,6,1,6
+# P8_46: diozero chip=2, line=7 → kernel gpiochip1, line=7
+P8,46,2,7,1,7
+# ── Diozero chip 3 → Kernel chip 2 (P9_25, P9_27, P9_28, P9_29, P9_30, P9_31) ──
+# P9_25: diozero chip=3, line=21 → kernel gpiochip2, line=21
+P9,25,3,21,2,21
+# P9_27: diozero chip=3, line=19 → kernel gpiochip2, line=19
+P9,27,3,19,2,19
+# P9_28: diozero chip=3, line=17 → kernel gpiochip2, line=17
+P9,28,3,17,2,17
+# P9_29: diozero chip=3, line=15 → kernel gpiochip2, line=15
+P9,29,3,15,2,15
+# P9_30: diozero chip=3, line=16 → kernel gpiochip2, line=16
+P9,30,3,16,2,16
+# P9_31: diozero chip=3, line=14 → kernel gpiochip2, line=14
+P9,31,3,14,2,14
+#
+# ── Pins not in diozero board defs (chip=-1) → kernel gpiochips ──
+# These pins exist in kernel 6.x device tree but have no entry in
+# diozero's ti_am335x-bone.txt. Manually added from gpioinfo dump.
+# P9_42A [IN_11]: diozero chip=-1 (not in defs) → kernel gpiochip3, line 7
+P9,42,-1,-1,3,7
+# P9_16 [IN_24]: diozero chip=-1 (not in defs) → kernel gpiochip0, line 19
+P9,16,-1,-1,0,19
+# P9_14 [IN_25]: diozero chip=-1 (not in defs) → kernel gpiochip0, line 18
+P9,14,-1,-1,0,18
+# P8_19 [IN_40]: diozero chip=-1 (not in defs) → kernel gpiochip3, line 22
+P8,19,-1,-1,3,22
+

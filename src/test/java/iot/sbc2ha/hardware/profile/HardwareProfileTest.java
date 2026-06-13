@@ -38,9 +38,10 @@ class HardwareProfileTest {
     void createsWithAllFields() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
-        HardwareProfile profile = new HardwareProfile("test-id", true, List.of(ch), List.of(mapping));
+        HardwareProfile profile = new HardwareProfile("test-id", true, List.of(), List.of(ch), List.of(mapping));
         assertEquals("test-id", profile.id());
         assertTrue(profile.incomplete());
+        assertEquals(0, profile.chips().size());
         assertEquals(1, profile.channelCount());
         assertEquals(1, profile.mappingCount());
     }
@@ -48,25 +49,25 @@ class HardwareProfileTest {
     @Test
     void incompleteFalseWhenNotSpecified() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(ch), List.of());
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(ch), List.of());
         assertFalse(profile.incomplete());
     }
 
     @Test
     void incompleteNullDefaultsToFalse() {
-        HardwareProfile profile = new HardwareProfile("test", null, List.of(), List.of());
+        HardwareProfile profile = new HardwareProfile("test", null, List.of(), List.of(), List.of());
         assertFalse(profile.incomplete());
     }
 
     @Test
     void channelsNullSafe() {
-        HardwareProfile profile = new HardwareProfile("test", false, null, List.of());
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), null, List.of());
         assertTrue(profile.channels().isEmpty());
     }
 
     @Test
     void mappingsNullSafe() {
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(), null);
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(), null);
         assertTrue(profile.mappings().isEmpty());
     }
 
@@ -74,13 +75,13 @@ class HardwareProfileTest {
 
     @Test
     void channelsUnmodifiable() {
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of());
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(), List.of());
         assertThrows(UnsupportedOperationException.class, () -> profile.channels().add(null));
     }
 
     @Test
     void mappingsUnmodifiable() {
-        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of());
+        HardwareProfile profile = new HardwareProfile("test", false, List.of(), List.of(), List.of());
         assertThrows(UnsupportedOperationException.class, () -> profile.mappings().add(null));
     }
 
@@ -89,23 +90,23 @@ class HardwareProfileTest {
     @Test
     void equalsAndHashCode_sameContent() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
-        HardwareProfile a = new HardwareProfile("test", true, List.of(ch), List.of());
-        HardwareProfile b = new HardwareProfile("test", true, List.of(ch), List.of());
+        HardwareProfile a = new HardwareProfile("test", true, List.of(), List.of(ch), List.of());
+        HardwareProfile b = new HardwareProfile("test", true, List.of(), List.of(ch), List.of());
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test
     void notEqual_differentId() {
-        HardwareProfile a = new HardwareProfile("a", true, List.of(), List.of());
-        HardwareProfile b = new HardwareProfile("b", true, List.of(), List.of());
+        HardwareProfile a = new HardwareProfile("a", true, List.of(), List.of(), List.of());
+        HardwareProfile b = new HardwareProfile("b", true, List.of(), List.of(), List.of());
         assertNotEquals(a, b);
     }
 
     @Test
     void notEqual_differentIncomplete() {
-        HardwareProfile a = new HardwareProfile("test", true, List.of(), List.of());
-        HardwareProfile b = new HardwareProfile("test", false, List.of(), List.of());
+        HardwareProfile a = new HardwareProfile("test", true, List.of(), List.of(), List.of());
+        HardwareProfile b = new HardwareProfile("test", false, List.of(), List.of(), List.of());
         assertNotEquals(a, b);
     }
 
@@ -115,7 +116,7 @@ class HardwareProfileTest {
     void toStringIncludesAllFields() {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_1", "switch 1", ch);
-        HardwareProfile profile = new HardwareProfile("test-id", true, List.of(ch), List.of(mapping));
+        HardwareProfile profile = new HardwareProfile("test-id", true, List.of(), List.of(ch), List.of(mapping));
         String s = profile.toString();
         assertTrue(s.contains("test-id"));
         assertTrue(s.contains("true"));
@@ -130,16 +131,17 @@ class HardwareProfileTest {
         String yaml = """
                 id: yrt-test
                 incomplete: true
+                chips: []
                 channels:
                   - type: gpio
-                    location: "P9_11"
+                    pin: "P9_11"
                     direction: input
                 mappings:
                   - logical_id: switch_x
                     description: "X switch"
                     physical:
                       type: gpio
-                      location: "P9_11"
+                      pin: "P9_11"
                       direction: input
                 """;
         Path f = writeYaml(yaml);
@@ -161,8 +163,8 @@ class HardwareProfileTest {
         GpioChannel ch = new GpioChannel("P9_11", GpioChannel.Direction.INPUT);
         HardwareMapping mapping = new HardwareMapping("switch_x", "X switch", ch);
 
-        HardwareModel fromProfile = new HardwareModel("test", "test", List.of(ch), List.of(mapping));
-        HardwareModel fromManual = new HardwareModel("test", null, List.of(ch), List.of(mapping));
+        HardwareModel fromProfile = new HardwareModel("test", "test", List.of(), List.of(ch), List.of(mapping));
+        HardwareModel fromManual = new HardwareModel("test", null, List.of(), List.of(ch), List.of(mapping));
 
         // Channels and mappings are equivalent even though profile differs
         assertEquals(fromProfile.channels(), fromManual.channels());

@@ -3,6 +3,8 @@ package iot.sbc2ha.hardware.profile;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.databind.MapperFeature;
+import iot.sbc2ha.hardware.GpioChannel;
+import iot.sbc2ha.hardware.HardwareChip;
 import iot.sbc2ha.hardware.HardwareMapping;
 import iot.sbc2ha.hardware.HardwareModel;
 import iot.sbc2ha.hardware.PhysicalChannel;
@@ -56,8 +58,9 @@ public final class ProfileRegistry {
         if (id == null) {
             throw new ProfileLoadingException("Profile must have a non-null id");
         }
+        // Idempotent: skip if already registered (loadFromClasspath may have already registered)
         if (profiles.containsKey(id)) {
-            throw new ProfileLoadingException("Profile already registered: " + id);
+            return;
         }
         profiles.put(id, profile);
     }
@@ -74,7 +77,9 @@ public final class ProfileRegistry {
         if (url == null) {
             throw new ProfileLoadingException("Profile resource not found on classpath: " + resourcePath);
         }
-        return loadFromUrl(url);
+        HardwareProfile profile = loadFromUrl(url);
+        register(profile);
+        return profile;
     }
 
     /**
@@ -86,7 +91,9 @@ public final class ProfileRegistry {
      */
     public HardwareProfile loadFromFile(Path path) {
         try {
-            return yamlMapper.readValue(path.toFile(), HardwareProfile.class);
+            HardwareProfile profile = yamlMapper.readValue(path.toFile(), HardwareProfile.class);
+            register(profile);
+            return profile;
         } catch (IOException e) {
             throw new ProfileLoadingException("Failed to load profile from file: " + path, e);
         }
@@ -103,7 +110,7 @@ public final class ProfileRegistry {
     /**
      * Expand a registered profile into a HardwareModel.
      * <p>
-     * The resulting model uses the profile's channels and mappings directly.
+     * The resulting model uses the profile's chips, channels and mappings directly.
      * Additional channels and mappings passed as arguments are appended after
      * the profile's contents (useful for extending a profile).
      *
@@ -122,6 +129,8 @@ public final class ProfileRegistry {
                     + ". Registered profiles: " + profiles.keySet());
         }
 
+        List<HardwareChip> allChips = profile.chips() != null
+                ? new ArrayList<>(profile.chips()) : new ArrayList<>();
         List<PhysicalChannel> allChannels = new ArrayList<>(profile.channels());
         List<HardwareMapping> allMappings = new ArrayList<>(profile.mappings());
 
@@ -132,14 +141,14 @@ public final class ProfileRegistry {
             allMappings.addAll(extraMappings);
         }
 
-        return new HardwareModel(profileName, profileName, allChannels, allMappings);
+        return new HardwareModel(profileName, profileName, allChips, allChannels, allMappings);
     }
 
     /**
      * Expand a profile with overrides — channels and mappings replace
      * profile entries with the same identifier.
      * <p>
-     * Override channels replace by location; override mappings replace by logical_id.
+     * Override channels replace by bus id; override mappings replace by logical_id.
      *
      * @param profileName      the registered profile name
      * @param overrideChannels channels that replace matching profile channels
@@ -156,10 +165,12 @@ public final class ProfileRegistry {
                     + ". Registered profiles: " + profiles.keySet());
         }
 
+        List<HardwareChip> allChips = profile.chips() != null
+                ? new ArrayList<>(profile.chips()) : new ArrayList<>();
         List<PhysicalChannel> channels = applyChannelOverrides(profile.channels(), overrideChannels);
         List<HardwareMapping> mappings = applyMappingOverrides(profile.mappings(), overrideMappings);
 
-        return new HardwareModel(profileName, profileName, channels, mappings);
+        return new HardwareModel(profileName, profileName, allChips, channels, mappings);
     }
 
     private static List<PhysicalChannel> applyChannelOverrides(
@@ -169,24 +180,44 @@ public final class ProfileRegistry {
             return profileChannels;
         }
 
-        // Build a map of location → override channel
+        // Build a map of channel identifier → override channel.
+        // I2C channels (MCP23017, PCA9685, OLED) use bus id.
+        // GPIO channels use pin label.
         Map<String, PhysicalChannel> overrideMap = new LinkedHashMap<>();
         for (PhysicalChannel ch : overrides) {
-            overrideMap.put(ch.location(), ch);
+            overrideMap.put(channelKey(ch), ch);
         }
 
         List<PhysicalChannel> result = new ArrayList<>();
         for (PhysicalChannel ch : profileChannels) {
-            PhysicalChannel override = overrideMap.get(ch.location());
+            String key = channelKey(ch);
+            PhysicalChannel override = overrideMap.get(key);
             result.add(Objects.requireNonNullElse(override, ch));
         }
         // Append overrides that don't match any profile channel
         for (Map.Entry<String, PhysicalChannel> entry : overrideMap.entrySet()) {
-            if (profileChannels.stream().noneMatch(ch -> ch.location().equals(entry.getKey()))) {
+            boolean found = profileChannels.stream()
+                    .anyMatch(ch -> channelKey(ch).equals(entry.getKey()));
+            if (!found) {
                 result.add(entry.getValue());
             }
         }
         return Collections.unmodifiableList(result);
+    }
+
+    /**
+     * Build a unique key for a channel for override matching.
+     * I2C channels (bus != null) use bus id.
+     * GPIO channels use pin label.
+     */
+    private static String channelKey(PhysicalChannel ch) {
+        if (ch.bus() != null) {
+            return ch.bus();
+        }
+        if (ch instanceof GpioChannel gpio) {
+            return gpio.pinLabel();
+        }
+        return ch.toString();
     }
 
     private static List<HardwareMapping> applyMappingOverrides(

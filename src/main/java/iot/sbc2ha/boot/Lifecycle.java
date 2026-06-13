@@ -19,7 +19,7 @@ public class Lifecycle {
     private static final Logger log = LoggerFactory.getLogger(Lifecycle.class);
 
     private LifecycleState state = LifecycleState.BOOTING;
-    private final BootDisplay display;
+    private BootDisplay display;
 
     public Lifecycle(BootDisplay display) {
         this.display = display;
@@ -50,6 +50,16 @@ public class Lifecycle {
         } catch (Exception e) {
             log.warn("BootDisplay.update failed (non-fatal): {}", e.getMessage());
         }
+    }
+
+    /**
+     * Replace the display with a new implementation (e.g. swap from
+     * log-only to real OLED after config is parsed).
+     *
+     * @param newDisplay the new display to use
+     */
+    public void setDisplay(BootDisplay newDisplay) {
+        this.display = newDisplay;
     }
 
     /**

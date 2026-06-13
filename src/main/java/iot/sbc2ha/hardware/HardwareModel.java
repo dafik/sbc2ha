@@ -1,6 +1,7 @@
 package iot.sbc2ha.hardware;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.*;
@@ -8,73 +9,65 @@ import java.util.*;
 /**
  * Complete hardware mapping model for a board.
  * <p>
- * Contains all physical channel definitions and logical-to-physical mappings.
+ * Contains I2C chip declarations, physical channel definitions, and
+ * logical-to-physical mappings. I2C channels reference chips by {@code bus} id.
  * Provides resolution from logical device ID to the underlying physical channel.
  * <p>
  * Validates that every device in the registry has a corresponding mapping.
  *
  * <pre>
  * board: bone1
+ * chips:
+ *   - id: mcp1
+ *     type: mcp23017
+ *     i2c_address: 0x20
  * channels:
- *   - type: gpio
- *     location: "P9_11"
- *     direction: input
  *   - type: mcp23017
- *     location: "i2c-1:0x20:A:0"
- *     port: A
+ *     bus: mcp1
  *     pin: 0
  * mappings:
- *   - logical_id: switch_entrance
- *     description: "Entrance door switch"
- *     physical:
- *       type: gpio
- *       location: "P9_11"
- *       direction: input
  *   - logical_id: out_relay1
  *     description: "First relay"
  *     physical:
  *       type: mcp23017
- *       location: "i2c-1:0x20:A:0"
- *       port: A
+ *       bus: mcp1
  *       pin: 0
  * </pre>
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class HardwareModel {
 
     private String board;
     private String profile;
+    private List<HardwareChip> chips;
     private List<PhysicalChannel> channels = new ArrayList<>();
     private List<HardwareMapping> mappings = new ArrayList<>();
     private final Map<String, HardwareMapping> byLogicalId = new LinkedHashMap<>();
+    private final Map<String, HardwareChip> chipsById = new LinkedHashMap<>();
 
     @SuppressWarnings("unused")
     HardwareModel() {}
 
-    @JsonCreator
-    public HardwareModel(
-            @JsonProperty("board") String board,
-            @JsonProperty("channels") List<PhysicalChannel> channels,
-            @JsonProperty("mappings") List<HardwareMapping> mappings) {
-        this.board = board;
-        this.channels = channels != null ? List.copyOf(channels) : List.of();
-        if (mappings != null) {
-            this.mappings = new ArrayList<>(mappings);
-            for (HardwareMapping m : this.mappings) {
-                byLogicalId.put(m.logicalId(), m);
-            }
-        } else {
-            this.mappings = List.of();
-        }
-    }
-
     /**
      * Create a HardwareModel with an optional profile reference.
      */
-    public HardwareModel(String board, String profile,
-                         List<PhysicalChannel> channels,
-                         List<HardwareMapping> mappings) {
+    @JsonCreator
+    public HardwareModel(
+            @JsonProperty("board") String board,
+            @JsonProperty("profile") String profile,
+            @JsonProperty("chips") List<HardwareChip> chips,
+            @JsonProperty("channels") List<PhysicalChannel> channels,
+            @JsonProperty("mappings") List<HardwareMapping> mappings) {
         this.board = board;
         this.profile = profile;
+        if (chips != null) {
+            this.chips = List.copyOf(chips);
+            for (HardwareChip c : this.chips) {
+                chipsById.put(c.id(), c);
+            }
+        } else {
+            this.chips = List.of();
+        }
         this.channels = channels != null ? List.copyOf(channels) : List.of();
         if (mappings != null) {
             this.mappings = new ArrayList<>(mappings);
@@ -99,6 +92,24 @@ public final class HardwareModel {
      */
     public String profile() {
         return profile;
+    }
+
+    /**
+     * I2C chips declared in this profile, in insertion order.
+     * Empty list if no chips are declared.
+     */
+    public List<HardwareChip> chips() {
+        return Collections.unmodifiableList(chips);
+    }
+
+    /**
+     * Lookup a chip by its bus id.
+     *
+     * @param id the chip id (e.g. "mcp1", "oled1")
+     * @return the chip, or {@code null} if not found
+     */
+    public HardwareChip getChip(String id) {
+        return chipsById.get(id);
     }
 
     /**
@@ -193,18 +204,20 @@ public final class HardwareModel {
         HardwareModel that = (HardwareModel) o;
         return Objects.equals(board, that.board)
                 && Objects.equals(profile, that.profile)
+                && Objects.equals(chips, that.chips)
                 && Objects.equals(channels, that.channels)
                 && Objects.equals(mappings, that.mappings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, profile, channels, mappings);
+        return Objects.hash(board, profile, chips, channels, mappings);
     }
 
     @Override
     public String toString() {
-        return "HardwareModel{board='" + board + "', channels=" + channels.size()
+        return "HardwareModel{board='" + board + "', chips=" + chips.size()
+                + ", channels=" + channels.size()
                 + ", mappings=" + mappings.size() + "}";
     }
 }
